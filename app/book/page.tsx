@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import type { SVGProps } from "react";
+import Image from "next/image";
+import Link from "next/link";
 
 type Service = { id: number; name: string; durationMin: number };
 
@@ -31,8 +33,10 @@ function Butterfly(props: SVGProps<SVGSVGElement>) {
 
 export default function BookPage() {
   const [services, setServices] = useState<Service[]>([]);
-  const [msg, setMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [msgType, setMsgType] = useState<"success" | "error" | null>(null);
+
 
   useEffect(() => {
     fetch("/api/services").then((res) => res.json()).then(setServices);
@@ -60,17 +64,14 @@ export default function BookPage() {
 
     const data = await res.json();
     if (!res.ok) {
-      setMsg(data.error || "Erro ao agendar. Escolha outro horário.");
+      setMsgType("error");
+      setMsg(`❌ Não foi possível agendar: ${data.error || "Verifique os dados e tente novamente."}`);
     } else {
-      setMsg(
-        `✨ Agendamento criado com sucesso para ${new Date(
-          data.startDateTime as string
-        ).toLocaleString("pt-BR")}`
-      );
+      setMsgType("success");
+      setMsg(`✨ Agendamento para ${new Date(data.startDateTime).toLocaleString("pt-BR")} realizado com sucesso! 💆‍♀️`);
       e.currentTarget.reset();
     }
-    setLoading(false);
-  }
+      }
 
   return (
     <main className="relative max-w-lg mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-xl p-8 border border-purple-100">
@@ -78,10 +79,11 @@ export default function BookPage() {
       <Butterfly className="absolute -top-4 -left-4 w-10 h-10 text-purple-300 rotate-12" />
       <Butterfly className="absolute -bottom-6 -right-6 w-12 h-12 text-green-900/20 -rotate-12" />
 
-      <h1 className="flex items-center gap-2 text-2xl font-bold text-green-900 mb-6">
-        <Butterfly className="w-6 h-6 text-purple-400" />
-        Agendar Atendimento
+      <h1 className="flex items-center gap-2 text-2xl font-bold text-green-900">
+      <Image src="/borboleta.png" alt="Borboleta" width={50} height={50} />
+       Agendar Atendimento
       </h1>
+
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
@@ -145,11 +147,43 @@ export default function BookPage() {
         </button>
 
         {msg && (
-          <p className="text-sm mt-2 text-purple-700 bg-purple-50 px-3 py-2 rounded-lg border border-purple-100">
-            {msg}
-          </p>
+        <div
+        className={`mt-3 flex items-center gap-2 px-4 py-3 rounded-lg border text-sm shadow-sm ${
+          msgType === "success"
+        ? "bg-purple-50 border-purple-200 text-purple-700"
+        : "bg-red-50 border-red-200 text-red-700"
+            }`}
+          >
+            {msgType === "success" ? (
+              <Image
+                src="/borboleta.png"
+                alt="Borboleta de sucesso"
+                width={32}
+                height={32}
+                className="animate-bounce"
+              />
+            ) : (
+              <svg
+                className="w-5 h-5 text-red-600 animate-pulse"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M9.17 9.17l5.66 5.66"
+                />
+              </svg>
+            )}
+            <span dangerouslySetInnerHTML={{ __html: msg }} />
+          </div>
         )}
+
       </form>
+   
     </main>
+    
   );
 }

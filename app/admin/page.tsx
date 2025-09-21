@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 type Booking = {
   id: number;
@@ -20,7 +21,8 @@ export default function AdminPage() {
 
   return (
     <main className="bg-white rounded-2xl shadow-lg p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-green-900 mb-4">Agendamentos</h1>
+      <h1 className="text-2xl font-bold text-green-900 mb-4">
+        <Image src="/borboleta.png" alt="Borboleta" width={50} height={50} /> Agendamentos</h1>
       {bookings.length === 0 ? (
         <p className="text-sm text-slate-600">Nenhum agendamento encontrado.</p>
       ) : (
