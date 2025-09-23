@@ -91,25 +91,38 @@ export default function BookPage() {
           <input
             name="clientName"
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-green-900">Telefone/WhatsApp</label>
+          <label className="block mb-2 font-medium text-green-900">
+            Telefone (WhatsApp):
+          </label>
           <input
-            name="clientPhone"
+            type="tel"
+            name="phone"
+            pattern="\d{11}"
+            maxLength={11}
+            minLength={11}
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            placeholder="Ex.: 24999999999"
+            className="w-full p-2 border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
+          <p className="text-xs text-green-700 mt-1">
+            Informe 11 dígitos (DDD + número), apenas números.
+          </p>
+
         </div>
 
         <div>
-          <label className="block text-sm text-green-900">E-mail (opcional)</label>
+          <label className="block text-sm text-green-900">
+            E-mail (opcional)
+          </label>
           <input
             name="clientEmail"
             type="email"
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
 
@@ -118,7 +131,7 @@ export default function BookPage() {
           <select
             name="serviceId"
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           >
             <option value="">Selecione um serviço</option>
             {services.map((service) => (
@@ -135,7 +148,7 @@ export default function BookPage() {
             name="startDateTime"
             type="datetime-local"
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
 
