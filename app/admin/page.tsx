@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Toast from "../components/toast";
 
 type Booking = {
   id: number;
@@ -7,9 +8,7 @@ type Booking = {
   clientPhone: string;
   clientEmail?: string | null;
   startDateTime: string;
-  service: {
-    name: string;
-  };
+  service: { name: string };
 };
 
 type FilterType = "all" | "future" | "past" | "today";
@@ -25,6 +24,7 @@ export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterType>("all");
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
     fetchBookings();
@@ -41,15 +41,13 @@ export default function AdminPage() {
   async function handleDelete(id: number) {
     if (!confirm("Tem certeza que deseja excluir este agendamento?")) return;
 
-    const res = await fetch(`/api/bookings/${id}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(`/api/bookings/${id}`, { method: "DELETE" });
 
     if (res.ok) {
-      alert("Agendamento excluído ✅");
-      fetchBookings(); // recarrega lista
+      setToast({ message: "✅ Agendamento excluído com sucesso!", type: "success" });
+      fetchBookings();
     } else {
-      alert("Erro ao excluir ❌");
+      setToast({ message: "❌ Erro ao excluir agendamento", type: "error" });
     }
   }
 
@@ -77,7 +75,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
+    <main className="max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-lg relative">
       <h1 className="text-2xl font-bold text-green-900 mb-6">
         Painel do Administrador
       </h1>
@@ -144,6 +142,15 @@ export default function AdminPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Toast de feedback */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </main>
   );

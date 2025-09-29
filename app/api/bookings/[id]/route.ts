@@ -7,6 +7,14 @@ export async function DELETE(
 ) {
   try {
     const bookingId = Number(params.id);
+
+    if (isNaN(bookingId)) {
+      return NextResponse.json(
+        { error: "ID inválido" },
+        { status: 400 }
+      );
+    }
+
     await prisma.booking.delete({
       where: { id: bookingId },
     });
