@@ -12,6 +12,7 @@ model Service {
   name        String
   durationMin Int
   active      Boolean  @default(true)
+  price       Float     @default(0)
   bookings    Booking[]
 }
 
