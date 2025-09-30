@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import type { SVGProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import Toast from "../components/toast";
+
 
 type Service = { id: number; name: string; durationMin: number };
 
@@ -42,20 +44,25 @@ export default function BookPage() {
     fetch("/api/services").then((res) => res.json()).then(setServices);
   }, []);
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setMsg(null);
-    setLoading(true);
+async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  e.preventDefault();
+  setMsg(null);
+  setLoading(true);
 
-    const form = new FormData(e.currentTarget);
-    const payload = {
-      clientName: form.get("clientName"),
-      clientPhone: form.get("clientPhone"),
-      clientEmail: form.get("clientEmail") || null,
-      serviceId: Number(form.get("serviceId")),
-      startDateTime: form.get("startDateTime"),
-    };
+  const form = new FormData(e.currentTarget);
 
+  const rawPhone = (form.get("clientPhone") as string) || "";
+  const cleanedPhone = rawPhone.replace(/\D/g, "");
+
+  const payload = {
+    clientName: form.get("clientName"),
+    clientPhone: cleanedPhone,
+    clientEmail: form.get("clientEmail") || null,
+    serviceId: Number(form.get("serviceId")),
+    startDateTime: form.get("startDateTime"),
+  };
+
+  try {
     const res = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -63,15 +70,25 @@ export default function BookPage() {
     });
 
     const data = await res.json();
+
     if (!res.ok) {
       setMsgType("error");
       setMsg(`❌ Não foi possível agendar: ${data.error || "Verifique os dados e tente novamente."}`);
     } else {
       setMsgType("success");
-      setMsg(`✨ Agendamento para ${new Date(data.startDateTime).toLocaleString("pt-BR")} realizado com sucesso! 💆‍♀️`);
+      setMsg(
+        `✨ Agendamento para ${new Date(data.startDateTime).toLocaleString("pt-BR")} realizado com sucesso! 💆‍♀️`
+      );
       e.currentTarget.reset();
     }
-      }
+  } catch (error) {
+    setMsgType("error");
+    setMsg("❌ Erro de conexão. Tente novamente mais tarde.");
+  } finally {
+    setLoading(false); // ✅ garante que sempre habilita o botão de novo
+  }
+}
+
 
   return (
     <main className="relative max-w-lg mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-xl p-8 border border-purple-100">
@@ -91,25 +108,35 @@ export default function BookPage() {
           <input
             name="clientName"
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-green-900">Telefone/WhatsApp</label>
+          <label className="block mb-2 font-medium text-green-900">
+            Telefone (WhatsApp):
+          </label>
           <input
+            type="tel"
             name="clientPhone"
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            placeholder="Ex.: (24) 99999-9999"
+            className="w-full p-2 border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
+          <p className="text-xs text-green-700 mt-1">
+            Informe o número com DDD. Formatos como (24) 99999-9999 também são aceitos.
+          </p>
+
         </div>
 
         <div>
-          <label className="block text-sm text-green-900">E-mail (opcional)</label>
+          <label className="block text-sm text-green-900">
+            E-mail (opcional)
+          </label>
           <input
             name="clientEmail"
             type="email"
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
 
@@ -118,7 +145,7 @@ export default function BookPage() {
           <select
             name="serviceId"
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           >
             <option value="">Selecione um serviço</option>
             {services.map((service) => (
@@ -135,7 +162,7 @@ export default function BookPage() {
             name="startDateTime"
             type="datetime-local"
             required
-            className="w-full px-3 py-2 border border-purple-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-300"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
           />
         </div>
 
@@ -146,43 +173,14 @@ export default function BookPage() {
           {loading ? "Agendando..." : "Confirmar Agendamento"}
         </button>
 
-        {msg && (
-        <div
-        className={`mt-3 flex items-center gap-2 px-4 py-3 rounded-lg border text-sm shadow-sm ${
-          msgType === "success"
-        ? "bg-purple-50 border-purple-200 text-purple-700"
-        : "bg-red-50 border-red-200 text-red-700"
-            }`}
-          >
-            {msgType === "success" ? (
-              <Image
-                src="/borboleta.png"
-                alt="Borboleta de sucesso"
-                width={32}
-                height={32}
-                className="animate-bounce"
-              />
-            ) : (
-              <svg
-                className="w-5 h-5 text-red-600 animate-pulse"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M12 9v2m0 4h.01M4.93 4.93l14.14 14.14M9.17 9.17l5.66 5.66"
-                />
-              </svg>
-            )}
-            <span dangerouslySetInnerHTML={{ __html: msg }} />
-          </div>
-        )}
-
       </form>
-   
+                      {msg && (
+                <Toast
+                  message={msg}
+                  type={msgType || "success"}
+                  onClose={() => setMsg(null)}
+                />
+              )}
     </main>
     
   );
