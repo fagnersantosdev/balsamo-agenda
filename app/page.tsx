@@ -3,14 +3,14 @@ import Link from "next/link";
 
 const services = [
   {
-    name: "Spa Detox PREMIUN",
+    name: "Spa Detox PREMIUM",
     price: 150,
     duration: "1:30H",
     details: [
-      "Desintoxicação Iônica no SPADETOX",
-      "Massagen Drenante Corporal",
-      "Assento Massageador",
-      "Aromaterapia",
+      "💧 Desintoxicação Iônica no SPADETOX",
+      "💆‍♀️ Massagen Drenante Corporal",
+      "💺 Assento Massageador",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -18,10 +18,10 @@ const services = [
     price: 100,
     duration: "45min",
     details: [
-      "Desintoxicação Iônica no SPADETOX",
-      "Foot Relax",
-      "Assento Massageador",
-      "Aromaterapia",
+      "💧 Desintoxicação Iônica no SPADETOX",
+      "🦶 Foot Relax: massagem drenante nos pés e pernas",
+      "💺 Assento Massageador",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -29,10 +29,10 @@ const services = [
     price: 110,
     duration: "45min",
     details: [
-      "Massagem Geotermal ccom Pedras Quentes",
-      "Óleo Vegetais e Óleos Essenciais",
-      "Manta Térmica / vibratória",
-      "Aromaterapia",
+      "🔥 Massagem Geotermal com Pedras Quentes",
+      "🌿 Óleo Vegetais e Óleos Essenciais",
+      "🔥 Manta térmica/ vibratória",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -40,9 +40,9 @@ const services = [
     price: 110,
     duration: "45min",
     details: [
-      "Massageador ZEN com função térmica (quente ou frio)",
-      "Manta Térmica / vibratória",
-      "Aromaterapia",
+      "❄️ 🔥 Massageador ZEN com função térmica (quente ou frio)",
+      "🔥 Manta térmica/vibratória",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -50,11 +50,11 @@ const services = [
     price: 110,
     duration: "45min",
     details: [
-      "Massageador ZEN com função térmica (quente ou frio)",
-      "Massagem Corporal",
+      "❄️ 🔥 Massageador ZEN com função térmica (quente ou frio)",
+      "💆‍♀️ Massagem Corporal",
       "Creme com  ativos drenates",
-      "Manta Térmica",
-      "Aromaterapia",
+      "🔥 Manta térmica",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -62,11 +62,10 @@ const services = [
     price: 100,
     duration: "45min",
     details: [
-      "Ofurô",
-      "Esfoliação",
-      "Imersão com óleos essenciais",
-      "Foot Relax (massagem drenante nos pés e pernas)",
-      "Aromaterapia",
+      "✨ Ofurô com esfoliação",
+      "🌿 Imersão com óleos essenciais",
+      "🦶 Foot Relax: massagem drenante nos pés e pernas",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -74,10 +73,10 @@ const services = [
     price: 90,
     duration: "45min",
     details: [
-      "Massagem corporal",
-      "Pistola massageadora",
-      "Manta térmica / vibratória",
-      "Aromaterapia",
+      "💆 Massagem corporal completa",
+      "🔔 Pistola massageadora",
+      "🔥 Manta térmica/vibratória",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -85,11 +84,10 @@ const services = [
     price: 80,
     duration: "30min",
     details: [
-      "Ofurô",
-      "Esfoliação",
-      "Imersão com óleos essenciais",
-      "Massagem drenante nos pés e pernas",
-      "Aromaterapia",
+      "✨ Ofurô com esfoliação",
+      "🌿 Imersão com óleos essenciais",
+      "🦶 Massagem drenante nos pés e pernas",
+      "🌸 Aromaterapia",
     ],
   },
   {
@@ -97,9 +95,9 @@ const services = [
     price: 50,
     duration: "25min",
     details: [
-      "Massagem express",
-      "Cadeira ergonômica",
-      "Alívio de tensão muscular imediato",
+      "✨ Massagem express",
+      "💺 Cadeira ergonômica",
+      "💆 Alívio de tensão muscular imediato",
     ],
   },
   

@@ -12,8 +12,22 @@
   animation: float 3s ease-in-out infinite;
 }
 
+:root {
+  --font-ooohbaby: "Oooh Baby", cursive;
+  --font-outfit: "Outfit", sans-serif;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
+   font-family: var(--font-outfit);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+}
+
+.decorative {
+  font-family: var(--font-ooohbaby);
 }
 
 .page-bg {
@@ -71,5 +85,6 @@ body {
 .fade-delay-4 {
   animation-delay: 0.8s;
 }
+
 
 
