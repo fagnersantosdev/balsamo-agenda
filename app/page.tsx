@@ -117,9 +117,13 @@ export default function HomePage() {
             height={110}
             className="mx-auto md:mx-0"
           />
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#1F3924]">
+          {/* <h1 className="text-3xl sm:text-4xl font-bold text-[#1F3924]">
             Bem-vindo(a) à Bálsamo Massoterapia 🌿
+          </h1> */}
+          <h1 className="font-[var(--font-ooohbaby)] text-3xl sm:text-4xl text-[#8D6A93]">
+            Bem-vindo à Bálsamo Massoterapia 🌿
           </h1>
+
           <p className="text-[#1F3924]/80 leading-relaxed text-base sm:text-lg">
             Cuidamos do seu corpo e da sua mente com técnicas terapêuticas que
             promovem relaxamento, saúde e bem-estar.

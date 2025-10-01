@@ -38,13 +38,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               priority
               className="transition-transform duration-500 group-hover:scale-110"
             />
-            <span className="text-xl font-semibold group-hover:text-[#D6A77A] transition-colors duration-300">
-              Bálsamo Massoterapia
+            <span className="hidden sm:inline text-xl font-semibold group-hover:text-[#D6A77A] transition-colors">
+            Bálsamo Massoterapia
             </span>
+
           </Link>
 
           {/* Navegação */}
           <nav className="flex justify-center sm:justify-end gap-6">
+            {/* Link Agendar */}
             <Link
               href="/book"
               className="flex items-center gap-1 hover:text-[#D6A77A] font-medium transition-colors"
@@ -54,37 +56,39 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth={2}
+                strokeWidth={1.8}
                 stroke="currentColor"
                 className="w-5 h-5"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25A2.25 2.25 0 0118.75 21H5.25A2.25 2.25 0 013 18.75z"
+                  d="M6 2v2M18 2v2M3 9h18M4 7h16a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z"
                 />
               </svg>
               Agendar
             </Link>
 
+            {/* Link Admin */}
             <Link
               href="/admin"
               className="flex items-center gap-1 hover:text-[#D6A77A] font-medium transition-colors"
             >
-              {/* Ícone painel */}
+              {/* Ícone engrenagem */}
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth={2}
+                strokeWidth={1.8}
                 stroke="currentColor"
                 className="w-5 h-5"
               >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  d="M3 9h18M9 3v18m6-18v18M3 15h18"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.893 3.31.874 2.417 2.417a1.724 1.724 0 001.065 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.893 1.543-.874 3.31-2.417 2.417a1.724 1.724 0 00-2.573 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.893-3.31-.874-2.417-2.417a1.724 1.724 0 00-1.065-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.893-1.543.874-3.31 2.417-2.417.84.486 1.907.222 2.573-1.065z"
                 />
+                <circle cx="12" cy="12" r="3" />
               </svg>
               Admin
             </Link>
@@ -99,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Rodapé */}
         <footer className="bg-[#8D6A93]/10 border-t border-[#D6A77A]/40 mt-16">
-  <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-10 text-center md:text-left">
+  <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
     {/* Coluna 1 - Logo + descrição */}
     <div>
       <div className="flex items-center justify-center md:justify-start gap-3 mb-3">
