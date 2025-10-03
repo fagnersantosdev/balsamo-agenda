@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import EventPromo from "./components/EventPromo";
 
 const services = [
   {
@@ -105,6 +106,7 @@ const services = [
 
 export default function HomePage() {
   return (
+    <>
     <main className="max-w-6xl mx-auto px-6 py-12 bg-gradient-to-b from-[#F5F3EB] to-[#D6A77A]/20">
       {/* Saudação */}
       <section className="grid md:grid-cols-2 gap-10 items-center mb-16">
@@ -124,7 +126,7 @@ export default function HomePage() {
             Bem-vindo à Bálsamo Massoterapia 🌿
           </h1>
 
-          <p className="text-[#1F3924]/80 leading-relaxed text-base sm:text-lg">
+          <p className="text-[#1F3924]90 leading-relaxed text-base sm:text-lg">
             Cuidamos do seu corpo e da sua mente com técnicas terapêuticas que
             promovem relaxamento, saúde e bem-estar.
           </p>
@@ -160,7 +162,7 @@ export default function HomePage() {
               <p className="text-[#8A4B2E] font-medium">
                 💰 R$ {service.price.toFixed(2)} — ⏱ {service.duration}
               </p>
-              <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924]/80 space-y-1">
+              <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924 space-y-1">
                 {service.details.map((d, i) => (
                   <li key={i}>{d}</li>
                 ))}
@@ -180,5 +182,8 @@ export default function HomePage() {
         </div>
       </section>
     </main>
+    <EventPromo/>
+  </>
+    
   );
 }

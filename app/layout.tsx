@@ -2,6 +2,7 @@ import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { Oooh_Baby, Outfit } from "next/font/google";
+import BackgroundButterflies from "./components/BackgroundButterflies";
 
 const ooohBaby = Oooh_Baby({
   subsets: ["latin"],
@@ -23,11 +24,13 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
-      <body className={`${ooohBaby.variable} ${outfit.variable} font-sans bg-[#FFFEF9] text-[#1F3924]`}>
+      <body className={`${ooohBaby.variable} ${outfit.variable} font-sans bg-[#FFFEF9] text-[#1F3924] relative`}>
+        <BackgroundButterflies />
+        
 
         {/* Header */}
-        <header className="bg-[#8D6A93] text-[#FFFEF9] shadow-md border-b border-[#D6A77A]/40">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <header className="relative z-10 bg-[#8D6A93] text-[#FFFEF9] shadow-md border-b border-[#D6A77A]/40">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           {/* Logo + Nome */}
           <Link href="/" className="flex items-center justify-center sm:justify-start gap-3 group">
             <Image
@@ -99,10 +102,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 
         {/* Conteúdo */}
-        <main className="max-w-5xl mx-auto px-4 py-10">{children}</main>
+        <main className="relative z-10 max-w-5xl mx-auto px-4 py-10">{children}</main>
 
         {/* Rodapé */}
-        <footer className="bg-[#8D6A93]/10 border-t border-[#D6A77A]/40 mt-16">
+        <footer className="relative z-10 bg-[#8D6A93]/10 border-t border-[#D6A77A]/40 mt-16">
   <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
     {/* Coluna 1 - Logo + descrição */}
     <div>
@@ -110,15 +113,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Image
           src="/logo-balsamo.png"
           alt="Bálsamo Massoterapia"
-          width={50}
-          height={50}
+          width={60}
+          height={60}
           className="rounded"
         />
         <span className="font-bold text-lg text-[#1F3924]">
           Bálsamo Massoterapia
         </span>
       </div>
-      <p className="text-sm text-[#1F3924]/80">
+      <p className="text-sm text-[#1F3924]/90">
         Bem-estar e cuidado através de massagens terapêuticas,
         para aliviar dores e renovar suas energias.
       </p>
@@ -192,7 +195,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     {/* Coluna 3 - Endereço */}
     <div>
       <h3 className="font-semibold text-[#1F3924] mb-3">Endereço</h3>
-      <p className="text-sm text-[#1F3924]/80 mb-2">
+      <p className="text-sm text-[#1F3924]/90 mb-2">
         📍 R. Albino de Almeida, 81 - sala 02 <br />
         Campos Elíseos, Resende - RJ <br />
         CEP: 27542-080

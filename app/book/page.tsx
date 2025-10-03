@@ -4,6 +4,7 @@ import type { SVGProps } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Toast from "../components/toast";
+import EventPromo from "../components/EventPromo";
 
 
 type Service = { id: number; name: string; durationMin: number };
@@ -91,12 +92,13 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 
 
   return (
+    <>
     <main className="relative max-w-lg mx-auto bg-white/80 backdrop-blur rounded-3xl shadow-xl p-8 border border-purple-100">
       {/* Borboletas decorativas */}
-      <Butterfly className="absolute -top-4 -left-4 w-10 h-10 text-purple-300 rotate-12" />
-      <Butterfly className="absolute -bottom-6 -right-6 w-12 h-12 text-green-900/20 -rotate-12" />
+      <Butterfly className="absolute -top-4 -left-4 w-10 h-10 text-purple-500 rotate-12" />
+      <Butterfly className="absolute -bottom-6 -right-6 w-12 h-12 text-[#1F3924] -rotate-12" />
 
-      <h1 className="flex items-center gap-2 text-2xl font-bold text-green-900">
+      <h1 className="flex items-center gap-2 text-2xl font-bold text-[#1F3924]">
       <Image src="/borboleta.png" alt="Borboleta" width={50} height={50} />
        Agendar Atendimento
       </h1>
@@ -104,16 +106,16 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <div>
-          <label className="block text-sm text-green-900">Nome</label>
+          <label className="block mb-2 font-medium text-[#1F3924]">Nome</label>
           <input
             name="clientName"
             required
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
         <div>
-          <label className="block mb-2 font-medium text-green-900">
+          <label className="block mb-2 font-medium text-[#1F3924]">
             Telefone (WhatsApp):
           </label>
           <input
@@ -121,31 +123,31 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
             name="clientPhone"
             required
             placeholder="Ex.: (24) 99999-9999"
-            className="w-full p-2 border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="w-full p-2 border border-purple-300 rounded focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
-          <p className="text-xs text-green-700 mt-1">
+          <p className="text-xs text-[#1F3924] mt-1">
             Informe o número com DDD. Formatos como (24) 99999-9999 também são aceitos.
           </p>
 
         </div>
 
         <div>
-          <label className="block text-sm text-green-900">
+          <label className="block mb-2 font-medium text-[#1F3924]">
             E-mail (opcional)
           </label>
           <input
             name="clientEmail"
             type="email"
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
         <div>
-          <label className="block text-sm text-green-900">Serviço</label>
+          <label className="block mb-2 font-medium text-[#1F3924]">Serviço</label>
           <select
             name="serviceId"
             required
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           >
             <option value="">Selecione um serviço</option>
             {services.map((service) => (
@@ -157,18 +159,18 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         </div>
 
         <div>
-          <label className="block text-sm text-green-900">Data e Hora</label>
+          <label className="block mb-2 font-medium text-[#1F3924]">Data e Hora</label>
           <input
             name="startDateTime"
             type="datetime-local"
             required
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
         <button
           disabled={loading}
-          className="w-full bg-green-900 text-purple-50 font-medium px-4 py-2 rounded-lg hover:bg-green-800 transition-colors duration-300 disabled:opacity-50"
+          className="w-full bg-[#1F3924] text-purple-50 font-medium px-4 py-2 rounded-lg hover:bg-green-900 transition-colors duration-300 disabled:opacity-50"
         >
           {loading ? "Agendando..." : "Confirmar Agendamento"}
         </button>
@@ -181,7 +183,12 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
                   onClose={() => setMsg(null)}
                 />
               )}
+      
     </main>
+    <EventPromo/>
+    </>
+    
+    
     
   );
 }
