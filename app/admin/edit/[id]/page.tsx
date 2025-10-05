@@ -95,7 +95,7 @@ export default function EditBookingPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto bg-white rounded-2xl shadow-md p-8 mt-8">
+    <main className="relative max-w-lg mx-auto bg-white rounded-3xl shadow-x1 p-8 mt-8 border border-purple-200">
       <h1 className="text-2xl font-bold text-[#1F3924] mb-6">Editar Agendamento</h1>
 
       {message && (
@@ -117,7 +117,7 @@ export default function EditBookingPage() {
             name="clientName"
             value={booking.clientName}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-700 outline-none"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
             required
           />
         </div>
@@ -130,7 +130,7 @@ export default function EditBookingPage() {
             name="clientPhone"
             value={booking.clientPhone}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-700 outline-none"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
             required
           />
         </div>
@@ -143,7 +143,7 @@ export default function EditBookingPage() {
             name="clientEmail"
             value={booking.clientEmail || ""}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-700 outline-none"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
@@ -154,7 +154,7 @@ export default function EditBookingPage() {
             name="serviceId"
             value={booking.serviceId}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-700 outline-none"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           >
             {services.map((s) => (
               <option key={s.id} value={s.id}>
@@ -172,7 +172,7 @@ export default function EditBookingPage() {
             name="startDateTime"
             value={new Date(booking.startDateTime).toISOString().slice(0, 16)}
             onChange={handleChange}
-            className="w-full border rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-700 outline-none"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
             required
           />
         </div>

@@ -5,9 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import Toast from "../components/toast";
 import EventPromo from "../components/EventPromo";
+import SuccessCard from "../components/SuccessCard";
+
 
 
 type Service = { id: number; name: string; durationMin: number };
+
 
 // Ícone de borboleta simples (SVG próprio)
 function Butterfly(props: SVGProps<SVGSVGElement>) {
@@ -39,6 +42,11 @@ export default function BookPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<"success" | "error" | null>(null);
+  const [successData, setSuccessData] = useState<{
+  name: string;
+  date: string;
+  service: string;
+} | null>(null);
 
 
   useEffect(() => {
@@ -48,6 +56,7 @@ export default function BookPage() {
 async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
   setMsg(null);
+  setMsgType(null);
   setLoading(true);
 
   const form = new FormData(e.currentTarget);
@@ -73,22 +82,29 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     const data = await res.json();
 
     if (!res.ok) {
+      // ❌ apenas exibe Toast vermelho se realmente for erro
       setMsgType("error");
-      setMsg(`❌ Não foi possível agendar: ${data.error || "Verifique os dados e tente novamente."}`);
+      setMsg(`❌ ${data.error || "Erro ao agendar. Verifique os dados e tente novamente."}`);
     } else {
-      setMsgType("success");
-      setMsg(
-        `✨ Agendamento para ${new Date(data.startDateTime).toLocaleString("pt-BR")} realizado com sucesso! 💆‍♀️`
-      );
+      // ✅ sucesso — remove mensagens antigas e exibe card
+      setMsg(null);
+      setMsgType(null);
+      setSuccessData({
+        name: data.clientName || payload.clientName?.toString() || "Cliente",
+        date: new Date(data.startDateTime).toLocaleString("pt-BR"),
+        service: data.service?.name || "Serviço",
+      });
       e.currentTarget.reset();
     }
   } catch (error) {
+    // ⚠️ Erro de rede — exibe Toast vermelho
     setMsgType("error");
     setMsg("❌ Erro de conexão. Tente novamente mais tarde.");
   } finally {
-    setLoading(false); // ✅ garante que sempre habilita o botão de novo
+    setLoading(false);
   }
 }
+
 
 
   return (
@@ -183,6 +199,17 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
                   onClose={() => setMsg(null)}
                 />
               )}
+      
+      {successData && (
+      <SuccessCard
+        show={true}
+        onClose={() => setSuccessData(null)}
+        name={successData.name}
+        date={successData.date}
+        service={successData.service}
+      />
+    )}
+
       
     </main>
     <EventPromo/>

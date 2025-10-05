@@ -10,51 +10,65 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const data = await req.json();
+  try {
+    const data = await req.json();
 
-  // Validações simples (pode melhorar com Zod depois)
-  if (!data.clientName || !data.clientPhone || !data.serviceId || !data.startDateTime) {
-    return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
-  }
+    if (!data.clientName || !data.clientPhone || !data.serviceId || !data.startDateTime) {
+      return NextResponse.json({ error: 'Dados incompletos' }, { status: 400 });
+    }
 
-  // Busca o serviço para calcular horário de término
-  const service = await prisma.service.findUnique({
-    where: { id: Number(data.serviceId) },
-  });
+    const service = await prisma.service.findUnique({
+      where: { id: Number(data.serviceId) },
+    });
 
-  if (!service) {
-    return NextResponse.json({ error: 'Serviço não encontrado' }, { status: 400 });
-  }
+    if (!service) {
+      return NextResponse.json({ error: 'Serviço não encontrado' }, { status: 400 });
+    }
 
-  const start = new Date(data.startDateTime);
-  const end = new Date(start.getTime() + service.durationMin * 60000);
+    const start = new Date(data.startDateTime);
+    const end = new Date(start.getTime() + service.durationMin * 60000);
 
-  // Verificar conflitos simples
-  const conflict = await prisma.booking.findFirst({
-    where: {
-      startDateTime: { lt: end },
-      endDateTime: { gt: start },
-    },
-  });
+    const conflict = await prisma.booking.findFirst({
+      where: {
+        startDateTime: { lt: end },
+        endDateTime: { gt: start },
+      },
+    });
 
-  if (conflict) {
+    if (conflict) {
+      return NextResponse.json(
+        { error: 'Este horário já está reservado' },
+        { status: 409 }
+      );
+    }
+
+    const booking = await prisma.booking.create({
+      data: {
+        clientName: data.clientName,
+        clientPhone: data.clientPhone,
+        clientEmail: data.clientEmail || null,
+        serviceId: Number(data.serviceId),
+        startDateTime: start,
+        endDateTime: end,
+      },
+      include: { service: true },
+    });
+
+    // ✅ Resposta padronizada
     return NextResponse.json(
-      { error: 'Este horário já está reservado' },
-      { status: 409 }
+      {
+        ok: true,
+        message: "Agendamento criado com sucesso!",
+        booking,
+      },
+      { status: 201 }
+    );
+
+  } catch (error) {
+    console.error("Erro ao criar agendamento:", error);
+    return NextResponse.json(
+      { error: "Erro ao criar agendamento." },
+      { status: 500 }
     );
   }
-
-  const booking = await prisma.booking.create({
-    data: {
-      clientName: data.clientName,
-      clientPhone: data.clientPhone,
-      clientEmail: data.clientEmail || null,
-      serviceId: Number(data.serviceId),
-      startDateTime: start,
-      endDateTime: end,
-    },
-    include: { service: true },
-  });
-
-  return NextResponse.json(booking, { status: 201 });
 }
