@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Toast from "../components/toast";
+import Link from "next/link";
+
 
 type Booking = {
   id: number;
@@ -172,29 +174,25 @@ export default function AdminPage() {
                 </td>
 
                 {/* Ações */}
-                <td className="p-3 text-center sm:table-cell block">
-                  <button
+                <td className="p-3 text-center sm:table-cell block flex justify-center gap-3">
+                {/* ✏️ Botão Editar */}
+                <Link
+                  href={`/admin/edit/${b.id}`}
+                  className="p-2 text-blue-600 hover:text-blue-800 transition"
+                  title="Editar agendamento"
+                >
+                  ✏️
+                </Link>
+
+                {/* 🗑️ Botão Excluir */}
+                <button
                   onClick={() => handleDelete(b.id)}
                   className="p-2 text-red-600 hover:text-red-800 transition"
                   title="Excluir agendamento"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.8}
-                    stroke="currentColor"
-                    className="w-5 h-5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 7h12M9 7V4h6v3m-9 0v13a2 2 0 002 2h6a2 2 0 002-2V7H6z"
-                    />
-                  </svg>
+                  🗑️
                 </button>
-
-                </td>
+              </td>
               </tr>
             ))}
           </tbody>
