@@ -18,7 +18,7 @@ export default function SuccessCard({
     <AnimatePresence>
       {show && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
+          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-[999]"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

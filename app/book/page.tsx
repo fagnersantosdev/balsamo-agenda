@@ -192,24 +192,24 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         </button>
 
       </form>
-                      {msg && (
+
+            {successData && (
+            <SuccessCard
+              show={true}
+              onClose={() => setSuccessData(null)}
+              name={successData.name}
+              date={successData.date}
+              service={successData.service}
+            />
+          )}
+
+                {msg && !successData && (
                 <Toast
                   message={msg}
-                  type={msgType || "success"}
+                  type={msgType || "error"}
                   onClose={() => setMsg(null)}
                 />
               )}
-      
-      {successData && (
-      <SuccessCard
-        show={true}
-        onClose={() => setSuccessData(null)}
-        name={successData.name}
-        date={successData.date}
-        service={successData.service}
-      />
-    )}
-
       
     </main>
     <EventPromo/>
