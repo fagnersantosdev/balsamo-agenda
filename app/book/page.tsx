@@ -56,7 +56,6 @@ export default function BookPage() {
 async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
   setMsg(null);
-  setMsgType(null);
   setLoading(true);
 
   const form = new FormData(e.currentTarget);
@@ -81,31 +80,41 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 
     const data = await res.json();
 
-    if (!res.ok) {
-      // ❌ apenas exibe Toast vermelho se realmente for erro
+    if (!res.ok || !data.ok) {
+      // ⚠️ Erros retornados pela API
       setMsgType("error");
-      setMsg(`❌ ${data.error || "Erro ao agendar. Verifique os dados e tente novamente."}`);
+      setMsg(`❌ ${data.error || "Não foi possível agendar. Verifique os dados e tente novamente."}`);
     } else {
-      // ✅ sucesso — remove mensagens antigas e exibe card
-      setMsg(null);
-      setMsgType(null);
-      setSuccessData({
-        name: data.clientName || payload.clientName?.toString() || "Cliente",
-        date: new Date(data.startDateTime).toLocaleString("pt-BR"),
-        service: data.service?.name || "Serviço",
-      });
+      // ✅ Sucesso
+      const booking = data.booking;
+      setMsgType("success");
+      setMsg(
+        `✨ Agendamento para ${new Date(
+          booking.startDateTime
+        ).toLocaleString("pt-BR")} realizado com sucesso! 💆‍♀️`
+      );
+
+      // 🧹 Limpa o formulário
       e.currentTarget.reset();
+
+      // 🔄 (opcional) rola para o topo para o toast ser visto
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      // ⏳ Esconde o Toast automaticamente após 4s
+      setTimeout(() => setMsg(null), 4000);
     }
   } catch (error) {
-    // ⚠️ Erro de rede — exibe Toast vermelho
+    // ⚠️ Erro real de rede
+    console.error("Erro de conexão:", error);
     setMsgType("error");
     setMsg("❌ Erro de conexão. Tente novamente mais tarde.");
+
+    // ⏳ Remove o toast de erro também após 4s
+    setTimeout(() => setMsg(null), 4000);
   } finally {
     setLoading(false);
   }
 }
-
-
 
   return (
     <>
