@@ -110,6 +110,13 @@ export default function AdminPage() {
           ))}
         </div>
 
+        <Link
+        href="/admin/services"
+        className="inline-block bg-[#8D6A93] text-[#FFFEF9] px-5 py-2 rounded-lg shadow hover:bg-[#7A5981] transition-all duration-300 text-sm font-medium"
+      >
+        ⚙️ Gerenciar Serviços
+      </Link>
+
         {/* Campo de busca */}
         <input
           type="text"
