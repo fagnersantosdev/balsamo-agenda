@@ -9,6 +9,7 @@ import SuccessCard from "../components/SuccessCard";
 
 
 
+
 type Service = { id: number; name: string; durationMin: number };
 
 
@@ -57,8 +58,11 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
   setMsg(null);
   setLoading(true);
+  setSuccessData(null);
 
-  const form = new FormData(e.currentTarget);
+  // ✅ Captura o formulário antes do await
+  const formElement = e.currentTarget;
+  const form = new FormData(formElement);
 
   const rawPhone = (form.get("clientPhone") as string) || "";
   const cleanedPhone = rawPhone.replace(/\D/g, "");
@@ -80,37 +84,52 @@ async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 
     const data = await res.json();
 
-    if (!res.ok || !data.ok) {
-      // ⚠️ Erros retornados pela API
+    if (!res.ok) {
       setMsgType("error");
       setMsg(`❌ ${data.error || "Não foi possível agendar. Verifique os dados e tente novamente."}`);
-    } else {
-      // ✅ Sucesso
-      const booking = data.booking;
-      setMsgType("success");
-      setMsg(
-        `✨ Agendamento para ${new Date(
-          booking.startDateTime
-        ).toLocaleString("pt-BR")} realizado com sucesso! 💆‍♀️`
-      );
-
-      // 🧹 Limpa o formulário
-      e.currentTarget.reset();
-
-      // 🔄 (opcional) rola para o topo para o toast ser visto
-      window.scrollTo({ top: 0, behavior: "smooth" });
-
-      // ⏳ Esconde o Toast automaticamente após 4s
       setTimeout(() => setMsg(null), 4000);
+      return;
     }
-  } catch (error) {
-    // ⚠️ Erro real de rede
-    console.error("Erro de conexão:", error);
-    setMsgType("error");
-    setMsg("❌ Erro de conexão. Tente novamente mais tarde.");
 
-    // ⏳ Remove o toast de erro também após 4s
-    setTimeout(() => setMsg(null), 4000);
+    // ✅ Sucesso
+const booking = data.booking;
+
+const formattedDate = new Date(booking.startDateTime).toLocaleString("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short",
+});
+
+setMsgType("success");
+setMsg("✨ Agendamento realizado com sucesso! 💆‍♀️");
+
+setSuccessData({
+  name: booking.clientName,
+  date: formattedDate,
+  service: booking.service?.name || "Serviço",
+});
+
+// ✅ Mensagem automática para WhatsApp
+const message = encodeURIComponent(
+  `🌿 Olá, ${booking.clientName}! Seu agendamento na *Bálsamo Massoterapia* foi confirmado com sucesso. 💆‍♀️✨
+
+📅 *Data:* ${formattedDate}
+💆‍♀️ *Serviço:* ${booking.service?.name}
+
+Aguardamos você! 🌸`
+);
+
+// Número do cliente
+const phone = booking.clientPhone.startsWith("55")
+  ? booking.clientPhone
+  : `55${booking.clientPhone}`;
+
+// ✅ Abre o WhatsApp automaticamente com a mensagem
+window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+
+// 🧹 Limpa o formulário
+formElement.reset();
+window.scrollTo({ top: 0, behavior: "smooth" });
+setTimeout(() => setMsg(null), 4000);
   } finally {
     setLoading(false);
   }

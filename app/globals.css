@@ -86,5 +86,13 @@ h1, h2, h3 {
   animation-delay: 0.8s;
 }
 
+/* @keyframes pulse-slow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite;
+} */
+
 
 

@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Oooh_Baby, Outfit } from "next/font/google";
 import BackgroundButterflies from "./components/BackgroundButterflies";
+import FloatingWhatsApp from "./components/FloatingWhatsApp";
+
 
 const ooohBaby = Oooh_Baby({
   subsets: ["latin"],
@@ -103,6 +105,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Conteúdo */}
         <main className="relative z-10 max-w-5xl mx-auto px-4 py-10">{children}</main>
+        {/* ✅ Botão fixo do WhatsApp */}
+        <FloatingWhatsApp />
 
         {/* Rodapé */}
         <footer className="relative z-10 bg-[#8D6A93]/10 border-t border-[#D6A77A]/40 mt-16">
