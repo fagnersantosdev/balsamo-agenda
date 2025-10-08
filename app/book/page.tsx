@@ -124,7 +124,7 @@ const phone = booking.clientPhone.startsWith("55")
   : `55${booking.clientPhone}`;
 
 // ✅ Abre o WhatsApp automaticamente com a mensagem
-window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+//window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
 
 // 🧹 Limpa o formulário
 formElement.reset();
