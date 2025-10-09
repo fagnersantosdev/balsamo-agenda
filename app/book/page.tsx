@@ -47,6 +47,7 @@ export default function BookPage() {
   name: string;
   date: string;
   service: string;
+  phone?: string
 } | null>(null);
 
 
@@ -104,9 +105,11 @@ setMsg("✨ Agendamento realizado com sucesso! 💆‍♀️");
 
 setSuccessData({
   name: booking.clientName,
-  date: formattedDate,
-  service: booking.service?.name || "Serviço",
+  date: new Date(booking.startDateTime).toLocaleString("pt-BR"),
+  service: booking.service.name,
+  phone: booking.clientPhone, // 👈 importante
 });
+
 
 // ✅ Mensagem automática para WhatsApp
 const message = encodeURIComponent(
@@ -228,8 +231,10 @@ setTimeout(() => setMsg(null), 4000);
               name={successData.name}
               date={successData.date}
               service={successData.service}
+              phone={successData.phone} // 👈 envia o telefone
             />
           )}
+
 
                 {msg && !successData && (
                 <Toast

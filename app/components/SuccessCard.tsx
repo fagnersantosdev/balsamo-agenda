@@ -1,6 +1,5 @@
 "use client";
-import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle, MessageCircle } from "lucide-react";
+import React from "react";
 
 type SuccessCardProps = {
   show: boolean;
@@ -19,75 +18,50 @@ export default function SuccessCard({
   service,
   phone,
 }: SuccessCardProps) {
-  const message = encodeURIComponent(
-    `🌿 Olá, ${name}! Seu agendamento na *Bálsamo Massoterapia* foi confirmado com sucesso. 💆‍♀️✨
+  if (!show) return null;
 
-📅 *Data:* ${date}
-💆‍♀️ *Serviço:* ${service}
+  const balsamoPhone = "5524992640951"; // DDD + número sem espaços ou símbolos
 
-Aguardamos você! 🌸`
-  );
-
-  const whatsappLink = `https://wa.me/${
-    phone?.startsWith("55") ? phone : `55${phone || ""}`
-  }?text=${message}`;
-
-  // 🔒 Chama o WhatsApp somente com clique direto do usuário
-  function handleOpenWhatsApp() {
-    window.open(whatsappLink, "_blank");
-  }
+  // Gera o link do WhatsApp se o número estiver disponível
+  const whatsappLink = `https://wa.me/${balsamoPhone}?text=${encodeURIComponent(
+  `Olá! 🌿 Fiz um agendamento no site da Bálsamo Massoterapia.\n\n🧘‍♀️ Nome: ${name}\n🗓 Data: ${date}\n💆 Serviço: ${service}\n\nGostaria de confirmar o atendimento.`
+)}`;
 
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.4 }}
-          className="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50"
+    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-xl p-6 max-w-md w-full text-center border border-[#8D6A93]/30">
+        <h2 className="text-2xl font-bold text-[#1F3924] mb-2">
+          🌿 Agendamento Confirmado!
+        </h2>
+
+        <p className="text-[#1F3924] mb-4 leading-relaxed">
+          <strong>{name}</strong>, seu atendimento foi agendado com sucesso para:
+        </p>
+
+        <div className="bg-[#F5F3EB] border border-[#D6A77A]/40 rounded-lg p-4 mb-4">
+          <p className="text-[#1F3924] font-medium">{service}</p>
+          <p className="text-sm text-[#8D6A93]">{date}</p>
+        </div>
+
+        {whatsappLink && (
+          <a
+          href={whatsappLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg shadow hover:bg-green-700 transition"
         >
-          <motion.div
-            initial={{ scale: 0.9 }}
-            animate={{ scale: 1 }}
-            exit={{ scale: 0.9 }}
-            transition={{ duration: 0.3 }}
-            className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm text-center border border-green-100"
-          >
-            <CheckCircle className="w-14 h-14 text-green-600 mx-auto mb-4 animate-pulse" />
+          💬 Falar com a Bálsamo no WhatsApp
+        </a>
 
-            <h2 className="text-2xl font-semibold text-green-800 mb-2">
-              Agendamento Confirmado!
-            </h2>
+        )}
 
-            <p className="text-gray-700 text-sm mb-1">
-              <strong>Cliente:</strong> {name}
-            </p>
-            <p className="text-gray-700 text-sm mb-1">
-              <strong>Serviço:</strong> {service}
-            </p>
-            <p className="text-gray-700 text-sm mb-4">
-              <strong>Data:</strong> {date}
-            </p>
-
-            {/* ✅ Botão com evento direto (não bloqueado) */}
-            <button
-              onClick={handleOpenWhatsApp}
-              className="inline-flex items-center justify-center gap-2 bg-green-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors duration-300 w-full mb-3"
-            >
-              <MessageCircle className="w-5 h-5" />
-              Enviar Confirmação no WhatsApp
-            </button>
-
-            <button
-              onClick={onClose}
-              className="text-sm text-gray-600 underline hover:text-gray-800 transition"
-            >
-              Fechar
-            </button>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        <button
+          onClick={onClose}
+          className="mt-4 block w-full border border-[#8D6A93] text-[#1F3924] rounded-lg py-2 hover:bg-[#8D6A93]/10 transition"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
   );
 }
