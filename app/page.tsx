@@ -77,6 +77,12 @@ export default function HomePage() {
                 <p className="text-[#8A4B2E] font-medium">
                   💰 R$ {Number(service.price).toFixed(2)} — ⏱ {service.durationMin} min
                 </p>
+                <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
+                {service.details.map((d, i) => (
+                  <li key={i}>{d}</li>
+                ))}
+              </ul>
+
               </div>
             ))}
           </div>

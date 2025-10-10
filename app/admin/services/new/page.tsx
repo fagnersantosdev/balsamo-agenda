@@ -12,12 +12,18 @@ export default function NewServicePage() {
     e.preventDefault();
     setLoading(true);
 
-    const form = new FormData(e.currentTarget);
+    const detailsText = form.get("details") as string;
+    const detailsArray = detailsText
+      ? detailsText.split("\n").map((line) => line.trim()).filter(Boolean)
+      : [];
+
     const payload = {
       name: form.get("name"),
-      price: Number(form.get("price")),
-      durationMin: Number(form.get("durationMin")),
+      price: form.get("price"),
+      durationMin: form.get("durationMin"),
+      details: detailsArray,
     };
+
 
     const res = await fetch("/api/services", {
       method: "POST",
@@ -69,6 +75,18 @@ export default function NewServicePage() {
             className="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
+        <div>
+        <label className="block mb-2 font-medium text-[#1F3924]">
+          Detalhes (um por linha)
+        </label>
+        <textarea
+          name="details"
+          rows={4}
+          placeholder="Exemplo:\n💆 Massagem corporal\n🌸 Aromaterapia"
+          className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+        />
+      </div>
+
 
         <button
           disabled={loading}

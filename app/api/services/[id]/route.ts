@@ -22,11 +22,13 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
       name: data.name,
       price: Number(data.price),
       durationMin: Number(data.durationMin),
+      details: data.details || [],
     },
   });
 
   return NextResponse.json(updated);
 }
+
 
 // 🔴 Deletar serviço
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {

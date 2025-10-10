@@ -28,6 +28,7 @@ export async function POST(req: Request) {
         name: data.name,
         price: Number(data.price),
         durationMin: Number(data.durationMin),
+        details: data.details || [], // ✅ aceita lista ou vazio
       },
     });
 
@@ -37,3 +38,4 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Erro ao criar serviço" }, { status: 500 });
   }
 }
+

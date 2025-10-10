@@ -13,7 +13,9 @@ model Service {
   durationMin Int
   active      Boolean  @default(true)
   price       Float     @default(0)
+  details     String[] @default([]) // ✅ novo campo tipo lista de strings (array)
   bookings    Booking[]
+  
 }
 
 model Booking {
