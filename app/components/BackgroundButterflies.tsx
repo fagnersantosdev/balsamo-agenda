@@ -12,6 +12,7 @@ type ButterflySpec = {
 const butterflies: ButterflySpec[] = [
   { top: "10%", left: "5%",  size: 50, rotate: 12,  opacity: 0.5 },
   { top: "20%", left: "80%", size: 60, rotate: -15, opacity: 0.5 },
+  { top: "60%", left: "5%",  size: 55, rotate: 12,  opacity: 0.5 },
   { top: "42%", left: "15%", size: 70, rotate: 25,  opacity: 0.5 },
   { top: "60%", left: "70%", size: 55, rotate: -20, opacity: 0.5 },
   { top: "75%", left: "30%", size: 65, rotate: 18,  opacity: 0.5 },

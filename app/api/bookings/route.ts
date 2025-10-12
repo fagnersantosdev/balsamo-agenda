@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     const start = new Date(data.startDateTime);
     const end = new Date(start.getTime() + service.durationMin * 60000);
 
+    // ✅ Verificar conflito (bloqueio)
     const conflict = await prisma.booking.findFirst({
       where: {
         startDateTime: { lt: end },
@@ -37,11 +38,12 @@ export async function POST(req: Request) {
 
     if (conflict) {
       return NextResponse.json(
-        { error: 'Este horário já está reservado' },
+        { error: '❌ Este horário já está reservado. Escolha outro horário disponível.' },
         { status: 409 }
       );
     }
 
+    // ✅ Criar agendamento
     const booking = await prisma.booking.create({
       data: {
         clientName: data.clientName,
@@ -54,11 +56,10 @@ export async function POST(req: Request) {
       include: { service: true },
     });
 
-    // ✅ Resposta padronizada
     return NextResponse.json(
       {
         ok: true,
-        message: "Agendamento criado com sucesso!",
+        message: "✅ Agendamento criado com sucesso!",
         booking,
       },
       { status: 201 }
@@ -67,7 +68,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Erro ao criar agendamento:", error);
     return NextResponse.json(
-      { error: "Erro ao criar agendamento." },
+      { error: "Erro interno ao criar agendamento." },
       { status: 500 }
     );
   }

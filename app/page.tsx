@@ -1,5 +1,3 @@
-"use client";
-import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import EventPromo from "./components/EventPromo";
@@ -12,31 +10,30 @@ type Service = {
   details?: string[];
 };
 
-export default function HomePage() {
-  const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
+// 🔄 Garante que a página será revalidada automaticamente a cada 10 minutos
+export const revalidate = 600;
 
-  useEffect(() => {
-    async function fetchServices() {
-      try {
-        const res = await fetch("/api/services");
-        const data = await res.json();
-        setServices(data);
-      } catch (error) {
-        console.error("Erro ao carregar serviços:", error);
-      } finally {
-        setLoading(false);
-      }
+export default async function HomePage() {
+  let services: Service[] = [];
+
+  try {
+    // Busca os serviços diretamente da API interna
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/services`, {
+      next: { revalidate: 600 }, // cache automático (10 min)
+    });
+
+    if (res.ok) {
+      services = await res.json();
     }
-    fetchServices();
-  }, []);
+  } catch (error) {
+    console.error("Erro ao carregar serviços:", error);
+  }
 
   return (
     <>
       <main className="max-w-6xl mx-auto px-6 py-12 bg-gradient-to-b from-[#F5F3EB] to-[#D6A77A]/20">
         {/* Saudação */}
         <section className="grid md:grid-cols-2 gap-10 items-center mb-16">
-          {/* Texto e logo */}
           <div className="text-center md:text-left space-y-4">
             <Image
               src="/logo-balsamo.png"
@@ -54,7 +51,6 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Imagem da proprietária */}
           <div className="flex justify-center md:justify-end">
             <Image
               src="/proprietaria.jpg"
@@ -72,9 +68,7 @@ export default function HomePage() {
             Nossos Serviços
           </h2>
 
-          {loading ? (
-            <p className="text-center text-[#1F3924]">Carregando serviços...</p>
-          ) : services.length === 0 ? (
+          {services.length === 0 ? (
             <p className="text-center text-[#1F3924]/70">
               Nenhum serviço cadastrado no momento.
             </p>
@@ -92,14 +86,15 @@ export default function HomePage() {
                     💰 R$ {service.price.toFixed(2)} — ⏱ {service.durationMin} min
                   </p>
 
-                  {/* Exibe lista de detalhes (se houver) */}
-                  {service.details && Array.isArray(service.details) && service.details.length > 0 && (
-                    <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
-                      {service.details.map((d, i) => (
-                        <li key={i}>{d}</li>
-                      ))}
-                    </ul>
-                  )}
+                  {service.details &&
+                    Array.isArray(service.details) &&
+                    service.details.length > 0 && (
+                      <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
+                        {service.details.map((d, i) => (
+                          <li key={i}>{d}</li>
+                        ))}
+                      </ul>
+                    )}
                 </div>
               ))}
             </div>

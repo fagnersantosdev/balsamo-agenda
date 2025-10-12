@@ -13,6 +13,7 @@ model Service {
   price       Float     @default(0)
   durationMin Int
   details      Json?     // ✅ novo campo para lista de detalhes
+  active       Boolean   @default(true) // ✅ campo para marcar se o serviço está ativo
   bookings    Booking[]
 }
 
