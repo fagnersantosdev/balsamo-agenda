@@ -1,34 +1,42 @@
 "use client";
-import useSWR from "swr";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import EventPromo from "./components/EventPromo";
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
-export default function HomePage() {
-  const { data: services, error, isLoading } = useSWR("/api/services", fetcher);
-
-  if (error) {
-    return <p className="text-center text-red-700 mt-10">❌ Erro ao carregar serviços.</p>;
-  }
-
-  if (isLoading || !services) {
-    return <p className="text-center text-[#1F3924] mt-10">Carregando serviços...</p>;
-  }
-
-  type Service = {
+type Service = {
   id: number;
   name: string;
   price: number;
   durationMin: number;
+  details?: string[];
 };
+
+export default function HomePage() {
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const res = await fetch("/api/services");
+        const data = await res.json();
+        setServices(data);
+      } catch (error) {
+        console.error("Erro ao carregar serviços:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchServices();
+  }, []);
 
   return (
     <>
       <main className="max-w-6xl mx-auto px-6 py-12 bg-gradient-to-b from-[#F5F3EB] to-[#D6A77A]/20">
         {/* Saudação */}
         <section className="grid md:grid-cols-2 gap-10 items-center mb-16">
+          {/* Texto e logo */}
           <div className="text-center md:text-left space-y-4">
             <Image
               src="/logo-balsamo.png"
@@ -40,13 +48,13 @@ export default function HomePage() {
             <h1 className="font-[var(--font-ooohbaby)] text-3xl sm:text-4xl text-[#8D6A93]">
               Bem-vindo à Bálsamo Massoterapia 🌿
             </h1>
-
-            <p className="text-[#1F3924]/90 leading-relaxed text-base sm:text-lg">
+            <p className="text-[#1F3924] leading-relaxed text-base sm:text-lg">
               Cuidamos do seu corpo e da sua mente com técnicas terapêuticas que
               promovem relaxamento, saúde e bem-estar.
             </p>
           </div>
 
+          {/* Imagem da proprietária */}
           <div className="flex justify-center md:justify-end">
             <Image
               src="/proprietaria.jpg"
@@ -64,29 +72,40 @@ export default function HomePage() {
             Nossos Serviços
           </h2>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-            {services.map((service: Service) => (
+          {loading ? (
+            <p className="text-center text-[#1F3924]">Carregando serviços...</p>
+          ) : services.length === 0 ? (
+            <p className="text-center text-[#1F3924]/70">
+              Nenhum serviço cadastrado no momento.
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+              {services.map((service) => (
+                <div
+                  key={service.id}
+                  className="bg-white rounded-2xl shadow-md border border-[#8D6A93]/30 p-6 hover:shadow-lg transition-shadow"
+                >
+                  <h3 className="text-xl font-semibold text-[#1F3924] mb-2">
+                    {service.name}
+                  </h3>
+                  <p className="text-[#8A4B2E] font-medium">
+                    💰 R$ {service.price.toFixed(2)} — ⏱ {service.durationMin} min
+                  </p>
 
-              <div
-                key={service.id}
-                className="bg-white rounded-2xl shadow-md border border-[#8D6A93]/30 p-6 hover:shadow-lg transition-shadow"
-              >
-                <h3 className="text-xl font-semibold text-[#1F3924] mb-2">
-                  {service.name}
-                </h3>
-                <p className="text-[#8A4B2E] font-medium">
-                  💰 R$ {Number(service.price).toFixed(2)} — ⏱ {service.durationMin} min
-                </p>
-                <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
-                {service.details.map((d, i) => (
-                  <li key={i}>{d}</li>
-                ))}
-              </ul>
+                  {/* Exibe lista de detalhes (se houver) */}
+                  {service.details && Array.isArray(service.details) && service.details.length > 0 && (
+                    <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
+                      {service.details.map((d, i) => (
+                        <li key={i}>{d}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
-              </div>
-            ))}
-          </div>
-
+          {/* Botão de agendar */}
           <div className="text-center mt-12">
             <Link
               href="/book"

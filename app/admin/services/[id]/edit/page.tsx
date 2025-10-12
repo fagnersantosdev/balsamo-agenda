@@ -8,102 +8,172 @@ type Service = {
   name: string;
   price: number;
   durationMin: number;
+  details?: string[];
 };
-
 
 export default function EditServicePage() {
   const router = useRouter();
-  const { id } = useParams();
+  const params = useParams();
+  const { id } = params;
+
   const [service, setService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  // 🔄 Buscar o serviço atual
   useEffect(() => {
-    fetch(`/api/services/${id}`)
-      .then((res) => res.json())
-      .then((data) => {
+    async function fetchService() {
+      try {
+        const res = await fetch(`/api/services/${id}`);
+        if (!res.ok) throw new Error("Erro ao carregar serviço");
+        const data = await res.json();
         setService(data);
+      } catch (error) {
+        console.error(error);
+        setToast({ message: "❌ Erro ao carregar dados do serviço.", type: "error" });
+      } finally {
         setLoading(false);
-      });
-  }, [id]);
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setLoading(true);
-
-    const form = new FormData(e.currentTarget);
-    const payload = {
-      name: form.get("name"),
-      price: Number(form.get("price")),
-      durationMin: Number(form.get("durationMin")),
-    };
-
-    const res = await fetch(`/api/services/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (res.ok) {
-      setToast({ message: "✅ Serviço atualizado!", type: "success" });
-      setTimeout(() => router.push("/admin/services"), 1200);
-    } else {
-      setToast({ message: "❌ Erro ao atualizar serviço", type: "error" });
+      }
     }
 
-    setLoading(false);
+    if (id) fetchService();
+  }, [id]);
+
+  // 💾 Atualizar serviço
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const formEl = e.currentTarget;
+    const form = new FormData(formEl);
+
+    const name = form.get("name") as string;
+    const price = parseFloat(form.get("price") as string);
+    const durationMin = parseInt(form.get("durationMin") as string);
+    const detailsText = (form.get("details") as string) || "";
+
+    const detailsArray = detailsText
+      .split("\n")
+      .map((d) => d.trim())
+      .filter(Boolean);
+
+    if (!name || isNaN(price) || isNaN(durationMin)) {
+      setToast({ message: "⚠️ Preencha todos os campos obrigatórios.", type: "error" });
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      const res = await fetch(`/api/services/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, price, durationMin, details: detailsArray }),
+      });
+
+      if (res.ok) {
+        setToast({ message: "✅ Serviço atualizado com sucesso!", type: "success" });
+        setTimeout(() => router.push("/admin/services"), 2000);
+      } else {
+        const err = await res.json();
+        setToast({
+          message: `❌ Erro ao atualizar: ${err.error || "Verifique os dados e tente novamente."}`,
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      setToast({ message: "❌ Erro de conexão. Tente novamente mais tarde.", type: "error" });
+    } finally {
+      setSaving(false);
+    }
   }
 
-  if (loading) return <p className="text-center mt-10">Carregando...</p>;
+  if (loading) {
+    return (
+      <main className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-[#8D6A93]/20">
+        <p className="text-[#1F3924] text-center">Carregando dados do serviço...</p>
+      </main>
+    );
+  }
+
+  if (!service) {
+    return (
+      <main className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-[#8D6A93]/20">
+        <p className="text-[#1F3924] text-center">Serviço não encontrado.</p>
+      </main>
+    );
+  }
 
   return (
-    <main className="max-w-md mx-auto p-6 bg-white rounded-2xl shadow-lg">
-      <h1 className="text-2xl font-bold text-[#1F3924] mb-6">Editar Serviço</h1>
+    <main className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-[#8D6A93]/20 relative">
+      <h1 className="text-2xl font-bold text-[#1F3924] mb-6 text-center">
+        ✏️ Editar Serviço
+      </h1>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Nome */}
         <div>
-          <label className="block font-medium text-[#1F3924]">Nome</label>
+          <label className="block mb-2 font-medium text-[#1F3924]">Nome do Serviço</label>
           <input
             name="name"
-            defaultValue={service?.name ?? ""}
+            defaultValue={service.name}
             required
-            className="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-[#8D6A93]"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
+        {/* Preço */}
         <div>
-          <label className="block font-medium text-[#1F3924]">Preço (R$)</label>
+          <label className="block mb-2 font-medium text-[#1F3924]">Preço (R$)</label>
           <input
+            name="price"
             type="number"
             step="0.01"
-            name="price"
-            defaultValue={service?.price ?? ""}
+            defaultValue={service.price}
             required
-            className="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-[#8D6A93]"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
+        {/* Duração */}
         <div>
-          <label className="block font-medium text-[#1F3924]">Duração (minutos)</label>
+          <label className="block mb-2 font-medium text-[#1F3924]">Duração (minutos)</label>
           <input
-            type="number"
             name="durationMin"
-            defaultValue={service?.durationMin ?? ""}
+            type="number"
+            defaultValue={service.durationMin}
             required
-            className="w-full p-2 border border-purple-300 rounded focus:ring-2 focus:ring-[#8D6A93]"
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
+        </div>
+
+        {/* Detalhes */}
+        <div>
+          <label className="block mb-2 font-medium text-[#1F3924]">Detalhes</label>
+          <textarea
+            name="details"
+            defaultValue={(service.details || []).join("\n")}
+            className="w-full px-3 py-2 border border-purple-300 rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+          />
+          <p className="text-xs text-[#1F3924]/70 mt-1">
+            Cada linha representa um item (ex.: 🌸 Aromaterapia, 💆 Massagem Relaxante)
+          </p>
         </div>
 
         <button
-          disabled={loading}
-          className="w-full bg-[#1F3924] text-purple-50 font-medium px-4 py-2 rounded-lg hover:bg-green-900 transition"
+          disabled={saving}
+          className="w-full bg-[#1F3924] text-purple-50 font-medium px-4 py-2 rounded-lg hover:bg-green-900 transition-colors duration-300 disabled:opacity-50"
         >
-          {loading ? "Salvando..." : "Salvar Alterações"}
+          {saving ? "Salvando..." : "Salvar Alterações"}
         </button>
       </form>
 
       {toast && (
-        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </main>
   );

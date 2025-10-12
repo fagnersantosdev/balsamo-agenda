@@ -10,13 +10,12 @@ datasource db {
 model Service {
   id          Int      @id @default(autoincrement())
   name        String
-  durationMin Int
-  active      Boolean  @default(true)
   price       Float     @default(0)
-  details     String[] @default([]) // ✅ novo campo tipo lista de strings (array)
+  durationMin Int
+  details      Json?     // ✅ novo campo para lista de detalhes
   bookings    Booking[]
-  
 }
+
 
 model Booking {
   id            Int      @id @default(autoincrement())
