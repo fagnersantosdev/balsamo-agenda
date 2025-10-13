@@ -17,6 +17,16 @@ model Service {
   bookings    Booking[]
 }
 
+model Availability {
+  id          Int      @id @default(autoincrement())
+  dayOfWeek   Int      // 0 = domingo, 1 = segunda...
+  openHour    Int
+  closeHour   Int
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 
 model Booking {
   id            Int      @id @default(autoincrement())

@@ -1,0 +1,10 @@
+-- CreateTable
+CREATE TABLE "Availability" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "dayOfWeek" INTEGER NOT NULL,
+    "openHour" INTEGER NOT NULL,
+    "closeHour" INTEGER NOT NULL,
+    "active" BOOLEAN NOT NULL DEFAULT true,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL
+);
