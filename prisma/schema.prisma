@@ -19,7 +19,7 @@ model Service {
 
 model Availability {
   id          Int      @id @default(autoincrement())
-  dayOfWeek   Int      // 0 = domingo, 1 = segunda...
+  dayOfWeek   Int      @unique
   openHour    Int
   closeHour   Int
   active      Boolean  @default(true)
