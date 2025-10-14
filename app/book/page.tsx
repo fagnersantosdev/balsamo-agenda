@@ -192,16 +192,54 @@ export default function BookPage() {
           </select>
 
           {/* Data */}
-          <input
-            type="date"
-            name="date"
-            required
-            className="w-full p-2 border rounded"
-            onChange={(e) => {
-              const serviceId = Number((document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value);
-              if (serviceId) loadAvailableTimes(e.target.value, serviceId);
-            }}
-          />
+          <div>
+          <label className="block mb-2 font-medium text-[#1F3924]">Escolha a data</label>
+
+          <div className="bg-white rounded-xl border border-purple-200 p-3 shadow-sm">
+            <DayPicker
+              mode="single"
+              selected={selectedDate ?? undefined}
+              onSelect={(date) => {
+                if (!date) return;
+
+                const day = date.getDay(); // 0 = domingo, 6 = sábado
+                if (day === 0 || day === 6) {
+                  setAvailableTimes([]);
+                  setSelectedDate(null);
+                  setMsgType("error");
+                  setMsg("🚫 Não funcionamos aos fins de semana.");
+                  setTimeout(() => setMsg(null), 4000);
+                  return;
+                }
+
+                setSelectedDate(date);
+
+                const serviceId = Number(
+                  (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
+                );
+                if (serviceId) {
+                  // envia a data formatada (yyyy-mm-dd)
+                  const formatted = date.toISOString().split("T")[0];
+                  loadAvailableTimes(formatted, serviceId);
+                }
+              }}
+              disabled={(date) => {
+                const day = date.getDay();
+                // Desabilita sábado e domingo no calendário
+                return day === 0 || day === 6;
+              }}
+              locale={ptBR}
+              weekStartsOn={1}
+              styles={{
+                day: { fontSize: "0.9rem" },
+                caption: { color: "#1F3924", fontWeight: "bold" },
+                head_cell: { color: "#8A4B2E" },
+              }}
+            />
+          </div>
+        </div>
+
+
 
           {/* Horários disponíveis */}
           {availableTimes.length > 0 ? (
