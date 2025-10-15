@@ -5,6 +5,10 @@ import Image from "next/image";
 import Toast from "../components/toast";
 import EventPromo from "../components/EventPromo";
 import SuccessCard from "../components/SuccessCard";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/style.css";
+import { ptBR } from "date-fns/locale";
+
 
 type Service = { id: number; name: string; durationMin: number };
 type Availability = {
@@ -43,6 +47,7 @@ export default function BookPage() {
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<"success" | "error" | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [successData, setSuccessData] = useState<{
     name: string;
     date: string;
@@ -117,12 +122,14 @@ export default function BookPage() {
     const cleanedPhone = rawPhone.replace(/\D/g, "");
 
     const payload = {
-      clientName: form.get("clientName"),
-      clientPhone: cleanedPhone,
-      clientEmail: form.get("clientEmail") || null,
-      serviceId: Number(form.get("serviceId")),
-      startDateTime: form.get("startDateTime"),
-    };
+    clientName: form.get("clientName"),
+    clientPhone: cleanedPhone,
+    clientEmail: form.get("clientEmail") || null,
+    serviceId: Number(form.get("serviceId")),
+    startDateTime: form.get("startDateTime") || (selectedDate ? selectedDate.toISOString() : null),
+  };
+
+  
 
     try {
       const res = await fetch("/api/bookings", {
@@ -252,7 +259,10 @@ export default function BookPage() {
               ))}
             </select>
           ) : (
-            <p className="text-sm text-[#8A4B2E]">Selecione um dia e serviço para ver horários disponíveis.</p>
+            <p className="text-sm text-[#8A4B2E] italic">
+              Escolha um <strong>serviço</strong> e uma <strong>data válida (segunda a sexta)</strong> para ver os horários disponíveis.
+            </p>
+
           )}
 
           <button
