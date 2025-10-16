@@ -13,3 +13,15 @@ export async function GET() {
     return NextResponse.json({ error: "Erro ao buscar disponibilidade" }, { status: 500 });
   }
 }
+
+export async function POST() {
+  try{
+    const items = await prisma.availability.findMany({
+      orderBy: {dayOfWeek: "asc"},
+    })
+
+  } catch (e) {
+    
+  }
+  
+}

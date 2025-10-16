@@ -57,9 +57,32 @@ export default function BookPage() {
 
   // 🔄 Carregar serviços e horários de funcionamento
   useEffect(() => {
-    fetch("/api/services").then((res) => res.json()).then(setServices);
-    fetch("/api/availability").then((res) => res.json()).then(setAvailability);
-  }, []);
+  (async () => {
+    try {
+      const resServices = await fetch("/api/services");
+      if (resServices.ok) {
+        const dataServices = await resServices.json();
+        setServices(Array.isArray(dataServices) ? dataServices : []);
+      } else {
+        setServices([]);
+      }
+
+      const resAvail = await fetch("/api/availability");
+      if (resAvail.ok) {
+        const text = await resAvail.text();
+        const dataAvail = text ? JSON.parse(text) : [];
+        setAvailability(Array.isArray(dataAvail) ? dataAvail : []);
+      } else {
+        console.warn("Erro ao buscar availability:", resAvail.status);
+        setAvailability([]);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar dados:", err);
+      setServices([]);
+      setAvailability([]);
+    }
+  })();
+}, []);
 
   // 🕒 Gera horários livres com base no expediente
   async function loadAvailableTimes(date: string, serviceId: number) {

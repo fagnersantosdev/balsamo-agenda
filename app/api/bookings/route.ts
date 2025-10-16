@@ -39,9 +39,10 @@ export async function POST(req: Request) {
 
     // 🗓️ verifica se o dia é ativo
     const dayOfWeek = start.getDay();
-    const availability = await prisma.availability.findUnique({
+    const availability = await prisma.availability.findFirst({
       where: { dayOfWeek },
     });
+
 
     if (!availability || !availability.active) {
       return NextResponse.json(
