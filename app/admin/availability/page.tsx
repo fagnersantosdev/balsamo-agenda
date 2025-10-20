@@ -46,7 +46,7 @@ export default function AvailabilityPage() {
   }
 
   // 📝 Atualiza campo em tempo real
-  function updateField(id: number, field: keyof Availability, value: any) {
+  function updateField<T extends keyof Availability>(id: number, field: T, value: Availability[T]) {
     setAvailability((prev) =>
       prev.map((day) =>
         day.id === id ? { ...day, [field]: value } : day

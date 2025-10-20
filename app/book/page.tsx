@@ -84,52 +84,62 @@ export default function BookPage() {
   })();
 }, []);
 
-  // 🕒 Gera horários livres com base no expediente
-  async function loadAvailableTimes(date: string, serviceId: number) {
-    if (!serviceId || !date) return;
+// 🕒 Gera horários livres com base no expediente
+async function loadAvailableTimes(date: string, serviceId: number) {
+  if (!serviceId || !date) return;
 
-    const res = await fetch("/api/bookings");
-    let bookings: Booking[] = [];
+  const res = await fetch("/api/bookings");
+  let bookings: Booking[] = [];
 
-    if (res.ok) {
-      bookings = await res.json();
-    } else {
-      console.warn("Falha ao carregar agendamentos:", res.status);
-    }
+  if (res.ok) {
+    bookings = await res.json();
+  } else {
+    console.warn("Falha ao carregar agendamentos:", res.status);
+  }
 
+  const selectedDate = new Date(date);
 
-    const selectedDate = new Date(date);
-    const dayOfWeek = selectedDate.getDay();
+  // ⚙️ Corrige o cálculo para alinhar com o banco (Segunda = 0, Domingo = 6)
+  const dayOfWeek = (selectedDate.getDay() + 6) % 7;
+  console.log("📅 Dia selecionado:", dayOfWeek, selectedDate.toDateString());
 
-    const dayAvailability = availability.find((a) => a.dayOfWeek === dayOfWeek);
+  const dayAvailability = availability.find((a) => a.dayOfWeek === dayOfWeek);
+  console.log("🕘 Disponibilidade encontrada:", dayAvailability);
 
-    if (!dayAvailability || !dayAvailability.active) {
-      setAvailableTimes([]);
-      return;
-    }
+  if (!dayAvailability || !dayAvailability.active) {
+    setAvailableTimes([]);
+    setMsgType("error");
+    setMsg("🚫 Este dia não está disponível para agendamento.");
+    setTimeout(() => setMsg(null), 4000);
+    return;
+  }
 
-    const times: string[] = [];
-    for (let h = dayAvailability.openHour; h < dayAvailability.closeHour; h++) {
-      for (let m = 0; m < 60; m += 60) {
-        const slot = new Date(selectedDate);
-        slot.setHours(h, m, 0, 0);
+  const times: string[] = [];
+  for (let h = dayAvailability.openHour; h < dayAvailability.closeHour; h++) {
+    for (let m = 0; m < 60; m += 60) {
+      const slot = new Date(selectedDate);
+      slot.setHours(h, m, 0, 0);
 
-        // verificar conflitos com reservas
-        const hasConflict = bookings.some((b: Booking) => {
+      // 🔎 Verifica conflitos com reservas existentes
+      const hasConflict = bookings.some((b: Booking) => {
         const start = new Date(b.startDateTime);
         const end = new Date(b.endDateTime);
         return slot >= start && slot < end;
       });
 
-
-        if (!hasConflict) {
-          times.push(slot.toISOString());
-        }
+      if (!hasConflict) {
+        times.push(slot.toISOString());
       }
     }
-
-    setAvailableTimes(times);
   }
+
+  console.log("🕓 Horários disponíveis:", times.map(t =>
+    new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+  ));
+
+  setAvailableTimes(times);
+}
+
 
   // 📤 Submissão do agendamento
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
