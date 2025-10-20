@@ -100,11 +100,15 @@ async function loadAvailableTimes(date: string, serviceId: number) {
   const selectedDate = new Date(date);
 
   // ⚙️ Corrige o cálculo para alinhar com o banco (Segunda = 0, Domingo = 6)
-  const dayOfWeek = (selectedDate.getDay() + 6) % 7;
-  console.log("📅 Dia selecionado:", dayOfWeek, selectedDate.toDateString());
-
+  const jsDay = selectedDate.getDay();
+  //rotaciona os dias: domingo (0) = 1, 
+  //segunda (1) = 2, ...., sábado (6) = 0
+  const dayOfWeek = (jsDay + 1) % 7;
   const dayAvailability = availability.find((a) => a.dayOfWeek === dayOfWeek);
+
+  console.log("📅 Dia selecionado:", jsDay, "→ convertido para:", dayOfWeek);
   console.log("🕘 Disponibilidade encontrada:", dayAvailability);
+
 
   if (!dayAvailability || !dayAvailability.active) {
     setAvailableTimes([]);
