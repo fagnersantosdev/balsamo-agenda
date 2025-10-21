@@ -27,15 +27,18 @@ model Availability {
   updatedAt   DateTime @updatedAt
 }
 
-
 model Booking {
-  id            Int      @id @default(autoincrement())
-  clientName    String
-  clientPhone   String
-  clientEmail   String?
-  serviceId     Int
-  service       Service  @relation(fields: [serviceId], references: [id])
-  startDateTime DateTime
-  endDateTime   DateTime
-  createdAt     DateTime @default(now())
+  id             Int       @id @default(autoincrement())
+  clientName     String
+  clientPhone    String
+  clientEmail    String?
+  startDateTime  DateTime
+  endDateTime    DateTime
+  serviceId      Int
+  service        Service   @relation(fields: [serviceId], references: [id])
+  status         String    @default("PENDENTE") // 👈 novo campo
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt // 👈 adicione o default(now())
 }
+
+

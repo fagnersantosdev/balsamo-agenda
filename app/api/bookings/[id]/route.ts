@@ -1,6 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  try {
+    const { status } = await req.json();
+    const id = Number(params.id);
+
+    if (!["PENDENTE", "CONCLUIDO", "CANCELADO"].includes(status)) {
+      return NextResponse.json({ error: "Status inválido." }, { status: 400 });
+    }
+
+    const booking = await prisma.booking.update({
+      where: { id },
+      data: { status },
+    });
+
+    return NextResponse.json({ ok: true, booking });
+  } catch (error) {
+    console.error("Erro ao atualizar status:", error);
+    return NextResponse.json({ error: "Erro interno no servidor." }, { status: 500 });
+  }
+}
+
 // ✅ Obter agendamento por ID
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -64,5 +85,7 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     return NextResponse.json({ error: "Erro ao excluir agendamento" }, { status: 500 });
   }
 }
+
+
 
 

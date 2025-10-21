@@ -13,19 +13,20 @@ type Booking = {
   service: { name: string };
 };
 
-type FilterType = "all" | "future" | "past" | "today";
+type FilterType = "today" | "past" | "future" | "all";
 
 const filters: { key: FilterType; label: string }[] = [
-  { key: "all", label: "Todos" },
-  { key: "future", label: "Futuros" },
-  { key: "past", label: "Passados" },
   { key: "today", label: "Hoje" },
+  { key: "past", label: "Passados" },
+  { key: "future", label: "Futuros" },
+  { key: "all", label: "Todos" },
+  
 ];
 
 export default function AdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [filter, setFilter] = useState<FilterType>("today");
   const [search, setSearch] = useState(""); // 🔎 estado da busca
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 

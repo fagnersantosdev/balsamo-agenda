@@ -1,18 +1,21 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get("status");
+
     const bookings = await prisma.booking.findMany({
+      where: status ? { status } : {}, // ✅ filtra se vier um status
       include: { service: true },
-      orderBy: { startDateTime: "asc" },
+      orderBy: { startDateTime: "desc" },
     });
 
     return NextResponse.json(bookings);
   } catch (error) {
     console.error("Erro ao buscar agendamentos:", error);
-    // 🔒 Garante que mesmo em erro, devolvemos um JSON válido
-    return NextResponse.json([], { status: 200 });
+    return NextResponse.json({ error: "Erro ao buscar agendamentos." }, { status: 500 });
   }
 }
 
@@ -38,10 +41,16 @@ export async function POST(req: Request) {
     const end = new Date(start.getTime() + (service.durationMin + 15) * 60000);
 
     // 🗓️ verifica se o dia é ativo
-    const dayOfWeek = start.getDay();
-    const availability = await prisma.availability.findFirst({
+    // 🧭 Corrige o mapeamento para bater com o banco (sábado = 0, domingo = 1, segunda = 2, etc.)
+    const jsDay = start.getDay();
+    const dayOfWeek = (jsDay + 1) % 7;
+
+    console.log(`🗓️ JS day: ${jsDay} → Banco dayOfWeek: ${dayOfWeek}`);
+
+    const availability = await prisma.availability.findUnique({
       where: { dayOfWeek },
     });
+
 
 
     if (!availability || !availability.active) {
