@@ -1,221 +1,365 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import Toast from "../components/toast";
-import Link from "next/link";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
-
+// 🔹 Tipos
 type Booking = {
   id: number;
   clientName: string;
   clientPhone: string;
-  clientEmail?: string | null;
-  startDateTime: string;
   service: { name: string };
+  startDateTime: string;
+  status: string;
 };
 
-type FilterType = "today" | "past" | "future" | "all";
+type TabType = "agenda" | "status";
 
-const filters: { key: FilterType; label: string }[] = [
-  { key: "today", label: "Hoje" },
-  { key: "past", label: "Passados" },
-  { key: "future", label: "Futuros" },
-  { key: "all", label: "Todos" },
-  
-];
-
-export default function AdminPage() {
+export default function AdminDashboard() {
+  const [tab, setTab] = useState<TabType>("agenda");
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterType>("today");
-  const [search, setSearch] = useState(""); // 🔎 estado da busca
+  const [filter, setFilter] = useState<string>("HOJE");
+  const [statusFilter, setStatusFilter] = useState<string>("PENDENTE");
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
+  // 🔄 Busca inicial
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (tab === "agenda") fetchBookingsByDate(filter);
+    else fetchBookingsByStatus(statusFilter);
+  }, [tab, filter, statusFilter]);
 
-  async function fetchBookings() {
-    setLoading(true);
-    const res = await fetch("/api/bookings");
-    const data = await res.json();
-    setBookings(data);
-    setLoading(false);
-  }
-
-  async function handleDelete(id: number) {
-    if (!confirm("Tem certeza que deseja excluir este agendamento?")) return;
-
-    const res = await fetch(`/api/bookings/${id}`, { method: "DELETE" });
-
-    if (res.ok) {
-      setToast({ message: "✅ Agendamento excluído com sucesso!", type: "success" });
-      fetchBookings();
+  // 🔍 Busca dinâmica
+  useEffect(() => {
+    if (searchTerm.trim() !== "") {
+      searchBookings(searchTerm);
     } else {
-      setToast({ message: "❌ Erro ao excluir agendamento", type: "error" });
+      if (tab === "agenda") fetchBookingsByDate(filter);
+      else fetchBookingsByStatus(statusFilter);
+    }
+  }, [searchTerm]);
+
+  // 🔄 Buscar agendamentos por data
+  async function fetchBookingsByDate(filter: string) {
+    try {
+      const res = await fetch(`/api/bookings?filter=${filter}`);
+      const data = await res.json();
+      setBookings(data);
+    } catch (error) {
+      console.error(error);
     }
   }
 
-  // 🔎 Aplica filtro por data e busca por nome/telefone
-  const filteredBookings = bookings.filter((b) => {
-    const now = new Date();
-    const bookingDate = new Date(b.startDateTime);
-
-    let dateMatch = true;
-    if (filter === "future") dateMatch = bookingDate > now;
-    if (filter === "past") dateMatch = bookingDate < now;
-    if (filter === "today") dateMatch = bookingDate.toDateString() === now.toDateString();
-
-    const searchTerm = search.toLowerCase();
-    const searchMatch =
-      b.clientName.toLowerCase().includes(searchTerm) ||
-      b.clientPhone.toLowerCase().includes(searchTerm);
-
-    return dateMatch && (search === "" || searchMatch);
-  });
-
-  function getRowClass(date: string) {
-    const now = new Date();
-    const bookingDate = new Date(date);
-
-    if (bookingDate.toDateString() === now.toDateString()) {
-      return "bg-purple-100 text-purple-900 font-medium";
-    } else if (bookingDate > now) {
-      return "bg-green-50 text-green-900";
-    } else {
-      return "bg-gray-100 text-gray-500";
+  // 🔄 Buscar agendamentos por status
+  async function fetchBookingsByStatus(status: string) {
+    try {
+      const res = await fetch(`/api/bookings?status=${status}`);
+      const data = await res.json();
+      setBookings(data);
+    } catch (error) {
+      console.error(error);
     }
+  }
+
+  // 🔍 Buscar agendamentos por nome ou telefone
+  async function searchBookings(term: string) {
+    try {
+      const res = await fetch(`/api/bookings?search=${encodeURIComponent(term)}`);
+      const data = await res.json();
+      setBookings(data);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // ✅ Atualizar status
+  async function updateStatus(
+    id: number,
+    status: "CONCLUIDO" | "CANCELADO",
+    clientPhone?: string,
+    clientName?: string,
+    serviceName?: string
+  ) {
+    try {
+      const res = await fetch(`/api/bookings/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+
+      if (res.ok) {
+        const msg =
+          status === "CONCLUIDO"
+            ? "✅ Atendimento concluído com sucesso!"
+            : "❌ Agendamento cancelado.";
+
+        setToast({ message: msg, type: "success" });
+
+        // WhatsApp apenas para concluído
+        if (status === "CONCLUIDO" && clientPhone && clientName && serviceName) {
+          const formattedPhone = clientPhone.startsWith("55")
+            ? clientPhone
+            : `55${clientPhone.replace(/\D/g, "")}`;
+
+          const message = encodeURIComponent(
+            `🌸 Olá, ${clientName}! Aqui é da *Bálsamo Massoterapia* 💆‍♀️\n\n` +
+              `Seu atendimento de *${serviceName}* foi concluído com sucesso. 😊✨\n\n` +
+              `Agradecemos por escolher nossos serviços e esperamos vê-la novamente em breve! 💜`
+          );
+
+          window.open(`https://wa.me/${formattedPhone}?text=${message}`, "_blank");
+        }
+
+        fetchBookingsByStatus(statusFilter);
+      } else {
+        const data = await res.json();
+        setToast({ message: data.error || "Erro ao atualizar status.", type: "error" });
+      }
+    } catch (err) {
+      console.error(err);
+      setToast({ message: "Erro de conexão com o servidor.", type: "error" });
+    } finally {
+      setTimeout(() => setToast(null), 4000);
+    }
+  }
+
+  // 📄 Exportar agendamentos do mês atual em PDF
+  function exportToPDF() {
+    const doc = new jsPDF();
+    const month = new Date().toLocaleString("pt-BR", { month: "long", year: "numeric" });
+    doc.text(`📅 Relatório de Agendamentos - ${month}`, 14, 15);
+
+    const tableData = bookings.map((b) => [
+      b.clientName,
+      b.clientPhone,
+      b.service.name,
+      new Date(b.startDateTime).toLocaleString("pt-BR"),
+      b.status,
+    ]);
+
+    (doc as any).autoTable({
+      startY: 25,
+      head: [["Cliente", "Telefone", "Serviço", "Data", "Status"]],
+      body: tableData,
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [31, 57, 36] },
+    });
+
+    doc.save(`agendamentos_${month}.pdf`);
   }
 
   return (
-    <main className="max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-lg relative">
-      <h1 className="text-2xl font-bold text-[#1F3924] mb-6">
-        Painel do Administrador
-      </h1>
+    <main className="max-w-6xl mx-auto bg-white rounded-3xl shadow-lg p-8">
+      <h1 className="text-3xl font-bold text-[#1F3924] mb-8">Painel Administrativo 🌿</h1>
 
-      {/* 🔎 Barra de filtros e busca */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-6">
-        {/* Botões de filtro */}
-        <div className="flex gap-2 flex-wrap">
-          {filters.map((btn) => (
-            <button
-              key={btn.key}
-              onClick={() => setFilter(btn.key)}
-              className={`px-4 py-2 rounded-lg border ${
-                filter === btn.key
-                  ? "bg-green-900 text-white"
-                  : "bg-purple-100 text-green-900 hover:bg-purple-200"
-              }`}
-            >
-              {btn.label}
-            </button>
-          ))}
-        </div>
+      {/* 🔹 Tabs */}
+      <div className="flex gap-4 mb-6 border-b pb-2">
+        <button
+          onClick={() => setTab("agenda")}
+          className={`px-4 py-2 rounded-t-lg font-semibold ${
+            tab === "agenda" ? "bg-green-900 text-white" : "bg-gray-100 text-[#1F3924]"
+          }`}
+        >
+          📅 Agenda
+        </button>
 
-        <Link
-        href="/admin/services"
-        className="inline-block bg-[#8D6A93] text-[#FFFEF9] px-5 py-2 rounded-lg shadow hover:bg-[#7A5981] transition-all duration-300 text-sm font-medium"
-      >
-        ⚙️ Gerenciar Serviços
-      </Link>
-
-        {/* Campo de busca */}
-        <input
-          type="text"
-          placeholder="Buscar por nome ou telefone..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 border rounded-lg w-full md:w-80 focus:ring-2 focus:ring-green-700 outline-none"
-        />
+        <button
+          onClick={() => setTab("status")}
+          className={`px-4 py-2 rounded-t-lg font-semibold ${
+            tab === "status" ? "bg-green-900 text-white" : "bg-gray-100 text-[#1F3924]"
+          }`}
+        >
+          📋 Status dos Agendamentos
+        </button>
       </div>
 
-      {loading ? (
-        <p className="text-[#1F3924]">Carregando agendamentos...</p>
-      ) : filteredBookings.length === 0 ? (
-        <p className="text-[#1F3924]">Nenhum agendamento encontrado.</p>
+      {/* 🔍 Campo de busca e exportar PDF */}
+      <div className="flex justify-between items-center mb-6">
+        <input
+          type="text"
+          placeholder="🔍 Buscar por nome ou telefone..."
+          className="border rounded-lg px-4 py-2 w-1/2"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <button
+          onClick={exportToPDF}
+          className="bg-[#1F3924] text-white px-4 py-2 rounded-lg hover:bg-green-900"
+        >
+          📄 Exportar PDF do mês
+        </button>
+      </div>
+
+      {/* 🔹 Conteúdo da aba */}
+      {tab === "agenda" ? (
+        <AgendaSection filter={filter} setFilter={setFilter} bookings={bookings} />
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse rounded-lg overflow-hidden">
-            <thead className="hidden sm:table-header-group">
-            <tr className="bg-purple-200 text-green-900">
-              <th className="p-3 text-left">Cliente</th>
-              <th className="p-3 text-left">Telefone</th>
-              <th className="p-3 text-left">Serviço</th>
-              <th className="p-3 text-left">Data e Hora</th>
-              <th className="p-3 text-left">E-mail</th>
-              <th className="p-3 text-center">Ações</th>
-            </tr>
-            </thead>
-            <tbody>
-            {filteredBookings.map((b) => (
-              <tr
-                key={b.id}
-                className="border-b hover:opacity-90 transition-colors sm:table-row block mb-4 sm:mb-0 sm:border-0"
-              >
-                {/* Cliente */}
-                <td className="p-3 font-medium sm:table-cell block">
-                  <span className="sm:hidden font-semibold">Cliente: </span>
-                  {b.clientName}
-                </td>
-
-                {/* Telefone */}
-                <td className="p-3 sm:table-cell block">
-                  <span className="sm:hidden font-semibold">Telefone: </span>
-                  {b.clientPhone}
-                </td>
-
-                {/* Serviço */}
-                <td className="p-3 sm:table-cell block">
-                  <span className="sm:hidden font-semibold">Serviço: </span>
-                  {b.service?.name}
-                </td>
-
-                {/* Data */}
-                <td className="p-3 sm:table-cell block">
-                  <span className="sm:hidden font-semibold">Data: </span>
-                  {new Date(b.startDateTime).toLocaleString("pt-BR")}
-                </td>
-
-                {/* E-mail */}
-                <td className="p-3 sm:table-cell block">
-                  <span className="sm:hidden font-semibold">E-mail: </span>
-                  {b.clientEmail || "—"}
-                </td>
-
-                {/* Ações */}
-                <td className="p-3 text-center sm:table-cell block flex justify-center gap-3">
-                {/* ✏️ Botão Editar */}
-                <Link
-                  href={`/admin/edit/${b.id}`}
-                  className="p-2 text-blue-600 hover:text-blue-800 transition"
-                  title="Editar agendamento"
-                >
-                  ✏️
-                </Link>
-
-                {/* 🗑️ Botão Excluir */}
-                <button
-                  onClick={() => handleDelete(b.id)}
-                  className="p-2 text-red-600 hover:text-red-800 transition"
-                  title="Excluir agendamento"
-                >
-                  🗑️
-                </button>
-              </td>
-              </tr>
-            ))}
-          </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Toast de feedback */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
+        <StatusSection
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          bookings={bookings}
+          updateStatus={updateStatus}
         />
       )}
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
     </main>
+  );
+}
+
+//
+// 🔸 COMPONENTE: AGENDA
+//
+function AgendaSection({
+  filter,
+  setFilter,
+  bookings,
+}: {
+  filter: string;
+  setFilter: (v: string) => void;
+  bookings: Booking[];
+}) {
+  return (
+    <>
+      <h2 className="text-xl font-semibold mb-4 text-[#1F3924]">📅 Visualizar Agenda</h2>
+      <div className="flex gap-2 mb-4">
+        {["HOJE", "FUTUROS", "PASSADOS", "TODOS"].map((f) => (
+          <button
+            key={f}
+            onClick={() => setFilter(f)}
+            className={`px-4 py-2 rounded ${
+              filter === f ? "bg-green-800 text-white" : "bg-gray-200 text-[#1F3924]"
+            }`}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+      <BookingTable bookings={bookings} showActions={false} />
+    </>
+  );
+}
+
+//
+// 🔸 COMPONENTE: STATUS
+//
+function StatusSection({
+  statusFilter,
+  setStatusFilter,
+  bookings,
+  updateStatus,
+}: {
+  statusFilter: string;
+  setStatusFilter: (v: string) => void;
+  bookings: Booking[];
+  updateStatus: (
+    id: number,
+    status: "CONCLUIDO" | "CANCELADO",
+    phone?: string,
+    name?: string,
+    service?: string
+  ) => void;
+}) {
+  return (
+    <>
+      <h2 className="text-xl font-semibold mb-4 text-[#1F3924]">📋 Gerenciar Status dos Agendamentos</h2>
+      <div className="flex gap-2 mb-4">
+        {["PENDENTE", "CONCLUIDO", "CANCELADO", "TODOS"].map((s) => (
+          <button
+            key={s}
+            onClick={() => setStatusFilter(s)}
+            className={`px-4 py-2 rounded ${
+              statusFilter === s ? "bg-green-800 text-white" : "bg-gray-200 text-[#1F3924]"
+            }`}
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+      <BookingTable bookings={bookings} showActions={true} updateStatus={updateStatus} />
+    </>
+  );
+}
+
+//
+// 🔸 COMPONENTE: TABELA
+//
+function BookingTable({
+  bookings,
+  showActions,
+  updateStatus,
+}: {
+  bookings: Booking[];
+  showActions: boolean;
+  updateStatus?: (
+    id: number,
+    status: "CONCLUIDO" | "CANCELADO",
+    phone?: string,
+    name?: string,
+    service?: string
+  ) => void;
+}) {
+  if (!bookings.length)
+    return <p className="text-gray-500 text-center py-6">Nenhum agendamento encontrado.</p>;
+
+  return (
+    <table className="w-full border-collapse rounded-xl overflow-hidden shadow">
+      <thead>
+        <tr className="bg-purple-200 text-[#1F3924]">
+          <th className="p-3 text-left">Cliente</th>
+          <th className="p-3 text-left">Serviço</th>
+          <th className="p-3 text-left">Data</th>
+          <th className="p-3 text-center">Status</th>
+          {showActions && <th className="p-3 text-center">Ações</th>}
+        </tr>
+      </thead>
+      <tbody>
+        {bookings.map((b) => (
+          <tr key={b.id} className="border-b hover:bg-purple-50 transition">
+            <td className="p-3">{b.clientName}</td>
+            <td className="p-3">{b.service.name}</td>
+            <td className="p-3">
+              {new Date(b.startDateTime).toLocaleString("pt-BR", {
+                dateStyle: "short",
+                timeStyle: "short",
+              })}
+            </td>
+            <td className="p-3 text-center font-semibold">
+              {b.status === "CONCLUIDO" && "✅ Concluído"}
+              {b.status === "PENDENTE" && "🕓 Pendente"}
+              {b.status === "CANCELADO" && "❌ Cancelado"}
+            </td>
+
+            {showActions && updateStatus && (
+              <td className="p-3 text-center flex gap-3 justify-center">
+                {b.status === "PENDENTE" && (
+                  <>
+                    <button
+                      onClick={() =>
+                        updateStatus(b.id, "CONCLUIDO", b.clientPhone, b.clientName, b.service.name)
+                      }
+                      className="text-green-700 text-xl hover:scale-110 transition"
+                      title="Concluir atendimento"
+                    >
+                      ✅
+                    </button>
+                    <button
+                      onClick={() => updateStatus(b.id, "CANCELADO")}
+                      className="text-red-600 text-xl hover:scale-110 transition"
+                      title="Cancelar agendamento"
+                    >
+                      ❌
+                    </button>
+                  </>
+                )}
+              </td>
+            )}
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
