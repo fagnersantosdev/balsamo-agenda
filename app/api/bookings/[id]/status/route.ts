@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+
+  console.log("🧩 Atualizando status do agendamento:", params.id);
+
   try {
     const { status } = await req.json();
     const id = Number(params.id);
@@ -12,7 +15,10 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     const booking = await prisma.booking.update({
       where: { id },
-      data: { status },
+      data: {
+        status,
+        updatedAt: new Date(),
+      },
     });
 
     return NextResponse.json({ ok: true, booking });
@@ -21,6 +27,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: "Erro interno no servidor." }, { status: 500 });
   }
 }
+
 
 // ✅ Obter agendamento por ID
 export async function GET(req: Request, { params }: { params: { id: string } }) {
