@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Service {
+  id          Int      @id @default(autoincrement())
+  name        String
+  price       Float     @default(0)
+  durationMin Int
+  details      Json?     // ✅ novo campo para lista de detalhes
+  active       Boolean   @default(true) // ✅ campo para marcar se o serviço está ativo
+  bookings    Booking[]
+}
+
+model Availability {
+  id          Int      @id @default(autoincrement())
+  dayOfWeek   Int      @unique
+  openHour    Int
+  closeHour   Int
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum BookingStatus {
+  PENDENTE
+  CONCLUIDO
+  CANCELADO
+}
+
+
+model Booking {
+  id             Int       @id @default(autoincrement())
+  clientName     String
+  clientPhone    String
+  clientEmail    String?
+  startDateTime  DateTime
+  endDateTime    DateTime
+  serviceId      Int
+  service        Service   @relation(fields: [serviceId], references: [id])
+  status         BookingStatus   @default(PENDENTE)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now()) @updatedAt // 👈 adicione o default(now())
+}
+
+

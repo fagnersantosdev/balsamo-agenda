@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Animação personalizada */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-4px); }
+  100% { transform: translateY(0px); }
+}
+.float-logo {
+  animation: float 3s ease-in-out infinite;
+}
+
+:root {
+  --font-ooohbaby: "Oooh Baby", cursive;
+  --font-outfit: "Outfit", sans-serif;
+}
+
+body {
+   font-family: var(--font-outfit);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-outfit);
+  font-weight: 600;
+}
+
+.decorative {
+  font-family: var(--font-ooohbaby);
+}
+
+.page-bg {
+  position: fixed;
+  inset: 0;
+  background-image: url('/borboleta.png');
+  background-repeat: no-repeat;
+  background-size: 200px;
+  background-position: top right;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 1s ease-out forwards;
+}
+
+/* Atrasos graduais */
+.fade-delay-1 {
+  animation-delay: 0.2s;
+}
+.fade-delay-2 {
+  animation-delay: 0.4s;
+}
+.fade-delay-3 {
+  animation-delay: 0.6s;
+}
+.fade-delay-4 {
+  animation-delay: 0.8s;
+}
+
+/* @keyframes pulse-slow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite;
+} */
+
+
+
