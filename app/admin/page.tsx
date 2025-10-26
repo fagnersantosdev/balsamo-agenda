@@ -132,7 +132,7 @@ export default function AdminPage() {
   doc.setFont("times", "normal"); // “times” lida bem com caracteres UTF-8
   doc.setFontSize(16);
 
-  const clinicName = "🌿 Bálsamo Massoterapia";
+  const clinicName = "Bálsamo Massoterapia";
   const title = "Relatório de Agendamentos";
   const today = new Date();
   const dateStr = today.toLocaleDateString("pt-BR", {
@@ -150,10 +150,10 @@ export default function AdminPage() {
     const dataHora = new Date(b.startDateTime).toLocaleString("pt-BR");
     const statusTraduzido =
       b.status === "PENDENTE"
-        ? "🕓 Pendente"
+        ? "Pendente"
         : b.status === "CONCLUIDO"
-        ? "✅ Concluído"
-        : "❌ Cancelado";
+        ? "Concluído"
+        : "Cancelado";
 
     return [
       i + 1,
