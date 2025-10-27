@@ -101,7 +101,7 @@ export default function EditServicePage() {
 
   if (loading) {
     return (
-      <main className="max-w-xl mx-auto p-6 bg-white rounded-2xl shadow-lg border border-[#8D6A93]/20">
+      <main className="max-w-xl mx-auto p-6 bg-[#F5F3EB] rounded-2xl shadow-lg border border-[#8D6A93]/20">
         <p className="text-[#1F3924] text-center">Carregando dados do serviço...</p>
       </main>
     );

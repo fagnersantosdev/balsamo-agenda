@@ -33,7 +33,6 @@ enum BookingStatus {
   CANCELADO
 }
 
-
 model Booking {
   id             Int       @id @default(autoincrement())
   clientName     String

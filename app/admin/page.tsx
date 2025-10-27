@@ -125,79 +125,42 @@ export default function AdminPage() {
       b.clientPhone.includes(searchTerm)
   );
 
-  function exportToPDF(): void {
-  const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-
-  // ✅ Define fonte compatível com acentuação
-  doc.setFont("times", "normal"); // “times” lida bem com caracteres UTF-8
-  doc.setFontSize(16);
-
-  const clinicName = "Bálsamo Massoterapia";
-  const title = "Relatório de Agendamentos";
+  function exportToPDF() {
+  const doc = new jsPDF();
   const today = new Date();
-  const dateStr = today.toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  const title =
+    statusFilter === "CONCLUIDO"
+      ? "Relatório de Agendamentos Concluídos — Últimos 3 meses"
+      : statusFilter === "CANCELADO"
+      ? "Relatório de Agendamentos Cancelados — Últimos 3 meses"
+      : "Relatório de Agendamentos";
 
-  doc.text(clinicName, 14, 20);
-  doc.setFontSize(12);
-  doc.text(title, 14, 28);
-  doc.text(`Data de emissão: ${dateStr}`, 14, 35);
+  doc.text(title, 14, 15);
+  doc.setFontSize(10);
+  doc.text(`Emitido em: ${today.toLocaleString("pt-BR")}`, 14, 22);
 
-  const tableData: RowInput[] = bookings.map((b, i) => {
-    const dataHora = new Date(b.startDateTime).toLocaleString("pt-BR");
-    const statusTraduzido =
-      b.status === "PENDENTE"
-        ? "Pendente"
-        : b.status === "CONCLUIDO"
-        ? "Concluído"
-        : "Cancelado";
-
-    return [
-      i + 1,
-      b.clientName,
-      b.clientPhone,
-      b.service?.name ?? "—",
-      dataHora,
-      statusTraduzido,
-    ];
-  });
+  const tableData = bookings.map((b) => [
+    b.clientName,
+    b.clientPhone,
+    b.service?.name || "—",
+    new Date(b.startDateTime).toLocaleString("pt-BR"),
+    b.status,
+  ]);
 
   autoTable(doc, {
-    startY: 45,
-    head: [["#", "Cliente", "Telefone", "Serviço", "Data/Hora", "Status"]],
+    startY: 28,
+    head: [["Cliente", "Telefone", "Serviço", "Data/Hora", "Status"]],
     body: tableData,
-    styles: {
-      font: "times",
-      fontSize: 10,
-      cellPadding: 3,
-      valign: "middle",
-      textColor: [40, 40, 40],
-    },
-    headStyles: {
-      fillColor: [31, 57, 36],
-      textColor: [255, 255, 255],
-      fontStyle: "bold",
-    },
-    alternateRowStyles: { fillColor: [245, 243, 235] },
-    margin: { top: 45, left: 14, right: 14 },
+    styles: { fontSize: 9 },
+    headStyles: { fillColor: [31, 57, 36] },
   });
 
-  const pageCount = getPageCount(doc);
-
-  for (let i = 1; i <= pageCount; i++) {
-    doc.setPage(i);
-    doc.setFontSize(9);
-    doc.setTextColor(100);
-    const footer = `Gerado em ${dateStr} • Página ${i} de ${pageCount}`;
-    doc.text(footer, 14, 287);
-  }
-
-  doc.save(`Agendamentos_Balsamo_${dateStr.replace(/\//g, "-")}.pdf`);
+  doc.save(
+    `Agendamentos_${statusFilter || "geral"}_${today
+      .toLocaleDateString("pt-BR")
+      .replace(/\//g, "-")}.pdf`
+  );
 }
-
 
   // 📦 Clique nos cards
   function handleCardClick(type: string) {
