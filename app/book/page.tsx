@@ -21,6 +21,7 @@ type Booking = {
   startDateTime: string;
   endDateTime: string;
   serviceId: number;
+  status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
 };
 
 // Ícone de borboleta
@@ -62,7 +63,17 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
   if (!serviceId || !dateYYYYMMDD) return;
 
   const res = await fetch("/api/bookings");
-  const bookings: Booking[] = res.ok ? await res.json() : [];
+  let bookings: Booking[] = [];
+
+  if (res.ok) {
+    // 🔹 Ignora agendamentos cancelados e concluídos
+    bookings = (await res.json()).filter(
+      (b: Booking) => b.status !== "CANCELADO" && b.status !== "CONCLUIDO"
+    );
+  } else {
+    console.warn("⚠️ Falha ao carregar agendamentos:", res.status);
+  }
+
 
   // data selecionada (apenas data)
   const [y, m, d] = dateYYYYMMDD.split("-").map(Number);
@@ -216,41 +227,41 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
           <div>
             <label className="block mb-2 font-medium text-[#1F3924]">Escolha a data</label>
             <div className="bg-white rounded-xl border border-purple-200 p-3 shadow-sm overflow-x-auto">
-              <div className="min-w-[300px] mx-auto">
-              <DayPicker
-                mode="single"
-                selected={selectedDate ?? undefined}
-                onSelect={(date) => {
-                  if (!date) return;
-                  const day = date.getDay();
-                  if (day === 0 || day === 6) {
-                    setAvailableTimes([]);
-                    setSelectedDate(null);
-                    setMsgType("error");
-                    setMsg("🚫 Não funcionamos aos fins de semana.");
-                    setTimeout(() => setMsg(null), 4000);
-                    return;
-                  }
-                  setSelectedDate(date);
-                  const serviceId = Number(
-                    (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
-                  );
-                  if (serviceId) {
-                    const formatted = date.toISOString().split("T")[0];
-                    loadAvailableTimes(formatted, serviceId);
-                  }
-                }}
-                disabled={(date) => {
-                  const day = date.getDay();
-                  return day === 0 || day === 6;
-                }}
-                locale={ptBR}
-                weekStartsOn={1}
-              />
+              <div className="min-w-[320px] mx-auto px-1">
+                <DayPicker
+                  mode="single"
+                  selected={selectedDate ?? undefined}
+                  onSelect={(date) => {
+                    if (!date) return;
+                    const day = date.getDay();
+                    if (day === 0 || day === 6) {
+                      setAvailableTimes([]);
+                      setSelectedDate(null);
+                      setMsgType("error");
+                      setMsg("🚫 Não funcionamos aos fins de semana.");
+                      setTimeout(() => setMsg(null), 4000);
+                      return;
+                    }
+                    setSelectedDate(date);
+                    const serviceId = Number(
+                      (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
+                    );
+                    if (serviceId) {
+                      const formatted = date.toISOString().split("T")[0];
+                      loadAvailableTimes(formatted, serviceId);
+                    }
+                  }}
+                  disabled={(date) => {
+                    const day = date.getDay();
+                    return day === 0 || day === 6;
+                  }}
+                  locale={ptBR}
+                  weekStartsOn={1}
+                />
               </div>
-            
             </div>
           </div>
+
 
           {availableTimes.length > 0 ? (
             <select name="startDateTime" required className="w-full p-2 border rounded">

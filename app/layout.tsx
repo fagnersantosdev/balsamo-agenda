@@ -31,7 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         
 
         {/* Header */}
-        <header className="relative z-10 bg-[#8D6A93] text-[#FFFEF9] shadow-md border-b border-[#D6A77A]/40">
+        <header className="fixed top-0 left-0 w-full z-50 bg-[#8D6A93]/95 backdrop-blur text-[#FFFEF9] shadow-md border-b border-[#D6A77A]/40 transition-all">
         <div className="max-w-6xl mx-auto px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           {/* Logo + Nome */}
           <Link href="/" className="flex items-center justify-center sm:justify-start gap-3 group">
@@ -104,7 +104,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 
         {/* Conteúdo */}
-        <main className="relative z-10 max-w-5xl mx-auto px-4 py-10">{children}</main>
+        <main className="relative z-10 max-w-5xl mx-auto px-4 pt-24 pb-10">{children}</main>
         {/* ✅ Botão fixo do WhatsApp */}
         <FloatingWhatsApp />
 
