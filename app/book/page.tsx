@@ -58,58 +58,54 @@ export default function BookPage() {
     fetch("/api/availability").then((res) => res.json()).then(setAvailability);
   }, []);
 
-  // 🕒 Gera horários livres com base no expediente
-  async function loadAvailableTimes(date: string, serviceId: number) {
-    if (!serviceId || !date) return;
+async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
+  if (!serviceId || !dateYYYYMMDD) return;
 
-    console.log("📅 Data selecionada:", date);
+  const res = await fetch("/api/bookings");
+  const bookings: Booking[] = res.ok ? await res.json() : [];
 
-    const res = await fetch("/api/bookings");
-    let bookings: Booking[] = [];
+  // data selecionada (apenas data)
+  const [y, m, d] = dateYYYYMMDD.split("-").map(Number);
+  const selected = new Date(y, m - 1, d);       // LOCAL
+  const now = new Date();                       // LOCAL
 
-    if (res.ok) {
-      bookings = await res.json();
-    } else {
-      console.warn("⚠️ Falha ao carregar agendamentos:", res.status);
-    }
+  // mapeia dia da semana para sua tabela (sab=0, dom=1, seg=2,...)
+  const jsDay = selected.getDay();
+  const dayOfWeek = (jsDay + 1) % 7;
+  const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
 
-    const selectedDate = new Date(date);
-    const jsDay = selectedDate.getDay();
-
-    // 🔧 Corrige o mapeamento: sábado = 0, domingo = 1, segunda = 2...
-    const dayOfWeek = (jsDay + 1) % 7;
-    console.log(`🗓️ Dia JS: ${jsDay} → Banco dayOfWeek: ${dayOfWeek}`);
-
-    const dayAvailability = availability.find((a) => a.dayOfWeek === dayOfWeek);
-    console.log("🕘 Disponibilidade encontrada:", dayAvailability);
-
-    if (!dayAvailability || !dayAvailability.active) {
-      setAvailableTimes([]);
-      setMsgType("error");
-      setMsg("🚫 Este dia não está disponível para agendamento.");
-      setTimeout(() => setMsg(null), 4000);
-      return;
-    }
-
-    const times: string[] = [];
-    for (let h = dayAvailability.openHour; h < dayAvailability.closeHour; h++) {
-      const slot = new Date(selectedDate);
-      slot.setHours(h, 0, 0, 0);
-
-      const hasConflict = bookings.some((b: Booking) => {
-        const start = new Date(b.startDateTime);
-        const end = new Date(b.endDateTime);
-        return slot >= start && slot < end;
-      });
-
-      if (!hasConflict) {
-        times.push(slot.toISOString());
-      }
-    }
-
-    console.log("✅ Horários disponíveis:", times);
-    setAvailableTimes(times);
+  if (!dayAvailability || !dayAvailability.active) {
+    setAvailableTimes([]);
+    setMsgType("error");
+    setMsg("🚫 Este dia não está disponível para agendamento.");
+    setTimeout(() => setMsg(null), 4000);
+    return;
   }
+
+  const times: string[] = [];
+  for (let h = dayAvailability.openHour; h < dayAvailability.closeHour; h++) {
+    const slot = new Date(y, m - 1, d, h, 0, 0, 0); // LOCAL
+
+    // Bloqueia horários já passados no dia atual
+    if (slot <= now && selected.toDateString() === now.toDateString()) continue;
+
+    // Conflito com o que já existe
+    const hasConflict = bookings.some(b => {
+      const start = new Date(b.startDateTime); // já vem como Date válida
+      const end   = new Date(b.endDateTime);
+      return slot >= start && slot < end;
+    });
+
+    if (!hasConflict) {
+      // Enviamos um valor LOCAL e inequívoco: "YYYY-MM-DDTHH:mm"
+      const hh = String(h).padStart(2, "0");
+      times.push(`${dateYYYYMMDD}T${hh}:00`);
+    }
+  }
+
+  setAvailableTimes(times);
+}
+
 
   // 📤 Envia o agendamento
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -219,7 +215,8 @@ export default function BookPage() {
 
           <div>
             <label className="block mb-2 font-medium text-[#1F3924]">Escolha a data</label>
-            <div className="bg-white rounded-xl border border-purple-200 p-3 shadow-sm">
+            <div className="bg-white rounded-xl border border-purple-200 p-3 shadow-sm overflow-x-auto">
+              <div className="min-w-[300px] mx-auto">
               <DayPicker
                 mode="single"
                 selected={selectedDate ?? undefined}
@@ -250,23 +247,32 @@ export default function BookPage() {
                 locale={ptBR}
                 weekStartsOn={1}
               />
+              </div>
+            
             </div>
           </div>
 
           {availableTimes.length > 0 ? (
             <select name="startDateTime" required className="w-full p-2 border rounded">
               <option value="">Selecione um horário</option>
-              {availableTimes.map((t) => (
-                <option key={t} value={t}>
-                  {new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
-                </option>
-              ))}
+              {availableTimes.map((value) => {
+                const label = new Date(value).toLocaleTimeString("pt-BR", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+                return (
+                  <option key={value} value={value}>
+                    {label}
+                  </option>
+                );
+              })}
             </select>
           ) : (
             <p className="text-sm text-[#8A4B2E] italic">
               Escolha um <strong>serviço</strong> e uma <strong>data válida (segunda a sexta)</strong> para ver os horários disponíveis.
             </p>
           )}
+
 
           <button
             disabled={loading}

@@ -94,5 +94,77 @@ h1, h2, h3 {
   animation: pulse-slow 3s infinite;
 } */
 
+/* === Ajuste responsivo para o calendário === */
+.rdp {
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  font-size: 0.95rem;
+}
+
+.rdp-months {
+  display: flex;
+  justify-content: center;
+}
+
+.rdp-month {
+  width: 100%;
+}
+
+.rdp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rdp-cell {
+  width: 14.28%; /* 100% / 7 dias */
+  text-align: center;
+  vertical-align: middle;
+  padding: 4px;
+}
+
+/* Corrige o desalinhamento de domingo e bordas quebradas */
+.rdp-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+/* 🧩 Melhor visual para mobile */
+@media (max-width: 480px) {
+  .rdp {
+    max-width: 100%;
+    font-size: 0.9rem;
+  }
+
+  .rdp-day {
+    padding: 0.5rem 0;
+    margin: 2px;
+  }
+
+  .rdp-caption_label {
+    font-size: 1rem;
+    text-align: center;
+  }
+
+  .rdp-head_row {
+    font-size: 0.85rem;
+  }
+}
+
+/* Melhor feedback de toque */
+.rdp-day:hover {
+  background-color: #f2f2f2;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.rdp-day_selected,
+.rdp-day_selected:hover {
+  background-color: #8D6A93 !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+
 
 

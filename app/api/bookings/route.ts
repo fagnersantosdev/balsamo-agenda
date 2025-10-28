@@ -2,38 +2,38 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import type { Prisma, BookingStatus } from "@prisma/client";
 
+// ===================================================================
+// 📋 GET — Buscar agendamentos (com filtros e status)
+// ===================================================================
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const filter = searchParams.get("filter");
   const status = searchParams.get("status");
 
   try {
-    const now = new Date();
-
-    // 🕐 Limites do dia
+    const now = new Date(); // Local do servidor
     const startOfToday = new Date(now);
     startOfToday.setHours(0, 0, 0, 0);
     const endOfToday = new Date(now);
     endOfToday.setHours(23, 59, 59, 999);
 
-    // 📆 Intervalos de tempo
+    // 📅 Intervalos para relatórios e filtros
     const pastLimit = new Date(now);
-    pastLimit.setDate(pastLimit.getDate() - 30); // últimos 30 dias
-    const futureLimit = new Date(now);
-    futureLimit.setDate(futureLimit.getDate() + 30); // próximos 30 dias
+    pastLimit.setDate(pastLimit.getDate() - 30);
 
-    // 📆 Últimos 3 meses (para relatórios concluídos/cancelados)
+    const futureLimit = new Date(now);
+    futureLimit.setDate(futureLimit.getDate() + 30);
+
     const threeMonthsAgo = new Date(now);
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-    // 🔍 Filtro base
     const whereClause: Prisma.BookingWhereInput = {};
 
-    // 🔖 Filtro por status
+    // 🎯 Filtro por status
     if (status && status !== "ALL") {
       whereClause.status = status as BookingStatus;
 
-      // Se for concluído ou cancelado → mostrar últimos 3 meses
+      // Relatórios — mostrar últimos 3 meses
       if (status === "CONCLUIDO" || status === "CANCELADO") {
         whereClause.startDateTime = {
           gte: threeMonthsAgo,
@@ -42,23 +42,21 @@ export async function GET(req: Request) {
       }
     }
 
-    // 🗓️ Filtro por período
+    // 🧭 Filtro por período
     switch (filter) {
       case "today":
         whereClause.startDateTime = { gte: startOfToday, lt: endOfToday };
+        // Excluir cancelados/concluídos
         whereClause.status = { notIn: ["CANCELADO", "CONCLUIDO"] };
         break;
-
       case "future":
         whereClause.startDateTime = { gt: endOfToday, lte: futureLimit };
         break;
-
       case "past":
         whereClause.endDateTime = { lt: startOfToday, gte: pastLimit };
         break;
-
       default:
-        break; // "all" — sem filtro de data
+        break; // "all"
     }
 
     const bookings = await prisma.booking.findMany({
@@ -75,14 +73,14 @@ export async function GET(req: Request) {
 }
 
 // ===================================================================
-// 📅 POST — Criação de agendamento
+// 🗓️ POST — Criar novo agendamento (horário local, sem UTC-3)
 // ===================================================================
 export async function POST(req: Request) {
   try {
     const data = await req.json();
 
     if (!data.clientName || !data.clientPhone || !data.serviceId || !data.startDateTime) {
-      return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
+      return NextResponse.json({ error: "Dados incompletos." }, { status: 400 });
     }
 
     const service = await prisma.service.findUnique({
@@ -90,14 +88,14 @@ export async function POST(req: Request) {
     });
 
     if (!service) {
-      return NextResponse.json({ error: "Serviço não encontrado" }, { status: 400 });
+      return NextResponse.json({ error: "Serviço não encontrado." }, { status: 400 });
     }
 
-    const start = new Date(data.startDateTime);
-    // 🕒 inclui 15 min de pausa após o serviço
-    const end = new Date(start.getTime() + (service.durationMin + 15) * 60000);
+    // 🕐 Criar data local sem converter fuso
+    const start = new Date(data.startDateTime); // ex: "2025-10-28T15:00"
+    const end = new Date(start.getTime() + (service.durationMin + 15) * 60 * 1000);
 
-    // 🗓️ Corrige mapeamento de dias (sábado = 0, domingo = 1, segunda = 2, ...)
+    // 🗓️ Dia da semana (sab=0, dom=1, seg=2,...)
     const jsDay = start.getDay();
     const dayOfWeek = (jsDay + 1) % 7;
 
@@ -112,7 +110,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // ⏰ verifica se horário está dentro do expediente
+    // ⏰ Dentro do expediente?
     const startHour = start.getHours() + start.getMinutes() / 60;
     if (startHour < availability.openHour || startHour >= availability.closeHour) {
       return NextResponse.json(
@@ -121,7 +119,7 @@ export async function POST(req: Request) {
       );
     }
 
-    // 🚫 verifica conflito de horários
+    // 🚫 Conflitos
     const conflict = await prisma.booking.findFirst({
       where: {
         startDateTime: { lt: end },
@@ -130,10 +128,13 @@ export async function POST(req: Request) {
     });
 
     if (conflict) {
-      return NextResponse.json({ error: "❌ Este horário já está reservado." }, { status: 409 });
+      return NextResponse.json(
+        { error: "❌ Este horário já está reservado." },
+        { status: 409 }
+      );
     }
 
-    // ✅ Cria o agendamento
+    // ✅ Criar agendamento (mantém o horário local coerente)
     const booking = await prisma.booking.create({
       data: {
         clientName: data.clientName,
@@ -151,7 +152,7 @@ export async function POST(req: Request) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Erro ao criar agendamento:", error);
+    console.error("❌ Erro ao criar agendamento:", error);
     return NextResponse.json({ error: "Erro ao criar agendamento." }, { status: 500 });
   }
 }
