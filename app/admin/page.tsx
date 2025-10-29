@@ -93,9 +93,29 @@ export default function AdminPage() {
 
       if (!res.ok) throw new Error("Erro ao atualizar status");
 
-      setBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: validStatus } : b))
-      );
+      // Atualiza localmente sem recarregar tudo
+      setBookings((prev) => {
+        const updated = prev.map((b) =>
+          b.id === id ? { ...b, status: validStatus } : b
+        );
+
+        // 🔹 Se for cancelado, removemos da lista “hoje” ou “futuros”
+        if (validStatus === "CANCELADO") {
+          return updated.filter(
+            (b) => !(b.id === id && (filter === "today" || filter === "future"))
+          );
+        }
+
+        return updated;
+      });
+
+      // Atualiza contadores
+      fetchCounts();
+
+      // Recarrega a lista atual, se necessário
+      if (filter !== "today" && filter !== "future") {
+        fetchBookings(filter, statusFilter);
+      }
 
       setToast({
         message:
@@ -104,13 +124,12 @@ export default function AdminPage() {
             : "❌ Agendamento cancelado.",
         type: "success",
       });
-
-      fetchCounts();
     } catch (error) {
       console.error(error);
       setToast({ message: "❌ Erro ao atualizar status.", type: "error" });
     }
   }
+
 
   // 🏁 Carregar dados iniciais
   useEffect(() => {
@@ -188,8 +207,8 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="max-w-6xl mx-auto px-4 py-6">
-      <h1 className="text-2xl font-bold text-[#1F3924] mb-6 text-center">
+    <main className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
+      <h1 className="text-2xl font-bold text-[#1F3924] mb-6 mt-10 sm:mt-10 text-center">
         🌿 Painel Administrativo
       </h1>
 

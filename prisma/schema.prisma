@@ -47,4 +47,12 @@ model Booking {
   updatedAt      DateTime  @default(now()) @updatedAt // 👈 adicione o default(now())
 }
 
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   // será armazenado com bcrypt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 

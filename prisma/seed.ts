@@ -1,19 +1,16 @@
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+import { prisma } from "../src/lib/prisma";
+import bcrypt from "bcryptjs";
 
 async function main() {
-  await prisma.service.create({
-    data: {
-      name: "Massagem Relaxante",
-      durationMin: 60,
-      active: true,
+  const hashed = await bcrypt.hash("admin123", 10);
+  await prisma.admin.upsert({
+    where: { email: "admin@balsamo.com" },
+    update: {},
+    create: {
+      email: "admin@balsamo.com",
+      password: hashed,
     },
   });
 }
 
-main()
-  .then(() => {
-    console.log("Serviço criado com sucesso!");
-  })
-  .catch((e) => console.error(e))
-  .finally(() => prisma.$disconnect());
+main().finally(() => prisma.$disconnect());
