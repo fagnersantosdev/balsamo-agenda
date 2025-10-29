@@ -1,16 +1,33 @@
-import { prisma } from "../src/lib/prisma";
-import bcrypt from "bcryptjs";
+// prisma/seed.ts
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+
+const prisma = new PrismaClient();
 
 async function main() {
-  const hashed = await bcrypt.hash("admin123", 10);
-  await prisma.admin.upsert({
-    where: { email: "admin@balsamo.com" },
-    update: {},
-    create: {
-      email: "admin@balsamo.com",
-      password: hashed,
-    },
+  const email = process.env.ADMIN_EMAIL || 'admin@balsamo.com';
+  const plain = process.env.ADMIN_PASSWORD || 'admin123';
+
+  const password = await bcrypt.hash(plain, 10);
+
+  const existing = await prisma.admin.findUnique({ where: { email } });
+  if (existing) {
+    console.log(`✅ Admin já existe: ${email}`);
+    return;
+  }
+
+  await prisma.admin.create({
+    data: { email, password },
   });
+
+  console.log(`✅ Admin criado: ${email} (senha: ${plain})`);
 }
 
-main().finally(() => prisma.$disconnect());
+main()
+  .catch((e) => {
+    console.error('❌ Seed falhou:', e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
