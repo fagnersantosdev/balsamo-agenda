@@ -101,8 +101,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
       </header>
 
-
-
         {/* Conteúdo */}
         <main className="relative z-10 max-w-5xl mx-auto px-4 pt-24 pb-10">{children}</main>
         {/* ✅ Botão fixo do WhatsApp */}

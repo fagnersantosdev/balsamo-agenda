@@ -208,9 +208,36 @@ export default function AdminPage() {
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-8 sm:py-10">
-      <h1 className="text-2xl font-bold text-[#1F3924] mb-6 mt-10 sm:mt-10 text-center">
-        🌿 Painel Administrativo
-      </h1>
+      {/* 🔹 Topo administrativo fixo */}
+    <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4 bg-[#E4F0FD]/40 border border-[#8D6A93]/30 p-4 rounded-lg shadow-sm">
+    <div>
+    <h1 className="text-2xl font-bold text-[#1F3924]">
+      🌿 Painel Administrativo
+    </h1>
+    <p className="text-sm text-[#1F3924]/70 mt-1">
+      Bem-vinda, <span className="font-medium">Admin</span>
+    </p>
+    </div>
+
+    <div className="flex gap-3">
+      <button
+        onClick={() => router.push("/admin/change-password")}
+        className="bg-[#8D6A93] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#734a79] transition-colors"
+      >
+        🔒 Alterar Senha
+      </button>
+
+      <button
+        onClick={async () => {
+          await fetch("/api/auth/logout", { method: "POST" });
+          window.location.href = "/login";
+        }}
+        className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition-colors"
+      >
+        🚪 Sair
+      </button>
+    </div>
+  </div>
 
       {/* 🔹 Cards de Contagem */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 text-center">

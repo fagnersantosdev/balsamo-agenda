@@ -3,27 +3,31 @@ import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 
 export function middleware(req: NextRequest) {
-  const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
-  if (!isAdminRoute) return NextResponse.next();
+  const token = req.cookies.get("token")?.value;
 
-  const token = req.cookies.get("admin_token")?.value;
+  // Lista de rotas que exigem login
+  const protectedPaths = ["/admin"];
 
-  if (!token) {
-    const url = req.nextUrl.clone();
-    url.pathname = "/admin-login";
-    return NextResponse.redirect(url);
+  const isProtected = protectedPaths.some((path) =>
+    req.nextUrl.pathname.startsWith(path)
+  );
+
+  if (isProtected) {
+    if (!token) {
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
+
+    try {
+      jwt.verify(token, process.env.JWT_SECRET!);
+    } catch (err) {
+      console.error("Token inválido:", err);
+      return NextResponse.redirect(new URL("/login", req.url));
+    }
   }
 
-  try {
-    jwt.verify(token, process.env.JWT_SECRET!);
-    return NextResponse.next();
-  } catch {
-    const url = req.nextUrl.clone();
-    url.pathname = "/admin-login";
-    return NextResponse.redirect(url);
-  }
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
 };
