@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React from "react";
 
 type Booking = {
   id: number;
@@ -12,18 +12,19 @@ type Booking = {
   service?: { name: string };
 };
 
-interface BookingTableProps {
+type BookingTableProps = {
   bookings: Booking[];
+  updateStatus: (id: number, status: "PENDENTE" | "CONCLUIDO" | "CANCELADO") => void;
   showActions?: boolean;
-  updateStatus?: (id: number, status: string) => void;
-}
+};
+
 
 export default function BookingTable({
   bookings,
   showActions = false,
   updateStatus,
 }: BookingTableProps) {
-  const [expandedId, setExpandedId] = useState<number | null>(null);
+  //const [expandedId, setExpandedId] = useState<number | null>(null);
 
   return (
     <div className="overflow-x-auto">

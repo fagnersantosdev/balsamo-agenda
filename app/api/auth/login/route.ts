@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   try {
@@ -9,36 +9,33 @@ export async function POST(req: Request) {
 
     const admin = await prisma.admin.findUnique({ where: { email } });
     if (!admin) {
-      return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
+      return NextResponse.json({ error: "Administrador não encontrado." }, { status: 404 });
     }
 
     const valid = await bcrypt.compare(password, admin.password);
     if (!valid) {
-      return NextResponse.json({ error: "Senha incorreta" }, { status: 401 });
+      return NextResponse.json({ error: "Senha incorreta." }, { status: 401 });
     }
 
-    // 🔐 Gera o token JWT
     const token = jwt.sign(
       { id: admin.id, email: admin.email },
       process.env.JWT_SECRET!,
-      { expiresIn: "8h" }
+      { expiresIn: "1d" }
     );
 
-    // 🍪 Define o cookie seguro
-    const response = NextResponse.json({ message: "Login realizado com sucesso" });
-    response.cookies.set({
-      name: "token",
-      value: token,
+    const response = NextResponse.json({ ok: true, message: "Login bem-sucedido!" });
+
+    response.cookies.set("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 8, // 8 horas
       sameSite: "lax",
+      path: "/", // ✅ garante acesso em todas as rotas
+      maxAge: 60 * 60 * 24, // 1 dia
     });
 
     return response;
-  } catch (err) {
-    console.error("Erro no login:", err);
-    return NextResponse.json({ error: "Erro ao autenticar" }, { status: 500 });
+  } catch (error) {
+    console.error("Erro ao fazer login:", error);
+    return NextResponse.json({ error: "Erro interno no servidor." }, { status: 500 });
   }
 }
