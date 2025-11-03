@@ -7,6 +7,7 @@ import Toast from "../components/toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+
 // 🔹 Tipagem dos agendamentos
 type Booking = {
   id: number;
@@ -45,6 +46,13 @@ export default function AdminPageClient() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    if (typeof document !== "undefined" && document.cookie.includes("token")) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   // 🔄 Buscar contadores fixos
   async function fetchCounts() {
@@ -190,32 +198,41 @@ export default function AdminPageClient() {
   }
 
   // 🧭 Logout
-  async function handleLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
-  }
+  // async function handleLogout() {
+  //   await fetch("/api/auth/logout", { method: "POST" });
+  //   window.location.href = "/login";
+  // }
 
   // =======================
   // 🧱 Interface
   // =======================
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
         <h1 className="text-2xl font-bold text-[#1F3924]">🌿 Painel Administrativo</h1>
-        <button
-          onClick={() => router.push("/admin/change-password")}
-          className="text-sm text-[#1F3924] hover:underline"
-        >
-          Alterar senha
-        </button>
 
-        <button
-          onClick={handleLogout}
-          className="text-sm text-red-600 hover:underline transition"
-        >
-          Sair
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => router.push("/admin/change-password")}
+            className="text-sm text-[#1F3924] hover:underline"
+          >
+            Alterar senha
+          </button>
+
+          {isLoggedIn && (
+            <button
+              onClick={async () => {
+                await fetch("/api/auth/logout", { method: "POST" });
+                window.location.href = "/login";
+              }}
+              className="text-sm text-red-600 hover:underline"
+            >
+              Sair
+            </button>
+          )}
+        </div>
       </div>
+
 
       {/* 🔹 Cards de Contagem */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 text-center">

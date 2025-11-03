@@ -29,7 +29,7 @@ export default function LoginPage() {
         onSubmit={handleLogin}
         className="bg-white shadow-lg p-8 rounded-lg w-80 border border-[#8D6A93]/20"
       >
-        <h1 className="text-2xl font-bold mb-6 text-center">Acesso Admin</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center">🔐 Acesso Administrativo</h1>
 
         <input
           type="email"

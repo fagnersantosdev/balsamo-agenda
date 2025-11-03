@@ -2,32 +2,39 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 
-export function middleware(req: NextRequest) {
+// ✅ Define as rotas protegidas (tudo que começa com /admin)
+const protectedRoutes = ["/admin"];
+
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // 🔒 Verifica se a rota é protegida
+  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route));
+  if (!isProtected) return NextResponse.next();
+
+  // 🔍 Busca o token
   const token = req.cookies.get("token")?.value;
 
-  // Lista de rotas que exigem login
-  const protectedPaths = ["/admin"];
-
-  const isProtected = protectedPaths.some((path) =>
-    req.nextUrl.pathname.startsWith(path)
-  );
-
-  if (isProtected) {
-    if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
-
-    try {
-      jwt.verify(token, process.env.JWT_SECRET!);
-    } catch (err) {
-      console.error("Token inválido:", err);
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
+  if (!token) {
+    console.warn("🚫 Acesso sem token, redirecionando para login...");
+    const loginUrl = new URL("/login", req.url);
+    return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  try {
+    // 🔑 Verifica se o token é válido
+    jwt.verify(token, process.env.JWT_SECRET!);
+    return NextResponse.next(); // ✅ Tudo certo → segue pra rota
+  } catch (err) {
+    console.error("⚠️ Token inválido ou expirado:", err);
+    const loginUrl = new URL("/login", req.url);
+    return NextResponse.redirect(loginUrl);
+  }
 }
 
+// ⚙️ Define onde o middleware será aplicado
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/admin/:path*", // Aplica a todas as rotas dentro de /admin
+  ],
 };

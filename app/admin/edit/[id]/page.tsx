@@ -79,7 +79,7 @@ export default function EditBookingPage() {
       } else {
         setMessage("❌ Erro ao atualizar o agendamento.");
       }
-    } catch (error) {
+    } catch {
       setMessage("❌ Falha ao se conectar com o servidor.");
     } finally {
       setSaving(false);
