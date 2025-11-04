@@ -6,6 +6,7 @@ import BookingTable from "../components/BookingTable";
 import Toast from "../components/toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { isTokenExpired } from "@/lib/auth-client"; 
 
 
 // 🔹 Tipagem dos agendamentos
@@ -46,13 +47,25 @@ export default function AdminPageClient() {
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    if (typeof document !== "undefined" && document.cookie.includes("token")) {
-      setIsLoggedIn(true);
+    const cookies = document.cookie.split("; ");
+    const token = cookies.find((c) => c.startsWith("token="))?.split("=")[1];
+
+    if (!token) {
+      router.replace("/login");
+      return;
     }
-  }, []);
+
+    // 👇 verifica expiração
+    if (isTokenExpired(token)) {
+      setToast({ message: "⚠️ Sessão expirada. Faça login novamente.", type: "error" });
+      setTimeout(() => {
+        document.cookie = "token=; Max-Age=0; path=/;";
+        router.replace("/login");
+      }, 2500);
+    }
+  }, [router]);
 
   // 🔄 Buscar contadores fixos
   async function fetchCounts() {
@@ -208,30 +221,33 @@ export default function AdminPageClient() {
   // =======================
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-6 flex-wrap gap-2">
+      <div className="flex justify-between items-center mb-8 flex-wrap gap-2">
+      <div>
         <h1 className="text-2xl font-bold text-[#1F3924]">🌿 Painel Administrativo</h1>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => router.push("/admin/change-password")}
-            className="text-sm text-[#1F3924] hover:underline"
-          >
-            Alterar senha
-          </button>
-
-          {isLoggedIn && (
-            <button
-              onClick={async () => {
-                await fetch("/api/auth/logout", { method: "POST" });
-                window.location.href = "/login";
-              }}
-              className="text-sm text-red-600 hover:underline"
-            >
-              Sair
-            </button>
-          )}
-        </div>
+        <p className="text-sm text-[#8D6A93] mt-1">
+          Olá, <strong>Administradora</strong> 👋 — bem-vinda de volta!
+        </p>
       </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => router.push("/admin/change-password")}
+          className="text-sm text-[#1F3924] hover:underline"
+        >
+          Alterar senha
+        </button>
+
+        <button
+          onClick={async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            window.location.href = "/login";
+          }}
+          className="text-sm text-red-600 hover:underline"
+        >
+          Sair
+        </button>
+      </div>
+    </div>
 
 
       {/* 🔹 Cards de Contagem */}

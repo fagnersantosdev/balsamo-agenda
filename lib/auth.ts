@@ -1,14 +1,13 @@
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import jwt from "jsonwebtoken";
-import { prisma } from "@/lib/prisma";
+import { redirect } from "next/navigation";
 
 /**
- * 🔒 Valida o token JWT e garante que o admin ainda exista no banco.
- * Retorna o admin autenticado ou redireciona para /login se inválido.
+ * Protege rotas administrativas.
+ * Redireciona para /login se o token for inválido ou inexistente.
  */
 export async function requireAdminAuth() {
-  const cookieStore = await cookies();
+  const cookieStore = await cookies(); // ✅ necessário no Next 15+
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
@@ -16,22 +15,8 @@ export async function requireAdminAuth() {
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: number;
-      email: string;
-    };
-
-    const admin = await prisma.admin.findUnique({
-      where: { email: decoded.email },
-    });
-
-    if (!admin) {
-      redirect("/login");
-    }
-
-    return admin;
-  } catch (error) {
-    console.error("❌ Erro de autenticação:", error);
+    jwt.verify(token, process.env.JWT_SECRET!);
+  } catch {
     redirect("/login");
   }
 }
