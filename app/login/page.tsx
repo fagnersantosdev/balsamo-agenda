@@ -5,21 +5,34 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
-    const res = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+        credentials: "include", // ✅ necessário para salvar o cookie JWT
+      });
 
-    if (res.ok) {
-      window.location.href = "/admin";
-    } else {
-      setError("❌ E-mail ou senha inválidos.");
+      if (res.ok) {
+        // 🔒 Espera um pouco antes de redirecionar para garantir que o cookie seja salvo
+        setTimeout(() => {
+          window.location.href = "/admin";
+        }, 500);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.error ?? "❌ Falha no login. Verifique as credenciais.");
+      }
+    } catch {
+      setError("⚠️ Erro ao conectar com o servidor. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -49,13 +62,16 @@ export default function LoginPage() {
           className="w-full mb-4 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-[#8D6A93]"
         />
 
-        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+        {error && (
+          <p className="text-red-600 text-sm mb-4 text-center">{error}</p>
+        )}
 
         <button
           type="submit"
-          className="w-full bg-[#8D6A93] text-white py-2 rounded-lg hover:bg-[#734a79] transition"
+          disabled={loading}
+          className="w-full bg-[#8D6A93] text-white py-2 rounded-lg hover:bg-[#734a79] transition disabled:opacity-60"
         >
-          Entrar
+          {loading ? "Entrando..." : "Entrar"}
         </button>
       </form>
     </main>

@@ -1,14 +1,14 @@
+// app/api/auth/logout/route.ts
 import { NextResponse } from "next/server";
 
 export async function POST() {
-  const response = NextResponse.json({ ok: true, message: "Logout realizado com sucesso." });
-
-  response.cookies.set({
+  const res = NextResponse.json({ ok: true });
+  res.cookies.set({
     name: "token",
     value: "",
     path: "/",
-    maxAge: 0, // expira imediatamente
+    maxAge: 0,              // ✅ expira agora
+    sameSite: "strict",
   });
-
-  return response;
+  return res;
 }

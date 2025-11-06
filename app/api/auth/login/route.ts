@@ -29,13 +29,14 @@ export async function POST(req: Request) {
     // 🍪 Define cookie seguro
     const response = NextResponse.json({ ok: true, message: "Login realizado com sucesso!" });
     response.cookies.set({
-      name: "token",
-      value: token,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 60 * 60 * 24, // 1 dia
+        name: "token",
+        value: token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production" ? true : false, // Garantir que seja 'false'
+        // ⚠️ Remova ou Comente a linha 'sameSite'
+        // sameSite: "strict", 
+        path: "/",
+        maxAge: 60 * 60 * 24, 
     });
 
     return response;

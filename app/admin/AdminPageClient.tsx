@@ -6,7 +6,6 @@ import BookingTable from "../components/BookingTable";
 import Toast from "../components/toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { isTokenExpired } from "@/lib/auth-client"; 
 
 
 // 🔹 Tipagem dos agendamentos
@@ -57,14 +56,6 @@ export default function AdminPageClient() {
       return;
     }
 
-    // 👇 verifica expiração
-    if (isTokenExpired(token)) {
-      setToast({ message: "⚠️ Sessão expirada. Faça login novamente.", type: "error" });
-      setTimeout(() => {
-        document.cookie = "token=; Max-Age=0; path=/;";
-        router.replace("/login");
-      }, 2500);
-    }
   }, [router]);
 
   // 🔄 Buscar contadores fixos
@@ -236,16 +227,17 @@ export default function AdminPageClient() {
         >
           Alterar senha
         </button>
-
+        
         <button
-          onClick={async () => {
-            await fetch("/api/auth/logout", { method: "POST" });
-            window.location.href = "/login";
-          }}
-          className="text-sm text-red-600 hover:underline"
-        >
-          Sair
-        </button>
+        onClick={async () => {
+          await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+          window.location.href = "/login";
+        }}
+        className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+      >
+        Sair
+      </button>
+
       </div>
     </div>
 

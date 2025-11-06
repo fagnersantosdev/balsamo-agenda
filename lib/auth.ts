@@ -3,11 +3,10 @@ import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";
 
 /**
- * Protege rotas administrativas.
- * Redireciona para /login se o token for inválido ou inexistente.
+ * 🔒 Middleware server-side para proteger páginas administrativas
  */
 export async function requireAdminAuth() {
-  const cookieStore = await cookies(); // ✅ necessário no Next 15+
+  const cookieStore = await cookies(); // ✅ Next 15+ precisa de await
   const token = cookieStore.get("token")?.value;
 
   if (!token) {
