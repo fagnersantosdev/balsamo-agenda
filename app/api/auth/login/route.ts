@@ -26,18 +26,18 @@ export async function POST(req: Request) {
       { expiresIn: "1d" }
     );
 
-    // 🍪 Define cookie seguro
     const response = NextResponse.json({ ok: true, message: "Login realizado com sucesso!" });
+    // 🍪 Define cookie seguro e compatível com desenvolvimento e produção
     response.cookies.set({
-        name: "token",
-        value: token,
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production" ? true : false, // Garantir que seja 'false'
-        // ⚠️ Remova ou Comente a linha 'sameSite'
-        // sameSite: "strict", 
-        path: "/",
-        maxAge: 60 * 60 * 24, 
+      name: "token",
+      value: token,
+      httpOnly: true,
+      sameSite: "lax", // 🔹 permite redirecionamento e é mais estável que 'strict'
+      secure: process.env.NODE_ENV === "production", // true apenas em deploy (Vercel)
+      path: "/",
+      maxAge: 60 * 60 * 24, // 24h
     });
+
 
     return response;
   } catch (error) {

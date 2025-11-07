@@ -47,17 +47,6 @@ export default function AdminPageClient() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    const cookies = document.cookie.split("; ");
-    const token = cookies.find((c) => c.startsWith("token="))?.split("=")[1];
-
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-
-  }, [router]);
-
   // 🔄 Buscar contadores fixos
   async function fetchCounts() {
     try {
@@ -216,7 +205,7 @@ export default function AdminPageClient() {
       <div>
         <h1 className="text-2xl font-bold text-[#1F3924]">🌿 Painel Administrativo</h1>
         <p className="text-sm text-[#8D6A93] mt-1">
-          Olá, <strong>Administradora</strong> 👋 — bem-vinda de volta!
+          Olá, <strong>Administradora</strong> — bem-vinda de volta!
         </p>
       </div>
 

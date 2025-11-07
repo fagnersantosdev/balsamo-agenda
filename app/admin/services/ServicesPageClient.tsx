@@ -46,27 +46,93 @@ export default function ServicesAdminPage() {
     }
   }
 
-  async function handleDelete(id: number) {
-    if (!confirm("Tem certeza que deseja excluir este serviço?")) return;
+  // 🔥 Exclusão com confirmação visual
+async function handleDelete(id: number) {
+  const confirmed = await showConfirmDialog({
+    title: "Confirmar Exclusão",
+    message: "Tem certeza que deseja excluir este serviço?",
+    confirmText: "Excluir",
+    confirmColor: "bg-red-600 hover:bg-red-700",
+  });
 
-    const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      setToast({ message: "✅ Serviço excluído com sucesso!", type: "success" });
-      fetchServices(true);
-    } else {
-      setToast({ message: "❌ Erro ao excluir serviço", type: "error" });
-    }
-  }
+  if (!confirmed) return;
 
-  async function handleRestore(id: number) {
-    const res = await fetch(`/api/services/${id}/restore`, { method: "PATCH" });
-    if (res.ok) {
-      setToast({ message: "✅ Serviço restaurado com sucesso!", type: "success" });
-      fetchServices(false);
-    } else {
-      setToast({ message: "❌ Erro ao restaurar serviço", type: "error" });
-    }
+  const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+  if (res.ok) {
+    setToast({ message: "✅ Serviço excluído com sucesso!", type: "success" });
+    fetchServices(true);
+  } else {
+    setToast({ message: "❌ Erro ao excluir serviço.", type: "error" });
   }
+}
+
+  // 🧩 Função auxiliar para confirmação visual reutilizável
+async function showConfirmDialog({
+  title,
+  message,
+  confirmText,
+  confirmColor,
+}: {
+  title: string;
+  message: string;
+  confirmText: string;
+  confirmColor: string;
+}): Promise<boolean> {
+  return new Promise((resolve) => {
+    const overlay = document.createElement("div");
+    overlay.className =
+      "fixed inset-0 flex items-center justify-center bg-black/40 z-50";
+
+    overlay.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-xl p-6 text-center w-80">
+        <h2 class="text-lg font-semibold text-[#1F3924] mb-3">${title}</h2>
+        <p class="text-[#1F3924]/80 mb-5">${message}</p>
+        <div class="flex justify-center gap-4">
+          <button id="cancelBtn" class="px-4 py-2 rounded-lg bg-gray-300 hover:bg-gray-400">
+            Cancelar
+          </button>
+          <button id="confirmBtn" class="px-4 py-2 rounded-lg text-white ${confirmColor}">
+            ${confirmText}
+          </button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    document.getElementById("confirmBtn")?.addEventListener("click", () => {
+      resolve(true);
+      overlay.remove();
+    });
+
+    document.getElementById("cancelBtn")?.addEventListener("click", () => {
+      resolve(false);
+      overlay.remove();
+    });
+  });
+}
+
+
+// ♻️ Restauração com confirmação visual
+async function handleRestore(id: number) {
+  const confirmed = await showConfirmDialog({
+    title: "Restaurar Serviço",
+    message: "Deseja reativar este serviço?",
+    confirmText: "Restaurar",
+    confirmColor: "bg-green-700 hover:bg-green-800",
+  });
+
+  if (!confirmed) return;
+
+  const res = await fetch(`/api/services/${id}/restore`, { method: "PATCH" });
+  if (res.ok) {
+    setToast({ message: "✅ Serviço restaurado com sucesso!", type: "success" });
+    fetchServices(true);
+  } else {
+    setToast({ message: "❌ Erro ao restaurar serviço.", type: "error" });
+  }
+}
+
 
   return (
     <main className="max-w-5xl mx-auto p-6 bg-[#F5F3EB] rounded-2xl shadow-lg relative overflow-hidden">
