@@ -6,7 +6,7 @@ import BookingTable from "../components/BookingTable";
 import Toast from "../components/toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-
+import AdminMenu from "../components/AdminMenu";
 
 // 🔹 Tipagem dos agendamentos
 type Booking = {
@@ -19,17 +19,6 @@ type Booking = {
   status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
   service?: { name: string };
 };
-
-// 🔹 Função auxiliar para obter número de páginas do PDF (sem usar any)
-function getPageCount(doc: jsPDF): number {
-  if ("getNumberOfPages" in doc && typeof doc.getNumberOfPages === "function") {
-    return doc.getNumberOfPages();
-  }
-  const internal = (doc as unknown as {
-    internal?: { getNumberOfPages?: () => number };
-  }).internal;
-  return internal?.getNumberOfPages?.() ?? 1;
-}
 
 export default function AdminPageClient() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -47,7 +36,7 @@ export default function AdminPageClient() {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // 🔄 Buscar contadores fixos
+  // 🔄 Buscar contadores
   async function fetchCounts() {
     try {
       const res = await fetch("/api/bookings/counts");
@@ -60,7 +49,7 @@ export default function AdminPageClient() {
     }
   }
 
-  // 🔍 Buscar agendamentos (com filtros de data e status)
+  // 🔍 Buscar agendamentos (com filtros)
   async function fetchBookings(selectedFilter: string, status?: string | null) {
     setLoading(true);
     try {
@@ -80,7 +69,7 @@ export default function AdminPageClient() {
     }
   }
 
-  // 🧩 Atualizar status (confirmar / cancelar)
+  // ✅ Atualizar status (confirmar / cancelar)
   async function updateStatus(id: number, newStatus: "PENDENTE" | "CONCLUIDO" | "CANCELADO") {
     try {
       const res = await fetch(`/api/bookings/${id}/status`, {
@@ -91,23 +80,20 @@ export default function AdminPageClient() {
 
       if (!res.ok) throw new Error("Erro ao atualizar status");
 
-      // Atualiza localmente sem recarregar
-      setBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
-      );
-
+      setBookings((prev) => prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b)));
       setToast({
-        message:
-          newStatus === "CONCLUIDO"
-            ? "✅ Agendamento concluído!"
-            : "❌ Agendamento cancelado.",
+        message: newStatus === "CONCLUIDO" ? "✅ Agendamento concluído!" : "❌ Agendamento cancelado.",
         type: "success",
       });
 
+      // Atualiza contadores e lista
       fetchCounts();
+      fetchBookings(filter, statusFilter);
     } catch (error) {
       console.error(error);
       setToast({ message: "❌ Erro ao atualizar status.", type: "error" });
+    } finally {
+      setTimeout(() => setToast(null), 4000);
     }
   }
 
@@ -117,6 +103,13 @@ export default function AdminPageClient() {
     fetchBookings(filter, statusFilter);
   }, [filter, statusFilter]);
 
+  // 🧭 Mantém filtro atual sincronizado com o menu
+  useEffect(() => {
+    sessionStorage.setItem("admin_filter", filter);
+    sessionStorage.setItem("admin_status", statusFilter || "");
+  }, [filter, statusFilter]);
+
+
   // 🔍 Filtro de busca
   const filteredBookings = bookings.filter(
     (b) =>
@@ -124,48 +117,7 @@ export default function AdminPageClient() {
       b.clientPhone.includes(searchTerm)
   );
 
-  // 📄 Exportar PDF
-  function exportToPDF() {
-    const doc = new jsPDF();
-    const today = new Date();
-    const title =
-      statusFilter === "CONCLUIDO"
-        ? "Relatório de Agendamentos Concluídos — Últimos 3 meses"
-        : statusFilter === "CANCELADO"
-        ? "Relatório de Agendamentos Cancelados — Últimos 3 meses"
-        : "Relatório de Agendamentos";
-
-    doc.text(title, 14, 15);
-    doc.setFontSize(10);
-    doc.text(`Emitido em: ${today.toLocaleString("pt-BR")}`, 14, 22);
-
-    const tableData = bookings.map((b) => [
-      b.clientName,
-      b.clientPhone,
-      b.service?.name || "—",
-      new Date(b.startDateTime).toLocaleString("pt-BR"),
-      b.status,
-    ]);
-
-    autoTable(doc, {
-      startY: 28,
-      head: [["Cliente", "Telefone", "Serviço", "Data/Hora", "Status"]],
-      body: tableData,
-      styles: { fontSize: 9 },
-      headStyles: { fillColor: [31, 57, 36] },
-    });
-
-    const pageCount = getPageCount(doc);
-    doc.text(`Total de páginas: ${pageCount}`, 14, doc.internal.pageSize.height - 10);
-
-    doc.save(
-      `Agendamentos_${statusFilter || "geral"}_${today
-        .toLocaleDateString("pt-BR")
-        .replace(/\//g, "-")}.pdf`
-    );
-  }
-
-  // 📦 Clique nos cards (hoje, futuros, concluídos, cancelados)
+  // 📦 Clique nos cards
   function handleCardClick(type: string) {
     switch (type) {
       case "hoje":
@@ -174,7 +126,7 @@ export default function AdminPageClient() {
         break;
       case "futuros":
         setFilter("future");
-        setStatusFilter(null);
+        setStatusFilter("PENDENTE");
         break;
       case "concluidos":
         setFilter("all");
@@ -190,48 +142,20 @@ export default function AdminPageClient() {
     }
   }
 
-  // 🧭 Logout
-  // async function handleLogout() {
-  //   await fetch("/api/auth/logout", { method: "POST" });
-  //   window.location.href = "/login";
-  // }
-
-  // =======================
-  // 🧱 Interface
-  // =======================
   return (
     <main className="max-w-6xl mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8 flex-wrap gap-2">
-      <div>
-        <h1 className="text-2xl font-bold text-[#1F3924]">🌿 Painel Administrativo</h1>
-        <p className="text-sm text-[#8D6A93] mt-1">
-          Olá, <strong>Administradora</strong> — bem-vinda de volta!
-        </p>
+      {/* Título + menu */}
+      <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1F3924]">🌿 Painel Administrativo</h1>
+          <p className="text-sm text-[#8D6A93] mt-1">
+            Bem-vinda de volta, <strong>Administradora</strong>.
+          </p>
+        </div>
+        <AdminMenu />
       </div>
 
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => router.push("/admin/change-password")}
-          className="text-sm text-[#1F3924] hover:underline"
-        >
-          Alterar senha
-        </button>
-        
-        <button
-        onClick={async () => {
-          await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-          window.location.href = "/login";
-        }}
-        className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-      >
-        Sair
-      </button>
-
-      </div>
-    </div>
-
-
-      {/* 🔹 Cards de Contagem */}
+      {/* 🔹 Cards de contagem */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 text-center">
         {[
           { label: "Hoje", key: "hoje" },
@@ -254,7 +178,7 @@ export default function AdminPageClient() {
         ))}
       </div>
 
-      {/* 🔍 Busca + Ações */}
+      {/* 🔍 Campo de busca */}
       <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6">
         <input
           type="text"
@@ -263,23 +187,9 @@ export default function AdminPageClient() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full sm:w-1/2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
         />
-        <div className="flex gap-3 flex-wrap justify-center sm:justify-end">
-          <button
-            onClick={exportToPDF}
-            className="bg-[#1F3924] text-white px-4 py-2 rounded-lg hover:bg-green-900 transition-colors w-full sm:w-auto"
-          >
-            📄 Exportar PDF
-          </button>
-          <button
-            onClick={() => router.push("/admin/services")}
-            className="bg-[#8D6A93] text-white px-4 py-2 rounded-lg hover:bg-[#734a79] transition-colors w-full sm:w-auto"
-          >
-            ⚙️ Gerenciar Serviços
-          </button>
-        </div>
       </div>
 
-      {/* 📋 Tabela Responsiva */}
+      {/* 📋 Tabela */}
       {loading ? (
         <p className="text-center text-[#1F3924]">Carregando agendamentos...</p>
       ) : filteredBookings.length === 0 ? (
@@ -294,6 +204,7 @@ export default function AdminPageClient() {
         </div>
       )}
 
+      {/* Toast */}
       {toast && (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       )}

@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import ConfirmModal from "./ConfirmModal";
 
 type Booking = {
   id: number;
@@ -8,23 +9,41 @@ type Booking = {
   clientEmail?: string | null;
   startDateTime: string;
   endDateTime: string;
-  status: string;
+  status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
   service?: { name: string };
 };
 
 type BookingTableProps = {
   bookings: Booking[];
-  updateStatus: (id: number, status: "PENDENTE" | "CONCLUIDO" | "CANCELADO") => void;
+  updateStatus: (
+    id: number,
+    status: "PENDENTE" | "CONCLUIDO" | "CANCELADO"
+  ) => Promise<void>;
   showActions?: boolean;
 };
-
 
 export default function BookingTable({
   bookings,
   showActions = false,
   updateStatus,
 }: BookingTableProps) {
-  //const [expandedId, setExpandedId] = useState<number | null>(null);
+  const [confirmData, setConfirmData] = useState<{
+    show: boolean;
+    id: number | null;
+    type: "CONCLUIDO" | "CANCELADO" | null;
+    clientName: string;
+    clientPhone: string;
+    serviceName: string;
+    date: string;
+  }>({
+    show: false,
+    id: null,
+    type: null,
+    clientName: "",
+    clientPhone: "",
+    serviceName: "",
+    date: "",
+  });
 
   return (
     <div className="overflow-x-auto">
@@ -59,7 +78,7 @@ export default function BookingTable({
               >
                 <td className="py-3 px-4">
                   <div className="font-medium">{b.clientName}</div>
-                  {/* Exibe detalhes adicionais no mobile */}
+                  {/* Mobile detalhes */}
                   <div className="text-xs text-[#1F3924]/70 sm:hidden mt-1">
                     📞 {b.clientPhone} <br />
                     💆 {b.service?.name || "—"} <br />
@@ -76,9 +95,7 @@ export default function BookingTable({
                   <span className="text-sm text-[#1F3924]/70">{timeStr}</span>
                 </td>
 
-                <td className="py-3 px-4 hidden sm:table-cell">
-                  {b.clientPhone}
-                </td>
+                <td className="py-3 px-4 hidden sm:table-cell">{b.clientPhone}</td>
 
                 <td className="py-3 px-4 text-center">
                   <span
@@ -99,16 +116,35 @@ export default function BookingTable({
                     {b.status === "PENDENTE" ? (
                       <div className="flex justify-center gap-3">
                         <button
-                          title="Concluir"
-                          onClick={() => updateStatus?.(b.id, "CONCLUIDO")}
-                          className="text-green-600 text-xl hover:scale-110 transition"
+                          onClick={() =>
+                            setConfirmData({
+                              show: true,
+                              id: b.id,
+                              type: "CONCLUIDO",
+                              clientName: b.clientName,
+                              clientPhone: b.clientPhone,
+                              serviceName: b.service?.name || "—",
+                              date: new Date(b.startDateTime).toLocaleString("pt-BR"),
+                            })
+                          }
+                          title="Concluir atendimento"
                         >
                           ✅
                         </button>
+
                         <button
-                          title="Cancelar"
-                          onClick={() => updateStatus?.(b.id, "CANCELADO")}
-                          className="text-red-600 text-xl hover:scale-110 transition"
+                          onClick={() =>
+                            setConfirmData({
+                              show: true,
+                              id: b.id,
+                              type: "CANCELADO",
+                              clientName: b.clientName,
+                              clientPhone: b.clientPhone,
+                              serviceName: b.service?.name || "—",
+                              date: new Date(b.startDateTime).toLocaleString("pt-BR"),
+                            })
+                          }
+                          title="Cancelar agendamento"
                         >
                           ❌
                         </button>
@@ -128,6 +164,22 @@ export default function BookingTable({
         <p className="text-center text-[#1F3924]/60 py-6">
           Nenhum agendamento encontrado.
         </p>
+      )}
+
+      {confirmData.show && confirmData.id && confirmData.type && (
+        <ConfirmModal
+          show={confirmData.show}
+          type={confirmData.type}
+          clientName={confirmData.clientName}
+          clientPhone={confirmData.clientPhone}
+          serviceName={confirmData.serviceName}
+          date={confirmData.date}
+          onClose={() => setConfirmData({ ...confirmData, show: false })}
+          onConfirm={async () => {
+            await updateStatus(confirmData.id!, confirmData.type!);
+            setConfirmData({ ...confirmData, show: false });
+          }}
+        />
       )}
     </div>
   );
