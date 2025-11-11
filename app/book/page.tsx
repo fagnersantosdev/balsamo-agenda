@@ -253,7 +253,11 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
                   }}
                   disabled={(date) => {
                     const day = date.getDay();
-                    return day === 0 || day === 6;
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    //bloqueia fims de semana e dias anteriores ao dia atual
+                    return day === 0 || day === 6 || date < today;
                   }}
                   locale={ptBR}
                   weekStartsOn={1}
