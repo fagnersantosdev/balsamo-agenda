@@ -1,0 +1,22 @@
+{
+  "name": "Bálsamo Massoterapia",
+  "short_name": "Bálsamo",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F3EB",
+  "theme_color": "#8D6A93",
+  "description": "Cuidamos do seu corpo e da sua mente com técnicas terapêuticas que promovem relaxamento, saúde e bem-estar.",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
