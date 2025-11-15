@@ -55,68 +55,58 @@ export default function BookPage() {
 
   // 🔄 Carrega serviços e disponibilidade
   useEffect(() => {
-    fetch("/api/services").then((res) => res.json()).then(setServices);
-    fetch("/api/availability").then((res) => res.json()).then(setAvailability);
+    fetch("/api/services").then(res => res.json()).then(setServices);
+    fetch("/api/availability").then(res => res.json()).then(setAvailability);
   }, []);
 
-async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
-  if (!serviceId || !dateYYYYMMDD) return;
+  // 🕒 Gera horários livres com base no expediente
+  async function loadAvailableTimes(date: string, serviceId: number) {
+    if (!serviceId || !date) return;
 
-  const res = await fetch("/api/bookings");
-  let bookings: Booking[] = [];
+    const res = await fetch("/api/bookings");
+    let bookings: Booking[] = [];
 
-  if (res.ok) {
-    // 🔹 Ignora agendamentos cancelados e concluídos
-    bookings = (await res.json()).filter(
-      (b: Booking) => b.status !== "CANCELADO" && b.status !== "CONCLUIDO"
-    );
-  } else {
-    console.warn("⚠️ Falha ao carregar agendamentos:", res.status);
-  }
-
-
-  // data selecionada (apenas data)
-  const [y, m, d] = dateYYYYMMDD.split("-").map(Number);
-  const selected = new Date(y, m - 1, d);       // LOCAL
-  const now = new Date();                       // LOCAL
-
-  // mapeia dia da semana para sua tabela (sab=0, dom=1, seg=2,...)
-  const jsDay = selected.getDay();
-  const dayOfWeek = (jsDay + 1) % 7;
-  const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
-
-  if (!dayAvailability || !dayAvailability.active) {
-    setAvailableTimes([]);
-    setMsgType("error");
-    setMsg("🚫 Este dia não está disponível para agendamento.");
-    setTimeout(() => setMsg(null), 4000);
-    return;
-  }
-
-  const times: string[] = [];
-  for (let h = dayAvailability.openHour; h < dayAvailability.closeHour; h++) {
-    const slot = new Date(y, m - 1, d, h, 0, 0, 0); // LOCAL
-
-    // Bloqueia horários já passados no dia atual
-    if (slot <= now && selected.toDateString() === now.toDateString()) continue;
-
-    // Conflito com o que já existe
-    const hasConflict = bookings.some(b => {
-      const start = new Date(b.startDateTime); // já vem como Date válida
-      const end   = new Date(b.endDateTime);
-      return slot >= start && slot < end;
-    });
-
-    if (!hasConflict) {
-      // Enviamos um valor LOCAL e inequívoco: "YYYY-MM-DDTHH:mm"
-      const hh = String(h).padStart(2, "0");
-      times.push(`${dateYYYYMMDD}T${hh}:00`);
+    if (res.ok) {
+      bookings = await res.json();
+      // Remover cancelados e concluídos → horário deve voltar a ficar disponível
+      bookings = bookings.filter(b => b.status !== "CANCELADO" && b.status !== "CONCLUIDO");
     }
+
+    const selected = new Date(date);
+    const jsDay = selected.getDay();
+
+    // ajustar para availability
+    const dayOfWeek = (jsDay + 1) % 7;
+
+    const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
+
+    if (!dayAvailability || !dayAvailability.active) {
+      setAvailableTimes([]);
+      setMsgType("error");
+      setMsg("🚫 Este dia não está disponível para agendamento.");
+      setTimeout(() => setMsg(null), 4000);
+      return;
+    }
+
+    const times: string[] = [];
+
+    for (let h = dayAvailability.openHour; h < dayAvailability.closeHour; h++) {
+      const slot = new Date(selected);
+      slot.setHours(h, 0, 0, 0);
+
+      const hasConflict = bookings.some(b => {
+        const start = new Date(b.startDateTime);
+        const end = new Date(b.endDateTime);
+        return slot >= start && slot < end;
+      });
+
+      if (!hasConflict) {
+        times.push(slot.toISOString());
+      }
+    }
+
+    setAvailableTimes(times);
   }
-
-  setAvailableTimes(times);
-}
-
 
   // 📤 Envia o agendamento
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -125,13 +115,13 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
     setLoading(true);
     setSuccessData(null);
 
-    const formElement = e.currentTarget;
-    const form = new FormData(formElement);
+    const form = new FormData(e.currentTarget);
 
     const rawPhone = (form.get("clientPhone") as string) || "";
     const cleanedPhone = rawPhone.replace(/\D/g, "");
 
     const startDateTime = form.get("startDateTime") as string;
+
     if (!startDateTime) {
       setMsgType("error");
       setMsg("⚠️ Selecione um horário antes de confirmar o agendamento.");
@@ -148,8 +138,6 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
       startDateTime,
     };
 
-    console.log("📦 Enviando payload:", payload);
-
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
@@ -161,7 +149,7 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
 
       if (!res.ok) {
         setMsgType("error");
-        setMsg(`❌ ${data.error || "Não foi possível agendar. Verifique os dados e tente novamente."}`);
+        setMsg(`❌ ${data.error || "Não foi possível agendar. Tente novamente."}`);
         setTimeout(() => setMsg(null), 4000);
         return;
       }
@@ -177,13 +165,14 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
         phone: booking.clientPhone,
       });
 
-      formElement.reset();
+      e.currentTarget.reset();
       window.scrollTo({ top: 0, behavior: "smooth" });
       setMsgType("success");
       setMsg("✨ Agendamento realizado com sucesso!");
       setTimeout(() => setMsg(null), 4000);
+
     } catch (error) {
-      console.error("❌ Erro inesperado ao agendar:", error);
+      console.error("❌ Erro inesperado:", error);
       setMsgType("error");
       setMsg("Erro ao conectar com o servidor. Tente novamente.");
       setTimeout(() => setMsg(null), 4000);
@@ -224,25 +213,39 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
             ))}
           </select>
 
+          {/* Calendário */}
           <div>
-            <label className="block mb-2 font-medium text-[#1F3924]">Escolha a data</label>
+            <label className="block mb-2 font-medium text-[#1F3924]">Escolhar a data</label>
             <div className="bg-white rounded-xl border border-purple-200 p-3 shadow-sm overflow-x-auto">
-              <div className="min-w-[320px] mx-auto px-1">
+              <div className="min-w-[300px] mx-auto">
                 <DayPicker
                   mode="single"
                   selected={selectedDate ?? undefined}
                   onSelect={(date) => {
                     if (!date) return;
+
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+
+                    if (date < today) {
+                      setSelectedDate(null);
+                      setMsgType("error");
+                      setMsg("🚫 Não é possível agendar dias passados.");
+                      setTimeout(() => setMsg(null), 4000);
+                      return;
+                    }
+
                     const day = date.getDay();
                     if (day === 0 || day === 6) {
-                      setAvailableTimes([]);
                       setSelectedDate(null);
                       setMsgType("error");
                       setMsg("🚫 Não funcionamos aos fins de semana.");
                       setTimeout(() => setMsg(null), 4000);
                       return;
                     }
+
                     setSelectedDate(date);
+
                     const serviceId = Number(
                       (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
                     );
@@ -252,11 +255,10 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
                     }
                   }}
                   disabled={(date) => {
-                    const day = date.getDay();
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
 
-                    //bloqueia fims de semana e dias anteriores ao dia atual
+                    const day = date.getDay();
                     return day === 0 || day === 6 || date < today;
                   }}
                   locale={ptBR}
@@ -266,28 +268,20 @@ async function loadAvailableTimes(dateYYYYMMDD: string, serviceId: number) {
             </div>
           </div>
 
-
           {availableTimes.length > 0 ? (
             <select name="startDateTime" required className="w-full p-2 border rounded">
               <option value="">Selecione um horário</option>
-              {availableTimes.map((value) => {
-                const label = new Date(value).toLocaleTimeString("pt-BR", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
-                return (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                );
-              })}
+              {availableTimes.map((t) => (
+                <option key={t} value={t}>
+                  {new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                </option>
+              ))}
             </select>
           ) : (
             <p className="text-sm text-[#8A4B2E] italic">
-              Escolha um <strong>serviço</strong> e uma <strong>data válida (segunda a sexta)</strong> para ver os horários disponíveis.
+              Escolha um <strong>serviço</strong> e uma <strong>data válida</strong> para ver os horários.
             </p>
           )}
-
 
           <button
             disabled={loading}

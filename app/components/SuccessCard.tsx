@@ -16,7 +16,7 @@ export default function SuccessCard({
   name,
   date,
   service,
-  phone,
+  //phone,
 }: SuccessCardProps) {
   if (!show) return null;
 

@@ -1,12 +1,14 @@
 {
   "name": "Bálsamo Massoterapia",
   "short_name": "Bálsamo",
+  "description": "Agendamento online de massagens terapêuticas e bem-estar.",
+  "lang": "pt-BR",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#F5F3EB",
   "theme_color": "#8D6A93",
-  "description": "Cuidamos do seu corpo e da sua mente com técnicas terapêuticas que promovem relaxamento, saúde e bem-estar.",
+  "background_color": "#FFFEF9",
+  "scope": "/",
   "icons": [
     {
       "src": "/icon-192.png",

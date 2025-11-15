@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Oooh_Baby, Outfit } from "next/font/google";
 import BackgroundButterflies from "./components/BackgroundButterflies";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
-
+//import ServiceWorkerRegister from "./components/ServiceWorkerRegister";
 
 const ooohBaby = Oooh_Baby({
   subsets: ["latin"],
@@ -21,7 +21,12 @@ const outfit = Outfit({
 export const metadata = {
   title: "Bálsamo Massoterapia",
   description: "Agendamento online",
+  manifest: "/manifest.json",
 };
+
+export const viewport = {
+  themeColor: "#8D6A93"
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -219,6 +224,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     © {new Date().getFullYear()} Bálsamo Massoterapia — Todos os direitos reservados.
   </div>
   </footer>
+
+  {/* <ServiceWorkerRegister /> */}
       </body>
     </html>
   );
