@@ -1,6 +1,6 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import type { SVGProps } from "react";
 import Image from "next/image";
 import Toast from "../components/toast";
 import EventPromo from "../components/EventPromo";
@@ -9,9 +9,12 @@ import { DayPicker } from "react-day-picker";
 import "react-day-picker/style.css";
 import { ptBR } from "date-fns/locale";
 
+/* ============================================================
+   TIPOS
+============================================================ */
 type Service = { id: number; name: string; durationMin: number };
 type Availability = {
-  dayOfWeek: number;
+  dayOfWeek: number; // 1=domingo ... 7=sábado
   openHour: number;
   closeHour: number;
   active: boolean;
@@ -24,187 +27,195 @@ type Booking = {
   status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
 };
 
-// Ícone de borboleta
-function Butterfly(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" strokeWidth={2} {...props}>
-      <path d="M32 14v18" />
-      <path d="M30 10c1 2 5 2 6 0" />
-      <circle cx="33" cy="9" r="1.5" fill="currentColor" />
-      <circle cx="31" cy="9" r="1.5" fill="currentColor" />
-      <path d="M32 32c-7-10-19-14-25-9s-4 15 7 15c9 0 14-4 18-6" />
-      <path d="M32 32c7-10 19-14 25-9s4 15-7 15c-9 0-14-4-18-6" />
-    </svg>
-  );
+type SuccessInfo = {
+  name: string;
+  date: string;
+  service: string;
+  phone?: string;
+};
+
+/* ============================================================
+   MAPEAMENTO PARA COMBINAR COM A TABELA availability
+============================================================ */
+function mapDay(jsDay: number): number {
+  // const map: Record<number, number> = {
+  //   0: 1, //domingo
+  //   1: 2, //...
+  //   2: 3, //...
+  //   3: 4, //...
+  //   4: 5, //...
+  //   5: 6, //...
+  //   6: 7, //sabado
+  // };
+  return jsDay;
+  //return map[jsDay];
 }
 
+/* ============================================================
+   FORMATAÇÃO SEGURA DE HORÁRIO LOCAL
+============================================================ */
+function formatSlot(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  const h = String(date.getHours()).padStart(2, "0");
+  return `${y}-${m}-${d}T${h}:00`;
+}
+
+/* ============================================================
+   COMPONENTE PRINCIPAL
+============================================================ */
 export default function BookPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [loading, setLoading] = useState(false);
+
   const [msg, setMsg] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<"success" | "error" | null>(null);
-  const [successData, setSuccessData] = useState<{
-    name: string;
-    date: string;
-    service: string;
-    phone?: string;
-  } | null>(null);
+  const [successData, setSuccessData] = useState<SuccessInfo | null>(null);
 
-  // 🔄 Carrega serviços e disponibilidade
+  /* ============================================================
+     CARREGA SERVIÇOS + DISPONIBILIDADE
+  ============================================================ */
   useEffect(() => {
-    fetch("/api/services").then(res => res.json()).then(setServices);
-    fetch("/api/availability").then(res => res.json()).then(setAvailability);
+    fetch("/api/services").then((r) => r.json()).then(setServices);
+    fetch("/api/availability").then((r) => r.json()).then(setAvailability);
   }, []);
 
-  // 🕒 Gera horários livres com base no expediente
-  async function loadAvailableTimes(date: string, serviceId: number) {
-    if (!serviceId || !date) return;
+  /* ============================================================
+     GERAR HORÁRIOS DISPONÍVEIS
+  ============================================================ */
+  async function loadAvailableTimes(dateString: string, serviceId: number) {
+    if (!serviceId || !dateString) return;
 
+    setAvailableTimes([]);
+
+    // Cria a data LOCAL sem UTC
+    const [year, month, day] = dateString.split("-").map(Number);
+    const selectedDate = new Date(year, month - 1, day, 0, 0, 0);
+
+    const now = new Date();
+    now.setSeconds(0, 0);
+
+    // Buscar agendamentos
     const res = await fetch("/api/bookings");
-    let bookings: Booking[] = [];
+    const allBookings: Booking[] = res.ok ? await res.json() : [];
 
-    if (res.ok) {
-      bookings = await res.json();
-      // Remover cancelados e concluídos → horário deve voltar a ficar disponível
-      bookings = bookings.filter(b => b.status !== "CANCELADO" && b.status !== "CONCLUIDO");
-    }
+    const bookingsDoDia = allBookings.filter((b) => {
+      const start = new Date(b.startDateTime);
+      return start.toDateString() === selectedDate.toDateString();
+    });
 
-    const selected = new Date(date);
-    const jsDay = selected.getDay();
+    // Disponibilidade do dia (corrigida)
+    const dbDay = mapDay(selectedDate.getDay());
+    const dayAvail = availability.find((a) => a.dayOfWeek === dbDay);
 
-    // ajustar para availability
-    const dayOfWeek = (jsDay + 1) % 7;
-
-    const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
-
-    if (!dayAvailability || !dayAvailability.active) {
-      setAvailableTimes([]);
+    if (!dayAvail || !dayAvail.active) {
       setMsgType("error");
       setMsg("🚫 Este dia não está disponível para agendamento.");
-      setTimeout(() => setMsg(null), 4000);
       return;
     }
 
-    const times: string[] = [];
+    const slots: string[] = [];
 
-    for (let h = dayAvailability.openHour; h < dayAvailability.closeHour; h++) {
-      const slot = new Date(selected);
-      slot.setHours(h, 0, 0, 0);
+    for (let hour = dayAvail.openHour; hour < dayAvail.closeHour; hour++) {
+      const slot = new Date(selectedDate);
+      slot.setHours(hour, 0, 0, 0);
 
-      const hasConflict = bookings.some(b => {
+      // Só bloqueia horários passados se o usuário selecionar o DIA REAL de hoje
+    const todayReal = new Date();
+    todayReal.setHours(0,0,0,0);
+
+    if (selectedDate.toDateString() === todayReal.toDateString()) {
+      if (slot.getTime() <= new Date().getTime()) continue;
+    }
+
+      const conflict = bookingsDoDia.some((b) => {
         const start = new Date(b.startDateTime);
         const end = new Date(b.endDateTime);
         return slot >= start && slot < end;
       });
 
-      if (!hasConflict) {
-        times.push(slot.toISOString());
-      }
+      if (!conflict) slots.push(formatSlot(slot));
     }
 
-    setAvailableTimes(times);
+    setAvailableTimes(slots);
   }
 
-  // 📤 Envia o agendamento
+  /* ============================================================
+     SUBMIT DO FORMULÁRIO
+  ============================================================ */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setMsg(null);
-    setLoading(true);
-    setSuccessData(null);
+    const formEl = e.currentTarget as HTMLFormElement;
 
-    const form = new FormData(e.currentTarget);
-
-    const rawPhone = (form.get("clientPhone") as string) || "";
-    const cleanedPhone = rawPhone.replace(/\D/g, "");
-
-    const startDateTime = form.get("startDateTime") as string;
-
-    if (!startDateTime) {
-      setMsgType("error");
-      setMsg("⚠️ Selecione um horário antes de confirmar o agendamento.");
-      setTimeout(() => setMsg(null), 4000);
-      setLoading(false);
-      return;
-    }
+    const form = new FormData(formEl);
 
     const payload = {
       clientName: form.get("clientName"),
-      clientPhone: cleanedPhone,
+      clientPhone: String(form.get("clientPhone")).replace(/\D/g, ""),
       clientEmail: form.get("clientEmail") || null,
       serviceId: Number(form.get("serviceId")),
-      startDateTime,
+      startDateTime: form.get("startDateTime"),
     };
 
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+    const res = await fetch("/api/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-      if (!res.ok) {
-        setMsgType("error");
-        setMsg(`❌ ${data.error || "Não foi possível agendar. Tente novamente."}`);
-        setTimeout(() => setMsg(null), 4000);
-        return;
-      }
-
-      const booking = data.booking;
-      setSuccessData({
-        name: booking.clientName,
-        date: new Date(booking.startDateTime).toLocaleString("pt-BR", {
-          dateStyle: "short",
-          timeStyle: "short",
-        }),
-        service: booking.service.name,
-        phone: booking.clientPhone,
-      });
-
-      e.currentTarget.reset();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      setMsgType("success");
-      setMsg("✨ Agendamento realizado com sucesso!");
-      setTimeout(() => setMsg(null), 4000);
-
-    } catch (error) {
-      console.error("❌ Erro inesperado:", error);
+    if (!res.ok) {
       setMsgType("error");
-      setMsg("Erro ao conectar com o servidor. Tente novamente.");
-      setTimeout(() => setMsg(null), 4000);
-    } finally {
-      setLoading(false);
+      setMsg(`❌ ${data.error}`);
+      return;
     }
+
+    const booking = data.booking;
+
+    setSuccessData({
+      name: booking.clientName,
+      date: new Date(booking.startDateTime).toLocaleString("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
+      service: booking.service.name,
+      phone: booking.clientPhone,
+    });
+
+    if (formEl) formEl.reset();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // 🧭 Interface
+  /* ============================================================
+     INTERFACE
+  ============================================================ */
   return (
     <>
-      <main className="relative max-w-lg mx-auto bg-[#F5F3EB] backdrop-blur rounded-3xl shadow-xl p-8 border border-purple-100">
-        <Butterfly className="absolute -top-4 -left-4 w-10 h-10 text-purple-500 rotate-12" />
-        <Butterfly className="absolute -bottom-6 -right-6 w-12 h-12 text-[#1F3924] -rotate-12" />
+      <main className="relative max-w-lg mx-auto bg-[#F5F3EB] p-8 rounded-3xl shadow-xl border border-purple-100">
 
         <h1 className="flex items-center gap-2 text-2xl font-bold text-[#1F3924] mb-4">
-          <Image src="/borboleta.png" alt="Borboleta" width={50} height={50} />
+          <Image src="/borboleta.png" width={50} height={50} alt="Borboleta" />
           Agendar Atendimento
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+
           <input name="clientName" required placeholder="Nome completo" className="w-full p-2 border rounded" />
           <input name="clientPhone" required placeholder="(24) 99999-9999" className="w-full p-2 border rounded" />
           <input name="clientEmail" placeholder="E-mail (opcional)" className="w-full p-2 border rounded" />
 
+          {/* Serviço */}
           <select
             name="serviceId"
             required
             className="w-full p-2 border rounded"
             onChange={(e) => {
-              const date = selectedDate ? selectedDate.toISOString().split("T")[0] : "";
-              if (date) loadAvailableTimes(date, Number(e.target.value));
+              if (!selectedDate) return;
+              loadAvailableTimes(selectedDate.toISOString().split("T")[0], Number(e.target.value));
             }}
           >
             <option value="">Selecione um serviço</option>
@@ -214,97 +225,63 @@ export default function BookPage() {
           </select>
 
           {/* Calendário */}
-          <div>
-            <label className="block mb-2 font-medium text-[#1F3924]">Escolhar a data</label>
-            <div className="bg-white rounded-xl border border-purple-200 p-3 shadow-sm overflow-x-auto">
-              <div className="min-w-[300px] mx-auto">
-                <DayPicker
-                  mode="single"
-                  selected={selectedDate ?? undefined}
-                  onSelect={(date) => {
-                    if (!date) return;
+          <DayPicker
+            mode="single"
+            selected={selectedDate ?? undefined}
+            locale={ptBR}
+            weekStartsOn={1}
+            disabled={(d) => {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
 
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
+              const dbDay = mapDay(d.getDay());
+              return d < today || d.getDay() === 0 || d.getDay() === 6; // bloqueia domingo e sábado
+            }}
+            onSelect={(date) => {
+              if (!date) return;
 
-                    if (date < today) {
-                      setSelectedDate(null);
-                      setMsgType("error");
-                      setMsg("🚫 Não é possível agendar dias passados.");
-                      setTimeout(() => setMsg(null), 4000);
-                      return;
-                    }
+              setSelectedDate(date);
 
-                    const day = date.getDay();
-                    if (day === 0 || day === 6) {
-                      setSelectedDate(null);
-                      setMsgType("error");
-                      setMsg("🚫 Não funcionamos aos fins de semana.");
-                      setTimeout(() => setMsg(null), 4000);
-                      return;
-                    }
+              const serviceId = Number(
+                (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
+              );
 
-                    setSelectedDate(date);
+              if (serviceId) {
+                loadAvailableTimes(date.toISOString().split("T")[0], serviceId);
+              }
+            }}
+          />
 
-                    const serviceId = Number(
-                      (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
-                    );
-                    if (serviceId) {
-                      const formatted = date.toISOString().split("T")[0];
-                      loadAvailableTimes(formatted, serviceId);
-                    }
-                  }}
-                  disabled={(date) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-
-                    const day = date.getDay();
-                    return day === 0 || day === 6 || date < today;
-                  }}
-                  locale={ptBR}
-                  weekStartsOn={1}
-                />
-              </div>
-            </div>
-          </div>
-
+          {/* Horários */}
           {availableTimes.length > 0 ? (
             <select name="startDateTime" required className="w-full p-2 border rounded">
               <option value="">Selecione um horário</option>
               {availableTimes.map((t) => (
                 <option key={t} value={t}>
-                  {new Date(t).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                  {new Date(t).toLocaleTimeString("pt-BR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </option>
               ))}
             </select>
           ) : (
             <p className="text-sm text-[#8A4B2E] italic">
-              Escolha um <strong>serviço</strong> e uma <strong>data válida</strong> para ver os horários.
+              Escolha um serviço e uma data para ver os horários disponíveis.
             </p>
           )}
 
-          <button
-            disabled={loading}
-            className="w-full bg-[#1F3924] text-purple-50 font-medium px-4 py-2 rounded-lg hover:bg-green-900 transition-colors disabled:opacity-50"
-          >
-            {loading ? "Agendando..." : "Confirmar Agendamento"}
+          <button className="w-full bg-[#1F3924] text-purple-50 font-medium px-4 py-2 rounded-lg">
+            Confirmar Agendamento
           </button>
         </form>
 
         {successData && (
-          <SuccessCard
-            show
-            onClose={() => setSuccessData(null)}
-            name={successData.name}
-            date={successData.date}
-            service={successData.service}
-            phone={successData.phone}
-          />
+          <SuccessCard show onClose={() => setSuccessData(null)} {...successData} />
         )}
 
-        {msg && !successData && (
-          <Toast message={msg} type={msgType || "error"} onClose={() => setMsg(null)} />
-        )}
+        {msg && <Toast message={msg} type={msgType || "error"} onClose={() => setMsg(null)} />}
+
       </main>
 
       <EventPromo />

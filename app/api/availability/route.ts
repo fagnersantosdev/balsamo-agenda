@@ -1,11 +1,16 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+// GET — Buscar disponibilidade
 export async function GET() {
-  const availability = await prisma.availability.findMany({ orderBy: { dayOfWeek: "asc" } });
+  const availability = await prisma.availability.findMany({
+    orderBy: { dayOfWeek: "asc" }
+  });
+
   return NextResponse.json(availability);
 }
 
+// PATCH — Atualizar disponibilidade
 export async function PATCH(req: Request) {
   try {
     const updates = await req.json();
@@ -24,19 +29,26 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Erro ao atualizar availability:", error);
-    return NextResponse.json({ error: "Erro ao salvar alterações" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erro ao salvar alterações" },
+      { status: 500 }
+    );
   }
 }
 
-
+// POST — Apenas retorna a lista (ou remova se não usar)
 export async function POST() {
-  try{
+  try {
     const items = await prisma.availability.findMany({
-      orderBy: {dayOfWeek: "asc"},
-    })
+      orderBy: { dayOfWeek: "asc" },
+    });
 
-  } catch (e) {
-    
+    return NextResponse.json(items);
+  } catch (error) {
+    console.error("Erro ao buscar availability:", error);
+    return NextResponse.json(
+      { error: "Erro ao buscar availability" },
+      { status: 500 }
+    );
   }
-  
 }
