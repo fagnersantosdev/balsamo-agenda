@@ -60,6 +60,122 @@ export default async function HomePage() {
             />
           </div>
         </section>
+        {/* Apresentação dos Vídeos */}
+        {/* Apresentação dos Vídeos */}
+<section className="max-w-6xl mx-auto mb-16 space-y-8">
+  <h2 className="text-2xl font-bold text-[#1F3924] text-center">
+    Conheça Mais Sobre Nossos Cuidados 🌿
+  </h2>
+
+  {/* MOBILE – vídeo mais estreito/vertical */}
+  <div className="mt-4 block md:hidden">
+    <div
+      className="
+        relative
+        mx-auto
+        max-w-[360px]
+        rounded-3xl
+        overflow-hidden
+        shadow-[0_8px_25px_-5px_rgba(141,106,147,0.35)]
+        border border-[#8D6A93]/30
+      "
+    >
+      <video
+        id="balsamo-video-mobile"
+        className="
+          w-full
+          aspect-[9/16]
+          opacity-100
+          transition-opacity duration-700
+        "
+        autoPlay
+        muted
+        playsInline
+      >
+        <source src="/video1.mp4" type="video/mp4" />
+      </video>
+    </div>
+  </div>
+
+  {/* DESKTOP/TABLET – vídeo em formato linha/banner */}
+  <div className="hidden md:block">
+    <div
+      className="
+        relative
+        mx-auto
+        max-w-5xl
+        rounded-3xl
+        overflow-hidden
+        shadow-[0_12px_40px_-10px_rgba(141,106,147,0.45)]
+        border border-[#8D6A93]/30
+        bg-gradient-to-r from-[#F5F3EB] to-[#D6A77A]/60
+        p-[2px]
+      "
+    >
+      <div className="rounded-[22px] bg-[#F5F3EB]/95">
+        <video
+          id="balsamo-video-player"
+          className="
+            w-full
+            sm:max-w-[500px]
+            md:max-w-[600px]
+            lg:max-w-[250px]
+            xl:max-w-[280px]
+            mx-auto
+            rounded-3xl
+            relative
+            z-10
+            opacity-100
+            transition-opacity
+            duration-700
+            ease-[cubic-bezier(0.4,0.0,0.2,1)]
+          "
+          preload="auto"
+          autoPlay
+          muted
+          playsInline
+        >
+          <source src="/video1.mp4" type="video/mp4" />
+        </video>
+      </div>
+    </div>
+  </div>
+
+  {/* Script para alternar video1/video2 com fade e loop em ambos */}
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `
+        (function () {
+          if (typeof window === "undefined") return;
+
+          const sources = ["/video1.mp4", "/video2.mp4"];
+
+          function setupPlayer(id) {
+            const video = document.getElementById(id);
+            if (!video) return;
+
+            let index = 0;
+
+            function fadeToNext() {
+              video.style.opacity = "0";
+              setTimeout(() => {
+                index = (index + 1) % sources.length;
+                video.src = sources[index];
+                video.play();
+                video.style.opacity = "1";
+              }, 500);
+            }
+
+            video.addEventListener("ended", fadeToNext);
+          }
+
+          setupPlayer("balsamo-video-mobile");
+          setupPlayer("balsamo-video-desktop");
+        })();
+      `,
+    }}
+  />
+</section>
 
         {/* Serviços */}
         <section>
