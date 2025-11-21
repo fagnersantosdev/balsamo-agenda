@@ -200,6 +200,13 @@ async function exportToPDF() {
             </button>
 
             <button
+              onClick={() => (window.location.href = "/admin/testimonials")}
+              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]"
+            >
+              ⭐ Gerenciar Avaliações
+            </button>
+
+            <button
               onClick={() => (window.location.href = "/admin/change-password")}
               className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]"
             >
