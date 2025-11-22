@@ -448,65 +448,56 @@ function formatRelativeDate(dateString: string) {
           </div>
         </section>
 
-{/* Sobre a Profissional */}
+        {/* Sobre a Profissional */}
         <section className="max-w-6xl mx-auto px-4 py-16">
           <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
             Sobre a Profissional 🌿
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
 
-            {/* Foto da profissional */}
-            <div className="flex justify-center">
-              <div className="
-                rounded-3xl overflow-hidden
-                shadow-[0_12px_40px_-10px_rgba(141,106,147,0.35)]
-                border border-[#8D6A93]/30
-                bg-[#F5F3EB]/60 p-[2px]
-              ">
+            {/* Foto menor estilo biografia */}
+            <div className="flex justify-center md:justify-start">
+              <div
+                className="
+                  rounded-2xl overflow-hidden
+                  shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
+                  border border-[#8D6A93]/20
+                  bg-[#F5F3EB]/70
+                  w-[190px] h-[260px]
+                "
+              >
                 <Image
                   src="/proprietaria2.jpg"
                   alt="Profissional da Bálsamo Massoterapia"
-                  width={400}
-                  height={400}
-                  className="
-                    w-full
-                    max-w-[320px]
-                    md:max-w-[360px]
-                    rounded-3xl
-                    object-cover
-                    transition-all duration-500
-                    hover:scale-[1.02]
-                  "
+                  width={190}
+                  height={260}
+                  className="w-full h-full object-cover rounded-2xl"
                 />
               </div>
             </div>
 
-            {/* Texto da profissional */}
-            <div className="
-              bg-[#F5F3EB]/90 rounded-2xl
-              p-6 md:p-8
-              shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
-              border border-[#8D6A93]/20
-            ">
+            {/* Texto da biografia */}
+            <div className="md:col-span-2">
               <h3 className="text-xl md:text-2xl font-semibold text-[#1F3924] mb-4">
-                Uma jornada dedicada ao bem-estar
+                Maria da Penha — Massoterapeuta Especialista
               </h3>
 
               <p className="text-[#1F3924]/90 leading-relaxed text-base md:text-lg mb-4">
-                Com formação especializada em técnicas terapêuticas e anos de experiência,
-                nossa profissional se dedica a proporcionar cuidados que promovem equilíbrio,
-                relaxamento e qualidade de vida.
+                Com uma trajetória construída com dedicação e amor pelo cuidado, Maria da Penha 
+                atua na área da massoterapia oferecendo acolhimento, técnica e sensibilidade em cada sessão.
               </p>
 
-              <p className="text-[#1F3924]/90 leading-relaxed text-base md:text-lg mb-4">
-                Seu propósito é oferecer uma experiência acolhedora, respeitosa e humana,
-                onde cada sessão é adaptada às necessidades únicas de cada cliente.
-              </p>
+              <ul className="space-y-3 text-[#1F3924]/90 text-base md:text-lg mb-6">
+                <li>🌱 <strong>Formação em Massoterapia</strong>, com foco em práticas terapêuticas e relaxantes.</li>
+                <li>💆‍♀️ Especialização em <strong>Pedras Quentes, Quick Massage e Massagem Relaxante</strong>.</li>
+                <li>🌿 Experiência em atendimento humanizado e abordagem integrada corpo–mente.</li>
+                <li>✨ Propósito voltado ao bem-estar, equilíbrio emocional e qualidade de vida.</li>
+              </ul>
 
-              <p className="text-[#1F3924]/90 leading-relaxed text-base md:text-lg">
-                A Bálsamo Massoterapia nasceu do desejo de transformar vidas através do toque,
-                da empatia e da presença.
+              <p className="text-[#1F3924]/80 leading-relaxed text-base md:text-lg">
+                Na Bálsamo Massoterapia, cada toque é guiado pela empatia, pela presença e pelo compromisso 
+                de transformar o dia de cada cliente, trazendo mais leveza e bem-estar.
               </p>
             </div>
 
