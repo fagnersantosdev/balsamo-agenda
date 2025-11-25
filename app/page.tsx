@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import EventPromo from "./components/EventPromo";
+import TestimonialSlider from "@/app/components/TestimonialSlider";
 
 type Service = {
   id: number;
@@ -278,29 +279,35 @@ function formatRelativeDate(dateString: string) {
           </h2>
 
           {testimonials.length === 0 ? (
-            <p className="text-center text-[#1F3924]/60">Ainda não há depoimentos.</p>
+            <p className="text-center text-[#1F3924]/60">
+              Ainda não há depoimentos cadastrados.
+            </p>
           ) : (
             <div className="relative">
               
               {/* Faixa deslizante */}
               <div
                 id="testimonial-track"
-                className="flex transition-transform duration-700 ease-out"
-                style={{ width: `${testimonials.length * 100}%` }}
+                className="
+                  flex
+                  transition-transform duration-700 ease-out
+                "
+                style={{ width: `auto` }}
               >
-                {testimonials.map((t: Testimonial, i) => (
+                {testimonials.map((t: Testimonial) => (
                   <div
                     key={t.id}
                     className="
-                      p-3 flex-shrink-0
-                      w-full
-                      sm:w-1/2
-                      md:w-1/3
+                      flex-shrink-0
+                      w-[100vw]         /* Mobile */
+                      sm:w-1/2          /* Tablet */
+                      md:w-1/3          /* Desktop */
+                      px-3
                     "
                   >
                     <div
                       className="
-                        bg-[#F5F3EB]/90 rounded-2xl p-6 h-full
+                        bg-[#F5F3EB]/90 rounded-2xl h-full p-6
                         shadow-[0_8px_25px_-5px_rgba(141,106,147,0.25)]
                         border border-[#8D6A93]/20
                       "
@@ -336,7 +343,6 @@ function formatRelativeDate(dateString: string) {
                   function slide() {
                     index = (index + 1) % total;
 
-                    // Largura por card depende da tela
                     const w = track.children[0].clientWidth;
 
                     track.style.transform = "translateX(-" + index * w + "px)";
@@ -357,8 +363,18 @@ function formatRelativeDate(dateString: string) {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
 
+            {/* Benefício 1 - Relaxamento profundo */}
             <div className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
-              <div className="text-4xl mb-3">💆‍♀️</div>
+              <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
+                <Image 
+                  src="/img1.png"
+                  alt="Relaxamento profundo"
+                  width={300}
+                  height={200}
+                  className="w-full h-full object-cover rounded-xl shadow-sm"
+                />
+              </div>
+
               <h3 className="text-lg font-semibold text-[#1F3924] mb-2">
                 Relaxamento profundo
               </h3>
@@ -367,8 +383,18 @@ function formatRelativeDate(dateString: string) {
               </p>
             </div>
 
+            {/* Benefício 2 - Equilíbrio mental */}
             <div className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
-              <div className="text-4xl mb-3">🧘‍♂️</div>
+              <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
+                <Image 
+                  src="/img2.png"
+                  alt="Equilíbrio mental"
+                  width={300}
+                  height={200}
+                  className="w-full h-full object-cover rounded-xl shadow-sm"
+                />
+              </div>
+
               <h3 className="text-lg font-semibold text-[#1F3924] mb-2">
                 Equilíbrio mental
               </h3>
@@ -377,8 +403,18 @@ function formatRelativeDate(dateString: string) {
               </p>
             </div>
 
+            {/* Benefício 3 - Saúde do corpo */}
             <div className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
-              <div className="text-4xl mb-3">🌿</div>
+              <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
+                <Image 
+                  src="/img3.png"
+                  alt="Saúde do corpo"
+                  width={300}
+                  height={200}
+                  className="w-full h-full object-cover rounded-xl shadow-sm"
+                />
+              </div>
+
               <h3 className="text-lg font-semibold text-[#1F3924] mb-2">
                 Saúde do corpo
               </h3>
@@ -448,14 +484,21 @@ function formatRelativeDate(dateString: string) {
           </div>
         </section>
 
+        {/* Promoções e eventos */}
+        <EventPromo />
+
         {/* Sobre a Profissional */}
         <section className="max-w-6xl mx-auto px-4 py-16">
           <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
             Sobre a Profissional 🌿
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start">
-
+          <div
+            className="
+              grid grid-cols-1 md:grid-cols-3 gap-12 items-start
+              animate-[fadeInUp_0.9s_ease-out]
+            "
+          >
             {/* Foto menor estilo biografia */}
             <div className="flex justify-center md:justify-start">
               <div
@@ -500,7 +543,6 @@ function formatRelativeDate(dateString: string) {
                 de transformar o dia de cada cliente, trazendo mais leveza e bem-estar.
               </p>
             </div>
-
           </div>
         </section>
 
@@ -528,8 +570,8 @@ function formatRelativeDate(dateString: string) {
 
       </main>
 
-      {/* Promoções e eventos */}
-      <EventPromo />
+      {/* Promoções e eventos
+      <EventPromo /> */}
     </>
   );
 }
