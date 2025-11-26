@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import EventPromo from "./components/EventPromo";
-import TestimonialSlider from "@/app/components/TestimonialSlider";
+import TestimonialSlider, { Testimonial } from "@/app/components/TestimonialSlider";
+import BalsamoVideoPlayer from "./components/BalsamoVideoPlayer";
 
 type Service = {
   id: number;
@@ -9,13 +10,6 @@ type Service = {
   price: number;
   durationMin: number;
   details?: string[];
-};
-
-type Testimonial = {
-  id: number;
-  author: string;
-  message: string;
-  createdAt: string;
 };
 
 export default async function HomePage() {
@@ -35,39 +29,18 @@ export default async function HomePage() {
 
   let testimonials: Testimonial[] = [];
 
-try {
-  const resTestimonials = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/testimonials`,
-    { cache: "no-store" }
-  );
+  try {
+    const resTestimonials = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/testimonials`,
+      { cache: "no-store" }
+    );
 
-  if (resTestimonials.ok) {
-    testimonials = await resTestimonials.json();
+    if (resTestimonials.ok) {
+      testimonials = await resTestimonials.json();
+    }
+  } catch (error) {
+    console.error("Erro ao carregar depoimentos:", error);
   }
-} catch (error) {
-  console.error("Erro ao carregar depoimentos:", error);
-}
-
-function formatRelativeDate(dateString: string) {
-  const date = new Date(dateString);
-  const now = new Date();
-
-  const diffMs = now.getTime() - date.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Hoje";
-  if (diffDays === 1) return "Há 1 dia";
-  if (diffDays < 7) return `Há ${diffDays} dias`;
-
-  const diffWeeks = Math.floor(diffDays / 7);
-  if (diffWeeks === 1) return "Há 1 semana";
-  if (diffWeeks < 4) return `Há ${diffWeeks} semanas`;
-
-  const diffMonths = Math.floor(diffDays / 30);
-  if (diffMonths === 1) return "Há 1 mês";
-
-  return `Há ${diffMonths} meses`;
-}
 
   return (
     <>
@@ -131,70 +104,8 @@ function formatRelativeDate(dateString: string) {
                   p-[2px]
                 "
               >
-                <video
-                  id="balsamo-video-player"
-                  className="
-                    w-full
-                    sm:max-w-[300px]
-                    md:max-w-[280px]
-                    lg:max-w-[300px]
-                    xl:max-w-[320px]
-                    rounded-3xl
-                    shadow-[0_8px_25px_-5px_rgba(141,106,147,0.35)]
-                    border border-[#8D6A93]/30
-                    opacity-100
-                    transition-opacity duration-700
-                  "
-                  autoPlay
-                  muted
-                  playsInline
-                >
-                  <source src="/video1.mp4" type="video/mp4" />
-                </video>
+                <BalsamoVideoPlayer />
               </div>
-
-              {/* Script do vídeo (troca suave) */}
-              <script
-                dangerouslySetInnerHTML={{
-                  __html: `
-                    (function () {
-                      if (typeof window === "undefined") return;
-
-                      const video = document.getElementById("balsamo-video-player");
-                      if (!video) return;
-
-                      const sources = ["/video1.mp4", "/video2.mp4"];
-                      let index = 0;
-
-                      const cache = sources.map(src => {
-                        const v = document.createElement("video");
-                        v.src = src;
-                        v.preload = "auto";
-                        return v;
-                      });
-
-                      function fadeToNext() {
-                        video.style.opacity = "0";
-
-                        setTimeout(() => {
-                          index = (index + 1) % sources.length;
-
-                          video.src = cache[index].src;
-                          video.load();
-
-                          video.addEventListener("canplay", function handler() {
-                            video.removeEventListener("canplay", handler);
-                            video.play();
-                            video.style.opacity = "1";
-                          });
-                        }, 400);
-                      }
-
-                      video.addEventListener("ended", fadeToNext);
-                    })();
-                  `,
-                }}
-              ></script>
             </div>
 
             {/* Texto ao lado do vídeo */}
@@ -273,86 +184,20 @@ function formatRelativeDate(dateString: string) {
         </div>
 
         {/* Seção de Depoimentos */}
-        <section className="max-w-6xl mx-auto px-4 py-16 overflow-hidden">
-          <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
-            O que nossos clientes dizem 🌟
-          </h2>
+        <section className="max-w-6xl mx-auto px-4 py-16">
+          <div className="bg-[#F5F3EB]/70 rounded-3xl px-4 sm:px-8 py-12 shadow-[0_10px_40px_-15px_rgba(141,106,147,0.35)] border border-[#8D6A93]/20">
+            <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-10">
+              O que nossos clientes dizem 🌟
+            </h2>
 
-          {testimonials.length === 0 ? (
-            <p className="text-center text-[#1F3924]/60">
-              Ainda não há depoimentos cadastrados.
-            </p>
-          ) : (
-            <div className="relative">
-              
-              {/* Faixa deslizante */}
-              <div
-                id="testimonial-track"
-                className="
-                  flex
-                  transition-transform duration-700 ease-out
-                "
-                style={{ width: `auto` }}
-              >
-                {testimonials.map((t: Testimonial) => (
-                  <div
-                    key={t.id}
-                    className="
-                      flex-shrink-0
-                      w-[100vw]         /* Mobile */
-                      sm:w-1/2          /* Tablet */
-                      md:w-1/3          /* Desktop */
-                      px-3
-                    "
-                  >
-                    <div
-                      className="
-                        bg-[#F5F3EB]/90 rounded-2xl h-full p-6
-                        shadow-[0_8px_25px_-5px_rgba(141,106,147,0.25)]
-                        border border-[#8D6A93]/20
-                      "
-                    >
-                      <p className="text-[#1F3924]/90 italic mb-4 leading-relaxed">
-                        {t.message.replace(/^\$/, "")}
-                      </p>
-
-                      <p className="text-[#8A4B2E] font-semibold">— {t.author}</p>
-
-                      <p className="text-sm text-[#1F3924]/50 mt-1">
-                        {formatRelativeDate(t.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-            </div>
-          )}
-
-          {/* Script do slider */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                (function () {
-                  const track = document.getElementById("testimonial-track");
-                  if (!track) return;
-
-                  const total = ${testimonials.length};
-                  let index = 0;
-
-                  function slide() {
-                    index = (index + 1) % total;
-
-                    const w = track.children[0].clientWidth;
-
-                    track.style.transform = "translateX(-" + index * w + "px)";
-                  }
-
-                  setInterval(slide, 5000);
-                })();
-              `,
-            }}
-          />
+            {testimonials.length === 0 ? (
+              <p className="text-center text-[#1F3924]/60">
+                Ainda não há depoimentos cadastrados.
+              </p>
+            ) : (
+              <TestimonialSlider testimonials={testimonials} />
+            )}
+          </div>
         </section>
 
         {/* Benefícios da Massoterapia */}
@@ -569,9 +414,6 @@ function formatRelativeDate(dateString: string) {
         </section>
 
       </main>
-
-      {/* Promoções e eventos
-      <EventPromo /> */}
     </>
   );
 }

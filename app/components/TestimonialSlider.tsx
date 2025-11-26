@@ -1,80 +1,91 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 export type Testimonial = {
   id: number;
-  message: string;
   author: string;
+  message: string;
   createdAt: string;
 };
 
-type Props = {
+interface Props {
   testimonials: Testimonial[];
-  formatRelativeDate: (date: string) => string;
-};
+}
 
-export default function TestimonialSlider({ testimonials, formatRelativeDate }: Props) {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [cardWidth, setCardWidth] = useState(0);
-  const [index, setIndex] = useState(0);
+export default function TestimonialSlider({ testimonials }: Props) {
+  const trackRef = useRef<HTMLDivElement | null>(null);
 
-  // Identifica quantos cards aparecem na tela
-  function getVisibleCount() {
-    if (window.innerWidth < 640) return 1;     // mobile
-    if (window.innerWidth < 768) return 2;     // tablet
-    return 3;                                  // desktop
+  // Função para formatar datas (agora no Client Component)
+  function formatRelativeDate(dateString: string) {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Hoje";
+    if (diffDays === 1) return "Há 1 dia";
+    if (diffDays < 7) return `Há ${diffDays} dias`;
+
+    const diffWeeks = Math.floor(diffDays / 7);
+    if (diffWeeks === 1) return "Há 1 semana";
+    if (diffWeeks < 4) return `Há ${diffWeeks} semanas`;
+
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths === 1) return "Há 1 mês";
+
+    return `Há ${diffMonths} meses`;
   }
 
-  // Observa tamanho dos cards
+  // Slider automático
   useEffect(() => {
-    const updateWidth = () => {
-      if (!trackRef.current) return;
-      const firstCard = trackRef.current.querySelector(".testimonial-card") as HTMLElement;
-      if (firstCard) setCardWidth(firstCard.clientWidth);
-    };
+    const track = trackRef.current;
+    if (!track || testimonials.length === 0) return;
 
-    updateWidth();
-    window.addEventListener("resize", updateWidth);
+    let index = 0;
+    const total = testimonials.length;
 
-    const obs = new ResizeObserver(updateWidth);
-    if (trackRef.current) obs.observe(trackRef.current);
+    function slide() {
+      if (!track) return;
 
-    return () => {
-      window.removeEventListener("resize", updateWidth);
-      obs.disconnect();
-    };
-  }, []);
+      const firstCard = track.children[0] as HTMLElement | undefined;
+      if (!firstCard) return;
 
-  // Auto slide
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setIndex((prev) => {
-        const maxIndex = testimonials.length - getVisibleCount();
-        return prev >= maxIndex ? 0 : prev + 1;
-      });
-    }, 5000);
+      const width = firstCard.clientWidth;
+      index = (index + 1) % total;
+
+      track.style.transform = `translateX(-${index * width}px)`;
+    }
+
+    const interval = setInterval(slide, 5000);
 
     return () => clearInterval(interval);
   }, [testimonials]);
 
   return (
-    <div className="overflow-hidden w-full">
+    <div className="relative overflow-hidden">
+      {/* Faixa dos cards */}
       <div
         ref={trackRef}
         className="flex transition-transform duration-700 ease-out"
-        style={{
-          transform: `translateX(-${index * cardWidth}px)`
-        }}
       >
         {testimonials.map((t) => (
           <div
             key={t.id}
-            className="testimonial-card flex-shrink-0 px-4 w-full sm:w-1/2 md:w-1/3"
+            className="
+              flex-shrink-0
+              w-full
+              max-w-[90vw]
+              sm:max-w-none
+              sm:w-1/2         /* Tablet */
+              md:w-1/3         /* Desktop */
+              px-3
+            "
           >
             <div
               className="
-                bg-[#F5F3EB]/90 rounded-2xl p-6 h-full
+                bg-[#F5F3EB]/90 rounded-2xl h-full p-6
                 shadow-[0_8px_25px_-5px_rgba(141,106,147,0.25)]
                 border border-[#8D6A93]/20
               "
