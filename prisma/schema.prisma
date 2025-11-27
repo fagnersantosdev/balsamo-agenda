@@ -57,8 +57,11 @@ model Admin {
 
 model Testimonial {
   id        Int      @id @default(autoincrement())
-  author    String
+  author    String?
   message   String
+  rating    Int @default(5)
+  photoUrl  String?
   createdAt DateTime @default(now())
+  approved  Boolean @default(false)
 }
 

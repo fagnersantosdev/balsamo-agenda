@@ -1,10 +1,9 @@
-import { prisma} from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const testimonials = await prisma.testimonial.findMany({
-      where: { approved: true },
       orderBy: { createdAt: "desc" },
     });
 

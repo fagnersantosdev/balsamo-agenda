@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import EventPromo from "./components/EventPromo";
-import TestimonialSlider, { Testimonial } from "@/app/components/TestimonialSlider";
+import { Testimonial } from "@/app/types/Testimonial";
+import TestimonialSlider from "./components/TestimonialSlider";
 import BalsamoVideoPlayer from "./components/BalsamoVideoPlayer";
+import FeedbackSection from "./components/FeedbackSection";
+//import { useState } from "react";
 
 type Service = {
   id: number;
@@ -41,6 +44,7 @@ export default async function HomePage() {
   } catch (error) {
     console.error("Erro ao carregar depoimentos:", error);
   }
+
 
   return (
     <>
@@ -84,12 +88,12 @@ export default async function HomePage() {
         </section>
 
         {/* Apresentação dos Vídeos */}
-        <section className="max-w-6xl mx-auto py-16 px-4">
+        <section className="max-w-6xl mx-auto py-20 px-4">
           <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
             Conheça Mais Sobre Nossos Cuidados 🌿
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
 
             {/* Vídeo */}
             <div className="flex justify-center">
@@ -99,45 +103,43 @@ export default async function HomePage() {
                   rounded-3xl
                   overflow-hidden
                   shadow-[0_12px_40px_-10px_rgba(141,106,147,0.35)]
-                  border border-[#8D6A93]/20
+                  border border-[#8D6A93]/30
                   bg-gradient-to-br from-[#F5F3EB]/60 to-[#D6A77A]/20
-                  p-[2px]
+                  p-[3px]
+                  backdrop-blur-sm
+                  transition-transform
+                  duration-700
+                  hover:scale-[1.015]
                 "
               >
                 <BalsamoVideoPlayer />
               </div>
             </div>
 
-            {/* Texto ao lado do vídeo */}
+            {/* Texto */}
             <div
               className="
-                relative
-                rounded-2xl
                 bg-[#F5F3EB]/90
+                rounded-2xl
                 p-6 md:p-8
                 shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
                 border border-[#8D6A93]/20
-                animate-[fadeInUp_0.8s_ease-out]
+                leading-relaxed
+                animate-[fadeInUp_0.7s_ease-out]
               "
             >
-              <div className="absolute -top-4 -right-4 opacity-10 text-[#1F3924] text-5xl select-none">
-                🍃
-              </div>
-
               <h3 className="text-2xl font-semibold text-[#1F3924] mb-4">
                 Qualidade, cuidado e carinho em cada atendimento 🌿
               </h3>
 
-              <p className="text-[#1F3924]/90 leading-relaxed text-base md:text-lg mb-4">
+              <p className="text-[#1F3924]/90 text-base md:text-lg mb-4">
                 Na Bálsamo Massoterapia, cada sessão é pensada para acolher,
-                relaxar e trazer equilíbrio ao corpo e à mente. Com técnicas
-                aplicadas com sensibilidade e atenção, oferecemos um ambiente
-                tranquilo, seguro e humanizado.
+                relaxar e trazer equilíbrio ao corpo e à mente.
               </p>
 
-              <p className="text-[#1F3924]/90 leading-relaxed text-base md:text-lg">
-                Aqui, você é cuidado com respeito, delicadeza e presença —
-                porque seu bem-estar é prioridade.
+              <p className="text-[#1F3924]/90 text-base md:text-lg">
+                Técnicas aplicadas com sensibilidade, ambiente tranquilo e um cuidado
+                genuíno para transformar o seu dia.
               </p>
 
               <a
@@ -148,7 +150,7 @@ export default async function HomePage() {
                   text-[#F5F3EB]
                   px-6 py-3
                   rounded-lg
-                  shadow
+                  shadow-md
                   hover:bg-[#1F3924]
                   transition-colors
                   font-medium
@@ -183,22 +185,23 @@ export default async function HomePage() {
           </a>
         </div>
 
-        {/* Seção de Depoimentos */}
+        {/* Seção de depoimentos */}
         <section className="max-w-6xl mx-auto px-4 py-16">
-          <div className="bg-[#F5F3EB]/70 rounded-3xl px-4 sm:px-8 py-12 shadow-[0_10px_40px_-15px_rgba(141,106,147,0.35)] border border-[#8D6A93]/20">
-            <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-10">
-              O que nossos clientes dizem 🌟
-            </h2>
+          <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
+            O que nossos clientes dizem 🌟
+          </h2>
 
-            {testimonials.length === 0 ? (
-              <p className="text-center text-[#1F3924]/60">
-                Ainda não há depoimentos cadastrados.
-              </p>
-            ) : (
-              <TestimonialSlider testimonials={testimonials} />
-            )}
-          </div>
+          {testimonials.length === 0 ? (
+            <p className="text-center text-[#1F3924]/60">
+              Ainda não há depoimentos cadastrados.
+            </p>
+          ) : (
+            <TestimonialSlider testimonials={testimonials} />
+          )}
         </section>
+
+        {/* Aqui abaixo, sozinho */}
+        <FeedbackSection testimonials={testimonials} />
 
         {/* Benefícios da Massoterapia */}
         <section className="max-w-6xl mx-auto px-4 py-20">

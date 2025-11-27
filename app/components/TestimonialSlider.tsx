@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Testimonial } from "@/app/types/Testimonial";
 
-export type Testimonial = {
-  id: number;
-  author: string;
-  message: string;
-  createdAt: string;
-};
+// export type Testimonial = {
+//   id: number;
+//   author: string;
+//   message: string;
+//   createdAt: string;
+// };
 
 interface Props {
   testimonials: Testimonial[];
