@@ -4,10 +4,16 @@ import { useEffect, useState } from "react";
 type ToastProps = {
   message: string;
   type?: "success" | "error";
+  position?: "top" | "bottom"; // <-- NOVO
   onClose: () => void;
 };
 
-export default function Toast({ message, type = "success", onClose }: ToastProps) {
+export default function Toast({
+  message,
+  type = "success",
+  position = "bottom",  // <-- padrão mantém tudo como era
+  onClose
+}: ToastProps) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
@@ -24,9 +30,17 @@ export default function Toast({ message, type = "success", onClose }: ToastProps
 
   return (
     <div
-      className={`fixed bottom-5 right-5 flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white text-sm transform transition-all duration-300 z-50
+      className={`
+        fixed z-[9999] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white text-sm
+        transform transition-all duration-300
         ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}
-        ${type === "success" ? "bg-green-700" : "bg-red-600"}`}
+
+        ${type === "success" ? "bg-green-700" : "bg-red-600"}
+
+        ${position === "top"
+          ? "top-6 left-1/2 -translate-x-1/2"        // ⬆ topo central
+          : "bottom-5 right-5"}                      // ⬇ posição padrão
+      `}
     >
       {type === "success" ? (
         <svg

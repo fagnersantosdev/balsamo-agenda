@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Toast from "@/app/components/toast";
+import Toast from "@/app/components/Toast";
 import { useRouter } from "next/navigation";
 
 export default function ChangePasswordForm() {

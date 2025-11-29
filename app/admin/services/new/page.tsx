@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Toast from "../../../components/toast";
+import Toast from "../../../components/Toast";
 
 export default function NewServicePage() {
   const router = useRouter();

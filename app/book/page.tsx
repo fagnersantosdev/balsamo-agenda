@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Toast from "../components/toast";
+import Toast from "../components/Toast";
 import EventPromo from "../components/EventPromo";
 import SuccessCard from "../components/SuccessCard";
 import { DayPicker } from "react-day-picker";

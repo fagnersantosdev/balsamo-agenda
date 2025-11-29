@@ -1,176 +1,223 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
-type Testimonial = {
+type AdminTestimonial = {
   id: number;
-  author: string;
+  author: string | null;
   message: string;
+  rating: number | null;
   createdAt: string;
+  approved: boolean;
 };
 
-export default function TestimonialsAdmin() {
-  const [author, setAuthor] = useState("");
-  const [message, setMessage] = useState("");
-  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
+type TabKey = "pending" | "approved" | "all";
 
-  // 🔹 Buscar avaliações ao carregar a página
-  async function loadTestimonials() {
+const titleMap: Record<TabKey, string> = {
+  pending: "Avaliações pendentes",
+  approved: "Avaliações aprovadas",
+  all: "Todas as avaliações",
+};
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleString("pt-BR", {
+    dateStyle: "short",
+    timeStyle: "short",
+  });
+}
+
+export default function AdminTestimonialsPage() {
+  const [activeTab, setActiveTab] = useState<TabKey>("pending");
+  const [items, setItems] = useState<AdminTestimonial[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  async function loadData(tab: TabKey) {
     setLoading(true);
     try {
-      const res = await fetch("/api/testimonials");
-      const data = await res.json();
-      setTestimonials(data);
-    } catch {
-      setToast({ message: "Erro ao carregar avaliações.", type: "error" });
+      const params = new URLSearchParams();
+      if (tab === "pending" || tab === "approved") {
+        params.set("status", tab);
+      }
+
+      const res = await fetch(
+        `/api/testimonials/admin?${params.toString()}`,
+        { cache: "no-store" }
+      );
+
+      if (!res.ok) {
+        throw new Error("Erro ao buscar depoimentos");
+      }
+
+      const data: AdminTestimonial[] = await res.json();
+      setItems(data);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   useEffect(() => {
-    loadTestimonials();
-  }, []);
+    loadData(activeTab);
+  }, [activeTab]);
 
-  // 🔹 Salvar nova avaliação
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (!author || !message) {
-      setToast({ message: "Preencha nome e avaliação!", type: "error" });
-      return;
-    }
-
+  async function handleApprove(id: number) {
     try {
-      const res = await fetch("/api/testimonials", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ author, message }),
+      const res = await fetch(`/api/testimonials/admin/${id}/approve`, {
+        method: "PUT",
       });
-
       if (!res.ok) throw new Error();
-
-      setAuthor("");
-      setMessage("");
-      setToast({ message: "Avaliação cadastrada com sucesso!", type: "success" });
-
-      loadTestimonials();
+      loadData(activeTab);
     } catch {
-      setToast({ message: "Erro ao salvar avaliação.", type: "error" });
+      alert("Não foi possível aprovar este depoimento.");
     }
   }
 
-  // 🔹 Excluir
-  async function deleteTestimonial(id: number) {
-    if (!confirm("Deseja realmente excluir esta avaliação?")) return;
-
+  async function handleDelete(id: number) {
+    if (!confirm("Tem certeza que deseja excluir este depoimento?")) return;
     try {
-      const res = await fetch(`/api/testimonials/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/testimonials/admin/${id}/delete`, {
+        method: "DELETE",
+      });
       if (!res.ok) throw new Error();
-
-      setToast({ message: "Avaliação removida com sucesso!", type: "success" });
-      loadTestimonials();
+      loadData(activeTab);
     } catch {
-      setToast({ message: "Erro ao excluir avaliação.", type: "error" });
+      alert("Não foi possível excluir este depoimento.");
     }
   }
 
-  return (
-    <div className="max-w-3xl mx-auto p-6">
+  function renderList(list: AdminTestimonial[]) {
+    if (loading) {
+      return (
+        <p className="text-sm text-[#1F3924]/70">
+          Carregando avaliações...
+        </p>
+      );
+    }
 
-      {/* Toast suave */}
-      {toast && (
-        <div
-          className={`
-            fixed top-5 right-5 px-4 py-2 rounded-lg shadow
-            text-white font-medium z-50 transition
-            ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}
-          `}
-        >
-          {toast.message}
-        </div>
-      )}
+    if (list.length === 0) {
+      return (
+        <p className="text-sm text-[#1F3924]/70">
+          Nenhuma avaliação encontrada.
+        </p>
+      );
+    }
 
-      <h1 className="text-3xl font-bold text-[#1F3924] mb-8 text-center">
-        ⭐ Gerenciar Avaliações
-      </h1>
-
-      {/* Formulário */}
-      <form
-        onSubmit={handleSubmit}
-        className="bg-[#F5F3EB] border border-[#8D6A93]/30 rounded-2xl p-6 shadow-md mb-10"
-      >
-        <h2 className="text-xl font-semibold text-[#1F3924] mb-4">
-          Cadastrar nova avaliação
-        </h2>
-
-        <input
-          type="text"
-          placeholder="Nome do cliente"
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          className="w-full p-3 rounded-lg border border-[#8D6A93]/30 mb-4 focus:ring focus:ring-[#8D6A93]/30"
-        />
-
-        <textarea
-          placeholder="Avaliação do cliente"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          className="w-full p-3 rounded-lg border border-[#8D6A93]/30 h-32 resize-none focus:ring focus:ring-[#8D6A93]/30"
-        />
-
-        <button
-          type="submit"
-          className="
-            mt-4 bg-[#8A4B2E] text-[#F5F3EB]
-            px-6 py-3 rounded-lg shadow-lg
-            hover:bg-[#1F3924] transition
-            font-medium
-          "
-        >
-          Salvar Avaliação
-        </button>
-      </form>
-
-      {/* Lista de avaliações */}
-      <h2 className="text-xl font-semibold text-[#1F3924] mb-4">
-        Avaliações cadastradas
-      </h2>
-
-      {loading ? (
-        <p className="text-[#1F3924]/70">Carregando avaliações...</p>
-      ) : testimonials.length === 0 ? (
-        <p className="text-[#1F3924]/70">Nenhuma avaliação cadastrada ainda.</p>
-      ) : (
-        <div className="space-y-4">
-          {testimonials.map((t) => (
-            <div
-              key={t.id}
-              className="
-                bg-white border border-[#8D6A93]/30 rounded-xl p-5 shadow-sm
-                flex justify-between items-start
-              "
-            >
+    return (
+      <ul className="space-y-3">
+        {list.map((t) => (
+          <li
+            key={t.id}
+            className="bg-white/80 rounded-xl border border-[#8D6A93]/20 px-4 py-3 flex flex-col gap-2"
+          >
+            <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-semibold text-[#1F3924]">{t.author}</p>
-                <p className="text-[#1F3924]/80 italic mt-1">{t.message}</p>
-                <p className="text-xs text-[#1F3924]/50 mt-2">
-                  {new Date(t.createdAt).toLocaleDateString("pt-BR")}
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-[#1F3924]">
+                    {t.author || "Anônimo"}
+                  </span>
+                  <Badge
+                    variant="outline"
+                    className={
+                      t.approved
+                        ? "border-emerald-500 text-emerald-700 bg-emerald-50"
+                        : "border-amber-500 text-amber-700 bg-amber-50"
+                    }
+                  >
+                    {t.approved ? "Aprovada" : "Pendente"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-[#1F3924]/60">
+                  {formatDate(t.createdAt)}
+                  {t.rating != null && ` • ⭐ ${t.rating}/5`}
                 </p>
               </div>
+            </div>
 
-              <button
-                onClick={() => deleteTestimonial(t.id)}
-                className="text-red-500 hover:text-red-700 text-sm ml-4"
+            <Separator className="my-1 bg-[#8D6A93]/10" />
+
+            <p className="text-sm text-[#1F3924]/90 whitespace-pre-line">
+              {t.message}
+            </p>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              {!t.approved && (
+                <Button
+                  size="sm"
+                  className="bg-[#1F3924] hover:bg-[#16301b] text-[#FFFEF9]"
+                  onClick={() => handleApprove(t.id)}
+                >
+                  Aprovar
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant="outline"
+                className="border-red-500 text-red-600 hover:bg-red-50"
+                onClick={() => handleDelete(t.id)}
               >
                 Excluir
-              </button>
+              </Button>
             </div>
-          ))}
-        </div>
-      )}
+          </li>
+        ))}
+      </ul>
+    );
+  }
 
-    </div>
+  // 🔹 Filtragem leve por aba (sem fazer 3 requisições)
+  const pendingItems = items.filter((t) => !t.approved);
+  const approvedItems = items.filter((t) => t.approved);
+
+  return (
+    <>
+      <header className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-[#1F3924]">
+            Avaliações dos clientes
+          </h1>
+          <p className="text-sm text-[#1F3924]/70">
+            Aprove, gerencie e organize os depoimentos exibidos no site.
+          </p>
+        </div>
+      </header>
+
+      <Card className="border-[#8D6A93]/20 bg-[#F5F3EB]/60">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-[#1F3924] text-base mb-3">
+            {titleMap[activeTab]}
+          </CardTitle>
+
+          <Tabs
+            value={activeTab}
+            onValueChange={(val) => setActiveTab(val as TabKey)}
+            className="mt-1"
+          >
+            <TabsList className="bg-white/80">
+              <TabsTrigger value="pending">Pendentes</TabsTrigger>
+              <TabsTrigger value="approved">Aprovadas</TabsTrigger>
+              <TabsTrigger value="all">Todas</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="pending" className="mt-4">
+              {renderList(pendingItems)}
+            </TabsContent>
+
+            <TabsContent value="approved" className="mt-4">
+              {renderList(approvedItems)}
+            </TabsContent>
+
+            <TabsContent value="all" className="mt-4">
+              {renderList(items)}
+            </TabsContent>
+          </Tabs>
+        </CardHeader>
+
+        <CardContent />
+      </Card>
+    </>
   );
 }

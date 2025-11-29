@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import Toast from "../../components/toast";
+import Toast from "../../components/Toast";
 
 type Availability = {
   id: number;

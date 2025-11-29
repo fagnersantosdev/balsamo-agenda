@@ -1,8 +1,17 @@
 "use client";
+
 import { MessageCircle } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export default function FloatingWhatsApp() {
-  const phone = "5524992640951"; // ✅ número da Bálsamo (com DDI 55)
+  const pathname = usePathname();
+
+  // ⛔ Não mostra o botão em nenhuma tela do admin
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
+
+  const phone = "5524992640951"; // número da Bálsamo (com DDI 55)
   const message = encodeURIComponent(
     "🌿 Olá! Gostaria de saber mais sobre os atendimentos da Bálsamo Massoterapia. 💆‍♀️✨"
   );

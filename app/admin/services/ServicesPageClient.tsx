@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import Toast from "../../components/toast";
+import Toast from "../../components/Toast";
 
 type Service = {
   id: number;

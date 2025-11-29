@@ -5,4 +5,5 @@ export interface Testimonial {
   rating: number | null;
   suggestion?: string | null;
   createdAt: string;
+  approvede: boolean;
 }
