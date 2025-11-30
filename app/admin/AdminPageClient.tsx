@@ -158,13 +158,13 @@ export default function AdminPageClient() {
     // ===================================================================
     // 🌿 Confirmação elegante
     // ===================================================================
-    window.__adminToast?.({
+    setToast({
       message: "🌿 PDF gerado com sucesso!",
       type: "success",
     });
   } catch (err) {
     console.error(err);
-    window.__adminToast?.({
+    setToast({
       message: "❌ Erro ao gerar o PDF.",
       type: "error",
     });
@@ -396,7 +396,7 @@ export default function AdminPageClient() {
           message={toast.message}
           type={toast.type}
           onClose={() => setToast(null)}
-          position="top"
+          // position="top"
         />
       )}
       </>
