@@ -23,7 +23,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   useEffect(() => {
     window.__adminToast = setToast;
   }, []);
-  
 
   return (
     <>
@@ -57,18 +56,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <main
           className="
             flex-1 
-            px-6
+            w-full
+            px-4 sm:px-6
             py-8 
-            max-w-6xl 
-            mx-auto 
-            pb-24
+            pb-32     /* 🔥 espaço maior para o menu fixo */
           "
         >
           {children}
         </main>
 
         {/* Menu mobile — fixo */}
-        <div className="lg:hidden">
+        <div
+          className="
+            lg:hidden
+            fixed
+            bottom-0
+            left-0
+            w-full
+            z-50
+            bg-[#FFFEF9]
+            border-t border-[#D6A77A]/40
+            shadow-[0_-4px_12px_-3px_rgba(0,0,0,0.12)]
+          "
+        >
           <AdminMobileNav />
         </div>
       </div>

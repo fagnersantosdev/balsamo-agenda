@@ -387,7 +387,7 @@ export default function AdminPageClient() {
       )}
 
       {/* Mobile Bottom Menu */}
-      <AdminMobileNav />
+      {/* <AdminMobileNav /> */}
 
     </main>
     {/* Toast */}
