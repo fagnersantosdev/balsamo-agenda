@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import EventPromo from "./components/EventPromo";
 import { Testimonial } from "@/app/types/Testimonial";
-import TestimonialSlider from "./components/TestimonialSlider";
+// import TestimonialSlider from "./components/TestimonialSlider";
 import BalsamoVideoPlayer from "./components/BalsamoVideoPlayer";
 import FeedbackSection from "./components/FeedbackSection";
 //import { useState } from "react";
@@ -185,20 +185,6 @@ export default async function HomePage() {
           </a>
         </div>
 
-        {/* Seção de depoimentos */}
-        <section className="max-w-6xl mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
-            O que nossos clientes dizem 🌟
-          </h2>
-
-          {testimonials.length === 0 ? (
-            <p className="text-center text-[#1F3924]/60">
-              Ainda não há depoimentos cadastrados.
-            </p>
-          ) : (
-            <TestimonialSlider testimonials={testimonials} />
-          )}
-        </section>
 
         {/* Aqui abaixo, sozinho */}
         <FeedbackSection testimonials={testimonials} />

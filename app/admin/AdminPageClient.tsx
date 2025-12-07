@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import BookingTable from "../components/BookingTable";
 import Toast from "../components/Toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import AdminMenu from "../components/AdminMenu";
-import AdminMobileNav from "../components/AdminMobileNav";
+// import AdminMobileNav from "../components/AdminMobileNav";
 
 // 🔹 Tipagem dos agendamentos
 type Booking = {
@@ -36,7 +36,7 @@ export default function AdminPageClient() {
   const [toast, setToast] =
     useState<{ message: string; type: "success" | "error" } | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  // const router = useRouter();
 
   // ===================================================================
   // 📄 FUNÇÃO: EXPORTAR PDF

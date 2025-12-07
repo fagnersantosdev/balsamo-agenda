@@ -32,11 +32,19 @@ export async function GET(req: Request) {
     if (status && status !== "ALL") {
       whereClause.status = status as BookingStatus;
 
-      if (status === "CONCLUIDO" || status === "CANCELADO") {
+      if (status === "CANCELADO") {
+        whereClause.status = "CANCELADO";
+      }
+      else if (status === "CONCLUIDO") {
+        whereClause.status = "CONCLUIDO";
         whereClause.startDateTime = {
           gte: threeMonthsAgo,
           lte: endOfToday,
         };
+      }
+
+      else {
+        whereClause.status = status as BookingStatus;
       }
     }
 
@@ -55,10 +63,19 @@ export async function GET(req: Request) {
       whereClause.endDateTime = { lt: startOfToday, gte: pastLimit };
     }
 
+    let orderBy: Prisma.BookingOrderByWithRelationInput = {
+      startDateTime: "asc",
+    };
+
+    // Cancelados e concluídos → mais recentes primeiro
+    if (status === "CANCELADO" || status === "CONCLUIDO") {
+      orderBy = { startDateTime: "desc" };
+    }
+
     const bookings = await prisma.booking.findMany({
       where: whereClause,
       include: { service: true },
-      orderBy: { startDateTime: "asc" },
+      orderBy,
     });
 
     return NextResponse.json(bookings);

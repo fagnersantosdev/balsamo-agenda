@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Oooh_Baby, Outfit } from "next/font/google";
 import BackgroundButterflies from "./components/BackgroundButterflies";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
+import SiteFooter from "./components/SiteFooter";
 
 const ooohBaby = Oooh_Baby({
   subsets: ["latin"],
@@ -148,6 +149,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* ╔══════════╗
            RODAPÉ PREMIUM
            ╚══════════╝ */}
+        <SiteFooter>
         <footer className="relative z-10 bg-[#8D6A93]/15 border-t border-[#D6A77A]/40 shadow-[0_-4px_18px_-5px_rgba(141,106,147,0.25)] mt-16">
 
           <div className="max-w-6xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
@@ -239,6 +241,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
 
         </footer>
+        </SiteFooter>
 
       </body>
     </html>

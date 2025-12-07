@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Testimonial } from "@/app/types/Testimonial";
-import FeedbackModal from "./FeedbackModal"; // <-- ESTA LINHA É A QUE FALTAVA
-// import TestimonialSlider from "./TestimonialSlider";  // Quando quiser ativar o slider
+import FeedbackModal from "./FeedbackModal";
+import TestimonialSlider from "./TestimonialSlider";
 
 interface Props {
   testimonials: Testimonial[];
@@ -14,34 +14,35 @@ export default function FeedbackSection({ testimonials }: Props) {
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
-      <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-6">
+      {/* Título */}
+      <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-10">
         O que nossos clientes dizem 🌟
       </h2>
 
-      {/* Botão para abrir o modal */}
-      <div className="text-center mb-10">
+      {/* Slider */}
+      {testimonials.length === 0 ? (
+        <p className="text-center text-[#1F3924]/60 mb-10">
+          Ainda não há depoimentos cadastrados.
+        </p>
+      ) : (
+        <div className="mb-12">
+          <TestimonialSlider testimonials={testimonials} />
+        </div>
+      )}
+
+      {/* Botão — agora abaixo do slider */}
+      <div className="text-center">
         <button
           onClick={() => setOpenFeedback(true)}
           className="
-            px-5 py-2 bg-[#8D6A93] text-[#FFFEF9]
-            rounded-lg shadow hover:bg-[#1F3924]
-            transition
+            px-6 py-3 bg-[#8D6A93] text-[#FFFEF9]
+            rounded-lg shadow-md hover:bg-[#1F3924]
+            transition font-medium
           "
         >
           ➕ Deixar minha avaliação
         </button>
       </div>
-
-      {/* Slider de depoimentos */}
-      {testimonials.length === 0 ? (
-        <p className="text-center text-[#1F3924]/60">
-          Ainda não há depoimentos cadastrados.
-        </p>
-      ) : (
-        <div className="mt-8">
-          {/* <TestimonialSlider testimonials={testimonials} /> */}
-        </div>
-      )}
 
       {/* Modal */}
       <FeedbackModal

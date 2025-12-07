@@ -199,6 +199,51 @@ h1, h2, h3 {
   }
 }
 
+/* ===========================
+   Calendário Bálsamo
+   =========================== */
+.balsamo-calendar .rdp-month {
+  padding: 0;
+}
+
+/* Centraliza o título do mês */
+.balsamo-calendar .rdp-caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;  /* 👈 centraliza o mês */
+  position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.balsamo-calendar .rdp-caption_label {
+  font-weight: 600;
+}
+
+/* Setas de navegação na direita */
+.balsamo-calendar .rdp-nav {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+}
+
+.balsamo-calendar .rdp-nav_button {
+  color: #8D6A93;           /* cor da marca */
+  transform: scale(0.9);
+}
+
+/* Ajustes de tabela e dias para caber no mobile */
+.balsamo-calendar .rdp-head_cell {
+  font-size: 0.75rem;
+}
+
+.balsamo-calendar .rdp-day {
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+  padding: 0;
+}
+
 
 
 

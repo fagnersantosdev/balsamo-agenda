@@ -13,12 +13,14 @@ import { ptBR } from "date-fns/locale";
    TIPOS
 ============================================================ */
 type Service = { id: number; name: string; durationMin: number };
+
 type Availability = {
-  dayOfWeek: number; // 1=domingo ... 7=sábado
+  dayOfWeek: number; // 0=domingo ... 6=sábado (usando js getDay)
   openHour: number;
   closeHour: number;
   active: boolean;
 };
+
 type Booking = {
   id: number;
   startDateTime: string;
@@ -35,20 +37,12 @@ type SuccessInfo = {
 };
 
 /* ============================================================
-   MAPEAMENTO PARA COMBINAR COM A TABELA availability
+   MAPEAMENTO PARA availability (aqui usamos o próprio getDay)
 ============================================================ */
 function mapDay(jsDay: number): number {
-  // const map: Record<number, number> = {
-  //   0: 1, //domingo
-  //   1: 2, //...
-  //   2: 3, //...
-  //   3: 4, //...
-  //   4: 5, //...
-  //   5: 6, //...
-  //   6: 7, //sabado
-  // };
+  // Se no banco o dayOfWeek está 0–6 (domingo–sábado),
+  // basta retornar o jsDay direto.
   return jsDay;
-  //return map[jsDay];
 }
 
 /* ============================================================
@@ -79,8 +73,15 @@ export default function BookPage() {
      CARREGA SERVIÇOS + DISPONIBILIDADE
   ============================================================ */
   useEffect(() => {
-    fetch("/api/services").then((r) => r.json()).then(setServices);
-    fetch("/api/availability").then((r) => r.json()).then(setAvailability);
+    fetch("/api/services")
+      .then((r) => r.json())
+      .then(setServices)
+      .catch(() => {});
+
+    fetch("/api/availability")
+      .then((r) => r.json())
+      .then(setAvailability)
+      .catch(() => {});
   }, []);
 
   /* ============================================================
@@ -95,19 +96,18 @@ export default function BookPage() {
     const [year, month, day] = dateString.split("-").map(Number);
     const selectedDate = new Date(year, month - 1, day, 0, 0, 0);
 
-    const now = new Date();
-    now.setSeconds(0, 0);
-
-    // Buscar agendamentos
+    // Buscar TODOS os agendamentos
     const res = await fetch("/api/bookings");
     const allBookings: Booking[] = res.ok ? await res.json() : [];
 
+    // Apenas do dia selecionado e que NÃO foram cancelados
     const bookingsDoDia = allBookings.filter((b) => {
+      if (b.status === "CANCELADO") return false;
       const start = new Date(b.startDateTime);
       return start.toDateString() === selectedDate.toDateString();
     });
 
-    // Disponibilidade do dia (corrigida)
+    // Disponibilidade do dia
     const dbDay = mapDay(selectedDate.getDay());
     const dayAvail = availability.find((a) => a.dayOfWeek === dbDay);
 
@@ -123,13 +123,13 @@ export default function BookPage() {
       const slot = new Date(selectedDate);
       slot.setHours(hour, 0, 0, 0);
 
-      // Só bloqueia horários passados se o usuário selecionar o DIA REAL de hoje
-    const todayReal = new Date();
-    todayReal.setHours(0,0,0,0);
+      // Se for o dia real de hoje, não mostrar horários já passados
+      const todayReal = new Date();
+      todayReal.setHours(0, 0, 0, 0);
 
-    if (selectedDate.toDateString() === todayReal.toDateString()) {
-      if (slot.getTime() <= new Date().getTime()) continue;
-    }
+      if (selectedDate.toDateString() === todayReal.toDateString()) {
+        if (slot.getTime() <= Date.now()) continue;
+      }
 
       const conflict = bookingsDoDia.some((b) => {
         const start = new Date(b.startDateTime);
@@ -186,6 +186,8 @@ export default function BookPage() {
       phone: booking.clientPhone,
     });
 
+    // Limpa horários e formulário
+    setAvailableTimes([]);
     if (formEl) formEl.reset();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -195,66 +197,113 @@ export default function BookPage() {
   ============================================================ */
   return (
     <>
-      <main className="relative max-w-lg mx-auto bg-[#F5F3EB] p-8 rounded-3xl shadow-xl border border-purple-100">
+      {/* Fundo da página já vem do RootLayout; aqui usamos um card central */}
+      <main className="relative max-w-lg mx-auto bg-[#F5F3EB] p-6 sm:p-10 rounded-3xl shadow-xl border border-[#D6A77A]/40 mt-8 mb-16">
 
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-[#1F3924] mb-4">
-          <Image src="/borboleta.png" width={50} height={50} alt="Borboleta" />
-          Agendar Atendimento
-        </h1>
+        {/* Título centralizado */}
+        <div className="flex flex-col items-center text-center mb-8">
+          <Image
+            src="/borboleta.png"
+            width={50}
+            height={50}
+            alt="Borboleta"
+            className="opacity-90 mx-auto"
+          />
+          <h1 className="text-2xl md:text-3xl font-bold text-[#1F3924] mt-3 leading-tight">
+            Agendar <br /> Atendimento
+          </h1>
+        </div>
 
+        {/* Formulário */}
         <form onSubmit={handleSubmit} className="space-y-5">
 
-          <input name="clientName" required placeholder="Nome completo" className="w-full p-2 border rounded" />
-          <input name="clientPhone" required placeholder="(24) 99999-9999" className="w-full p-2 border rounded" />
-          <input name="clientEmail" placeholder="E-mail (opcional)" className="w-full p-2 border rounded" />
+          <input
+            name="clientName"
+            required
+            placeholder="Nome completo"
+            className="w-full p-3 border border-[#8D6A93]/30 rounded-xl bg-white/80 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+          />
+
+          <input
+            name="clientPhone"
+            required
+            placeholder="(24) 99999-9999"
+            className="w-full p-3 border border-[#8D6A93]/30 rounded-xl bg-white/80 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+          />
+
+          <input
+            name="clientEmail"
+            placeholder="E-mail (opcional)"
+            className="w-full p-3 border border-[#8D6A93]/30 rounded-xl bg-white/80 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+          />
 
           {/* Serviço */}
           <select
             name="serviceId"
             required
-            className="w-full p-2 border rounded"
+            className="w-full p-3 border border-[#8D6A93]/30 rounded-xl bg-white/80 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
             onChange={(e) => {
               if (!selectedDate) return;
-              loadAvailableTimes(selectedDate.toISOString().split("T")[0], Number(e.target.value));
+              loadAvailableTimes(
+                selectedDate.toISOString().split("T")[0],
+                Number(e.target.value)
+              );
             }}
           >
-            <option value="">Selecione um serviço</option>
+            <option value="">Selecione um serviço...</option>
             {services.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
             ))}
           </select>
 
-          {/* Calendário */}
-          <DayPicker
-            mode="single"
-            selected={selectedDate ?? undefined}
-            locale={ptBR}
-            weekStartsOn={1}
-            disabled={(d) => {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
+          {/* Calendário ajustado sem scroll horizontal */}
+          <div
+            className="
+              bg-white/70 p-2 rounded-xl border border-[#8D6A93]/20 
+              shadow-inner backdrop-blur
+              max-w-full
+              overflow-hidden
+            "
+          >
+            <div className="mx-auto">
+              <DayPicker
+              mode="single"
+              selected={selectedDate ?? undefined}
+              locale={ptBR}
+              weekStartsOn={1}
+              className="text-[#1F3924] balsamo-calendar"
+              disabled={(d) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return d < today || d.getDay() === 0 || d.getDay() === 6;
+              }}
+              onSelect={(date) => {
+                if (!date) return;
 
-              const dbDay = mapDay(d.getDay());
-              return d < today || d.getDay() === 0 || d.getDay() === 6; // bloqueia domingo e sábado
-            }}
-            onSelect={(date) => {
-              if (!date) return;
+                setSelectedDate(date);
 
-              setSelectedDate(date);
+                const serviceId = Number(
+                  (document.querySelector("[name='serviceId']") as HTMLSelectElement)
+                    ?.value
+                );
 
-              const serviceId = Number(
-                (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
-              );
+                if (serviceId) {
+                  loadAvailableTimes(date.toISOString().split("T")[0], serviceId);
+                }
+              }}
+            />
+            </div>
+          </div>
 
-              if (serviceId) {
-                loadAvailableTimes(date.toISOString().split("T")[0], serviceId);
-              }
-            }}
-          />
-
-          {/* Horários */}
+          {/* Horários disponíveis */}
           {availableTimes.length > 0 ? (
-            <select name="startDateTime" required className="w-full p-2 border rounded">
+            <select
+              name="startDateTime"
+              required
+              className="w-full p-3 border border-[#8D6A93]/30 rounded-xl bg-white/80 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+            >
               <option value="">Selecione um horário</option>
               {availableTimes.map((t) => (
                 <option key={t} value={t}>
@@ -266,24 +315,44 @@ export default function BookPage() {
               ))}
             </select>
           ) : (
-            <p className="text-sm text-[#8A4B2E] italic">
+            <p className="text-sm text-[#8A4B2E] italic px-1">
               Escolha um serviço e uma data para ver os horários disponíveis.
             </p>
           )}
 
-          <button className="w-full bg-[#1F3924] text-purple-50 font-medium px-4 py-2 rounded-lg">
+          {/* Botão */}
+          <button
+            className="
+              w-full bg-[#1F3924] text-[#FFFEF9] 
+              font-medium px-4 py-3 
+              rounded-xl text-lg shadow-md
+              hover:bg-[#8D6A93] transition-colors
+            "
+          >
             Confirmar Agendamento
           </button>
         </form>
 
+        {/* Card de sucesso */}
         {successData && (
-          <SuccessCard show onClose={() => setSuccessData(null)} {...successData} />
+          <SuccessCard
+            show
+            onClose={() => setSuccessData(null)}
+            {...successData}
+          />
         )}
 
-        {msg && <Toast message={msg} type={msgType || "error"} onClose={() => setMsg(null)} />}
-
+        {/* Toast de erro/alerta */}
+        {msg && (
+          <Toast
+            message={msg}
+            type={msgType || "error"}
+            onClose={() => setMsg(null)}
+          />
+        )}
       </main>
 
+      {/* Seção de promoções / eventos abaixo do card */}
       <EventPromo />
     </>
   );
