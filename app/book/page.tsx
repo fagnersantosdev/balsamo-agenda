@@ -273,7 +273,7 @@ export default function BookPage() {
               selected={selectedDate ?? undefined}
               locale={ptBR}
               weekStartsOn={1}
-              className="text-[#1F3924] balsamo-calendar"
+              className="balsamo-calendar"
               disabled={(d) => {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
