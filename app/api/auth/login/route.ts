@@ -21,7 +21,7 @@ export async function POST(req: Request) {
 
     // 🔑 Cria token JWT
     const token = jwt.sign(
-      { id: admin.id, email: admin.email },
+      { id: admin.id, email: admin.email, role:"admin" },
       process.env.JWT_SECRET!,
       { expiresIn: "1d" }
     );
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const response = NextResponse.json({ ok: true, message: "Login realizado com sucesso!" });
     // 🍪 Define cookie seguro e compatível com desenvolvimento e produção
     response.cookies.set({
-      name: "token",
+      name: "admin_token",
       value: token,
       httpOnly: true,
       sameSite: "lax", // 🔹 permite redirecionamento e é mais estável que 'strict'

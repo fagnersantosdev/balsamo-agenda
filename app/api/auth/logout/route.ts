@@ -9,6 +9,7 @@ export async function POST() {
     path: "/",
     maxAge: 0,              // ✅ expira agora
     sameSite: "strict",
+    httpOnly: true,
   });
   return res;
 }
