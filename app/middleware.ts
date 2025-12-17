@@ -14,7 +14,7 @@ export async function middleware(req: NextRequest) {
 
   if (!token) {
     console.warn("🚫 Acesso sem token");
-    return NextResponse.redirect(new URL("/admin/login", req.url));
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
   try {
@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   } catch (err) {
     console.error("⚠️ Token inválido ou expirado:", err);
-    return NextResponse.redirect(new URL("/admin/login", req.url));
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 }
 
