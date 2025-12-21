@@ -1,11 +1,10 @@
 generator client {
   provider = "prisma-client-js"
-  previewFeatures =["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "sqlite"
-  url      = env("DATABASE_URL")
+  url      = "file:./dev.db"
 }
 
 model Service {
@@ -13,19 +12,19 @@ model Service {
   name        String
   price       Float     @default(0)
   durationMin Int
-  details      Json?     // ✅ novo campo para lista de detalhes
-  active       Boolean   @default(true) // ✅ campo para marcar se o serviço está ativo
+  details     Json?
+  active      Boolean   @default(true)
   bookings    Booking[]
 }
 
 model Availability {
-  id          Int      @id @default(autoincrement())
-  dayOfWeek   Int      @unique
-  openHour    Int
-  closeHour   Int
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        Int      @id @default(autoincrement())
+  dayOfWeek Int      @unique
+  openHour  Int
+  closeHour Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum BookingStatus {
@@ -35,23 +34,23 @@ enum BookingStatus {
 }
 
 model Booking {
-  id             Int       @id @default(autoincrement())
-  clientName     String
-  clientPhone    String
-  clientEmail    String?
-  startDateTime  DateTime
-  endDateTime    DateTime
-  serviceId      Int
-  service        Service   @relation(fields: [serviceId], references: [id])
-  status         BookingStatus   @default(PENDENTE)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @default(now()) @updatedAt 
+  id            Int           @id @default(autoincrement())
+  clientName    String
+  clientPhone  String
+  clientEmail  String?
+  startDateTime DateTime
+  endDateTime   DateTime
+  serviceId     Int
+  service       Service       @relation(fields: [serviceId], references: [id])
+  status        BookingStatus @default(PENDENTE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 }
 
 model Admin {
   id        Int      @id @default(autoincrement())
   email     String   @unique
-  password  String   // será armazenado com bcrypt
+  password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -60,9 +59,8 @@ model Testimonial {
   id        Int      @id @default(autoincrement())
   author    String?
   message   String
-  rating    Int @default(5)
+  rating    Int      @default(5)
   photoUrl  String?
   createdAt DateTime @default(now())
-  approved  Boolean @default(false)
+  approved  Boolean  @default(false)
 }
-

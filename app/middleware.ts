@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const token = req.cookies.get("token")?.value;
+  const token = req.cookies.get("admin_token")?.value;
 
   if (!token) {
     console.warn("🚫 Acesso sem token");
