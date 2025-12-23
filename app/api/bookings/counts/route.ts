@@ -1,7 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
+
 
 export async function GET() {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
     // 🕒 Ajuste para fuso horário do Brasil (GMT-3)
     const nowUTC = new Date();

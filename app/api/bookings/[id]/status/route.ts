@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
 
   console.log("🧩 Atualizando status do agendamento:", params.id);
 
@@ -31,6 +35,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
 // ✅ Obter agendamento por ID
 export async function GET(req: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
     const booking = await prisma.booking.findUnique({
       where: { id: Number(params.id) },
@@ -50,6 +57,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
 // ✅ Atualizar agendamento (PUT)
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
     const body = await req.json();
     const { clientName, clientPhone, clientEmail, startDateTime, serviceId } = body;
@@ -81,6 +91,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 
 // ✅ Deletar agendamento
 export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
     await prisma.booking.delete({
       where: { id: Number(params.id) },

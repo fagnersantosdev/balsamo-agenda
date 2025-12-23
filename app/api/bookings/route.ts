@@ -1,11 +1,17 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import type { Prisma, BookingStatus } from "@prisma/client";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
+
 
 /* ============================================================
    GET — Buscar agendamentos com filtros
 ============================================================ */
 export async function GET(req: Request) {
+  // 🔒 PROTEÇÃO ADMIN
+  const authError = await requireAdminApiAuth();
+  if (authError) return authError;
+
   const { searchParams } = new URL(req.url);
   const filter = searchParams.get("filter");
   const status = searchParams.get("status");
