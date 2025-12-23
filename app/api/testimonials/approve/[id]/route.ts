@@ -1,7 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  _: Request,
+  { params }: { params: { id: string } }
+) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
     const id = Number(params.id);
 

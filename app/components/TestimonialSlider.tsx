@@ -92,10 +92,13 @@ export default function TestimonialSlider({ testimonials }: Props) {
               "
             >
               <p className="text-[#1F3924]/90 italic mb-4 leading-relaxed">
-                {t.message.replace(/^\$/, "")}
+                {t.message}
               </p>
 
-              <p className="text-[#8A4B2E] font-semibold">— {t.author}</p>
+              <p className="text-[#8A4B2E] font-semibold">
+                — {t.author || "Anônimo"}
+              </p>
+
 
               <p className="text-sm text-[#1F3924]/50 mt-1">
                 {formatRelativeDate(t.createdAt)}
