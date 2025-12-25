@@ -215,7 +215,7 @@ export default function BookPage() {
         </div>
 
         {/* Formulário */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
 
           <input
             name="clientName"
@@ -261,7 +261,7 @@ export default function BookPage() {
           {/* Calendário ajustado sem scroll horizontal */}
           <div
             className="
-              bg-white/70 p-2 rounded-xl border border-[#8D6A93]/20 
+              bg-white/70 p-2 rounded-2xl border border-[#8D6A93]/20 
               shadow-inner backdrop-blur
               max-w-full
               overflow-hidden
@@ -315,7 +315,7 @@ export default function BookPage() {
               ))}
             </select>
           ) : (
-            <p className="text-sm text-[#8A4B2E] italic px-1">
+            <p className="text-sm text-[#8A4B2E] italic px-1 py-2 bg-[#F5F3EB]/70 rounded-lg">
               Escolha um serviço e uma data para ver os horários disponíveis.
             </p>
           )}
@@ -326,7 +326,7 @@ export default function BookPage() {
               w-full bg-[#1F3924] text-[#FFFEF9] 
               font-medium px-4 py-3 
               rounded-xl text-lg shadow-md
-              hover:bg-[#8D6A93] transition-colors
+              hover:bg-[#8D6A93] transition-all houver:shadow-lg
             "
           >
             Confirmar Agendamento

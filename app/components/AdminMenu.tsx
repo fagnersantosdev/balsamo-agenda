@@ -33,7 +33,15 @@ export default function AdminMenu() {
       {/* Botão hambúrguer — só DESKTOP */}
       <button
         onClick={() => setOpen(!open)}
-        className="p-2 border border-[#8D6A93]/40 rounded-lg hover:bg-[#F5F3EB] transition"
+        className="
+          p-2.5
+          rounded-xl
+          border border-[#8D6A93]/40
+          bg-white
+          shadow-sm
+          hover:shadow-md
+          hover:bg-[#F5F3EB]
+          transition"
         aria-label="Abrir menu administrativo"
       >
         <svg
@@ -50,36 +58,42 @@ export default function AdminMenu() {
 
       {/* Dropdown — só DESKTOP */}
       <div
-        className={`absolute right-0 mt-2 w-56 bg-white border border-[#8D6A93]/30 rounded-xl shadow-lg z-50 transform transition-all duration-200 origin-top-right
-          ${open ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}
-        `}
-      >
+        className={`
+        absolute right-0 mt-3 w-56
+        bg-white
+        border border-[#8D6A93]/20
+        rounded-xl
+        shadow-[0_12px_30px_-10px_rgba(141,106,147,0.35)]
+        z-50
+        transform transition-all duration-200 origin-top-right
+        ${open ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}
+      `}>
         {open && (
           <>
             <button
               onClick={triggerPDF}
-              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]"
+              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]/70 transition"
             >
               📄 Exportar PDF
             </button>
 
             <button
               onClick={() => go("/admin/services")}
-              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]"
+              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]/70 transition"
             >
               🛠 Gerenciar Serviços
             </button>
 
             <button
               onClick={() => go("/admin/testimonials")}
-              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]"
+              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]/70 transition"
             >
               ⭐ Gerenciar Avaliações
             </button>
 
             <button
               onClick={() => go("/admin/change-password")}
-              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]"
+              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]/70 transition"
             >
               🔒 Alterar Senha
             </button>
@@ -89,7 +103,7 @@ export default function AdminMenu() {
                 await fetch("/api/auth/logout", { method: "POST" });
                 window.location.href = "/login";
               }}
-              className="block w-full text-left px-4 py-2 text-red-600 hover:bg-[#FEE2E2]"
+              className="block w-full text-left px-4 py-2 text-red-600 hover:bg-[#FEE2E2] rounded-md"
             >
               🚪 Sair
             </button>

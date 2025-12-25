@@ -77,7 +77,15 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               placeholder="Seu nome (opcional)"
               value={author}
               onChange={(e) => setAuthor(e.target.value)}
-              className="w-full px-4 py-2 rounded-lg border border-[#8D6A93]/30 outline-none bg-white"
+              className="
+                w-full px-4 py-2
+                rounded-xl
+                border border-[#8D6A93]/30
+                bg-white
+                outline-none
+                focus:ring-2 focus:ring-[#8D6A93]/40
+                transition
+              "
             />
 
             {/* Mensagem */}
@@ -86,7 +94,15 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               required
-              className="w-full px-4 py-2 rounded-lg border border-[#8D6A93]/30 outline-none bg-white h-28 resize-none"
+              className="
+                w-full px-4 py-2
+                rounded-xl
+                border border-[#8D6A93]/30
+                bg-white
+                outline-none
+                focus:ring-2 focus:ring-[#8D6A93]/40
+                transition
+              "
             />
 
             {/* Botão enviar */}
@@ -94,8 +110,16 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
               type="submit"
               disabled={loading}
               className="
-                w-full bg-[#8A4B2E] text-[#F5F3EB] py-3 rounded-lg
-                hover:bg-[#1F3924] transition disabled:opacity-50
+                w-full py-3
+                rounded-xl
+                bg-[#8A4B2E]
+                text-[#F5F3EB]
+                font-semibold
+                shadow-sm
+                hover:bg-[#1F3924]
+                hover:shadow-md
+                transition-all
+                disabled:opacity-50
               "
             >
               {loading ? "Enviando..." : "Enviar avaliação"}
@@ -104,14 +128,21 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           </form>
         )}
 
-        {/* Botão fechar */}
+        {/* Botão cancelar */}
         <button
-          onClick={onClose}
-          className="mt-4 w-full text-sm text-[#1F3924]/70 underline hover:text-[#1F3924]"
-        >
-          Cancelar
-        </button>
-
+        onClick={onClose}
+        className="
+          mt-4 w-full
+          py-2
+          rounded-xl
+          text-sm
+          text-[#1F3924]/70
+          hover:bg-[#EDE9E2]
+          transition
+        "
+      >
+        Cancelar
+      </button>
       </div>
     </div>
   );

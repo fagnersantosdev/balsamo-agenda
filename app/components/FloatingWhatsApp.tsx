@@ -6,12 +6,12 @@ import { usePathname } from "next/navigation";
 export default function FloatingWhatsApp() {
   const pathname = usePathname();
 
-  // ⛔ Não mostra o botão em nenhuma tela do admin
+  // ⛔ Não exibe no admin
   if (pathname.startsWith("/admin")) {
     return null;
   }
 
-  const phone = "5524992640951"; // número da Bálsamo (com DDI 55)
+  const phone = "5524992640951";
   const message = encodeURIComponent(
     "🌿 Olá! Gostaria de saber mais sobre os atendimentos da Bálsamo Massoterapia. 💆‍♀️✨"
   );
@@ -23,8 +23,27 @@ export default function FloatingWhatsApp() {
       href={link}
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-5 right-5 z-50 bg-green-600 hover:bg-green-700 text-white p-4 rounded-full shadow-lg transition-transform transform hover:scale-110 animate-pulse-slow"
-      aria-label="WhatsApp"
+      aria-label="Falar com a Bálsamo no WhatsApp"
+      className="
+        fixed
+        bottom-6 right-6
+        sm:bottom-8 sm:right-8
+        z-50
+        flex items-center justify-center
+        bg-green-600
+        text-white
+        p-4
+        rounded-full
+        shadow-md
+        hover:bg-green-700
+        hover:shadow-lg
+        hover:scale-105
+        focus:outline-none
+        focus:ring-2
+        focus:ring-green-500
+        focus:ring-offset-2
+        transition
+      "
     >
       <MessageCircle className="w-7 h-7" />
     </a>

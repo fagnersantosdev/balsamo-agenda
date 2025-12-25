@@ -64,9 +64,15 @@ export default function AdminSidebar() {
       {/* Sair */}
       <button
         onClick={async () => {
-          await fetch("/api/auth/logout", { method: "POST" });
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.__adminToast?.({
+          message: "Sessão encerrada com sucesso",
+          type: "success",
+        });
+        setTimeout(() => {
           window.location.href = "/login";
-        }}
+        }, 800);
+      }}
         className="
           mt-10 mb-2 text-sm text-red-600
           underline underline-offset-2

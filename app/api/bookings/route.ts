@@ -95,69 +95,77 @@ export async function GET(req: Request) {
 }
 
 /* ============================================================
-   POST — Criar agendamento (SEM UTC, horário local)
+   POST — Criar agendamento (cliente, sem auth)
 ============================================================ */
 export async function POST(req: Request) {
   try {
     const data = await req.json();
 
     if (!data.clientName || !data.clientPhone || !data.serviceId || !data.startDateTime) {
-      return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
-    }
-
-    /* -------- Serviço -------- */
-    const service = await prisma.service.findUnique({
-      where: { id: Number(data.serviceId) },
-    });
-
-    if (!service) {
-      return NextResponse.json({ error: "Serviço não encontrado." }, { status: 404 });
-    }
-
-    /* -------- Criar horário local -------- */
-    const startLocal = new Date(data.startDateTime);
-    startLocal.setSeconds(0, 0);
-
-    const endLocal = new Date(startLocal.getTime() + (service.durationMin + 15) * 60000);
-    endLocal.setSeconds(0, 0);
-
-    /* ============================================================
-       MAPEAR DIA DA SEMANA — DOM=1, SEG=2, ..., SÁB=7
-    ============================================================ */
-    const jsDay = startLocal.getDay(); // 0-6 (0=domingo)
-    const dayOfWeek = jsDay === 0 ? 1 : jsDay + 1;
-
-    /* -------- Proibir sábado (7) e domingo (1) -------- */
-    if (dayOfWeek === 1 || dayOfWeek === 7) {
       return NextResponse.json(
-        { error: "❌ Não é possível agendar aos fins de semana." },
+        { error: "Dados incompletos." },
         { status: 400 }
       );
     }
 
-    /* -------- Disponibilidade -------- */
+    // 🔍 Serviço
+    const service = await prisma.service.findUnique({
+      where: { id: Number(data.serviceId) },
+    });
+
+    if (!service || !service.active) {
+      return NextResponse.json(
+        { error: "Serviço inválido ou inativo." },
+        { status: 404 }
+      );
+    }
+
+    // 🕒 Horário local
+    const startLocal = new Date(data.startDateTime);
+    startLocal.setSeconds(0, 0);
+
+    const endLocal = new Date(
+      startLocal.getTime() + (service.durationMin + 15) * 60000
+    );
+    endLocal.setSeconds(0, 0);
+
+    // 📅 Dia da semana (DOM=1 ... SAB=7)
+    const jsDay = startLocal.getDay();
+    const dayOfWeek = jsDay === 0 ? 1 : jsDay + 1;
+
+    // 🚫 Fim de semana
+    if (dayOfWeek === 1 || dayOfWeek === 7) {
+      return NextResponse.json(
+        { error: "Não é possível agendar aos fins de semana." },
+        { status: 400 }
+      );
+    }
+
+    // ⏰ Disponibilidade
     const availability = await prisma.availability.findUnique({
       where: { dayOfWeek },
     });
 
     if (!availability || !availability.active) {
       return NextResponse.json(
-        { error: "❌ Este dia não está disponível para agendamento." },
+        { error: "Este dia não está disponível para agendamento." },
         { status: 400 }
       );
     }
 
-    /* -------- Verificar horário dentro do expediente -------- */
     const startHour = startLocal.getHours() + startLocal.getMinutes() / 60;
 
-    if (startHour < availability.openHour || startHour >= availability.closeHour) {
+    if (
+      startHour < availability.openHour ||
+      startHour >= availability.closeHour
+    ) {
       return NextResponse.json(
-        { error: "⏳ Horário fora do expediente." },
+        { error: "Horário fora do expediente." },
         { status: 400 }
       );
     }
 
-    /* -------- Conflito de horário real -------- */
+    // 🔁 Conflito real
     const conflict = await prisma.booking.findFirst({
       where: {
         status: { notIn: ["CANCELADO", "CONCLUIDO"] },
@@ -168,12 +176,12 @@ export async function POST(req: Request) {
 
     if (conflict) {
       return NextResponse.json(
-        { error: "❌ Este horário já está reservado." },
+        { error: "Este horário já está reservado." },
         { status: 409 }
       );
     }
 
-    /* -------- Criar agendamento -------- */
+    // ✅ Criar agendamento
     const booking = await prisma.booking.create({
       data: {
         clientName: data.clientName,
@@ -191,7 +199,6 @@ export async function POST(req: Request) {
       { ok: true, message: "Agendamento criado com sucesso!", booking },
       { status: 201 }
     );
-
   } catch (error) {
     console.error("❌ Erro ao criar agendamento:", error);
     return NextResponse.json(

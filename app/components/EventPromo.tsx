@@ -17,11 +17,11 @@ export default function EventPromo() {
     >
 
       {/* Elemento decorativo suave */}
-      <div className="absolute -top-3 -right-3 text-[#8D6A93] opacity-10 text-6xl select-none">
+      <div className="absolute -top-4 -right-4 text-[#8D6A93] opacity-5 text-7xl pointer-events-none select-none">
         🌿
       </div>
 
-      <h2 className="text-2xl md:text-3xl font-bold text-[#1F3924] mb-4">
+      <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-[#1F3924] mb-4">
         ✨ Transforme seu evento com bem-estar e cuidado
       </h2>
 
@@ -38,14 +38,16 @@ export default function EventPromo() {
         href="https://wa.me/5524992640951?text=Olá! Gostaria de solicitar um orçamento para levar a Bálsamo Massoterapia ao meu evento."
         target="_blank"
         rel="noopener noreferrer"
+        aria-label="Solicitar orçamento via WhatsApp"
         className="
           inline-flex items-center gap-2
           bg-[#8D6A93] text-[#FFFEF9]
           px-8 py-3 rounded-xl
-          shadow-md hover:shadow-lg
+          shadow-md
           hover:bg-[#7A577F]
-          hover:scale-[1.03]
-          active:scale-[0.97]
+          hover:shadow-lg
+          hover:translate-y-[-1px]
+          active:translate-y-[0px]
           transition-all duration-300
           font-medium
         "

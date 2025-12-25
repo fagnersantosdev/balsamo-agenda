@@ -149,7 +149,7 @@ export default async function HomePage() {
                   bg-[#8A4B2E]
                   text-[#F5F3EB]
                   px-6 py-3
-                  rounded-lg
+                  rounded-xl
                   shadow-md
                   hover:bg-[#1F3924]
                   transition-colors
@@ -308,7 +308,7 @@ export default async function HomePage() {
               href="/book"
               className="
                 inline-block bg-[#8A4B2E] text-[#F5F3EB]
-                px-8 py-4 rounded-lg shadow
+                px-8 py-4 rounded-xl shadow
                 hover:bg-[#1F3924] transition-colors
                 text-lg font-medium
               "

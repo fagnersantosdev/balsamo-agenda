@@ -49,18 +49,23 @@ export default function BookingTable({
     <div className="w-full overflow-x-auto max-w-full">
       <table
         className="
-          w-full 
-          min-w-[650px] 
-          border border-[#8D6A93]/30 
-          bg-white 
-          rounded-lg 
-          shadow-md 
-          text-sm 
-          sm:text-base
+          w-full
+          min-w-[650px]
+          bg-white
+          border border-[#8D6A93]/20
+          rounded-xl
+          shadow-sm
+          transition
+          hover:shadow-md
+          overflow-hidden
         "
       >
-        <thead className="bg-[#F5F3EB] text-[#1F3924]">
-          <tr>
+        <thead className="bg-[#F5F3EB] text-[#1F3924] border-b border-[#8D6A93]/20">
+          <tr
+            className="
+              border-t border-[#8D6A93]/10 hover:bg-[#FAF8F4] transition-colors
+            "
+          >
             <th className="py-4 px-4 text-left w-[180px]">Cliente</th>
             <th className="py-4 px-4 text-left hidden sm:table-cell w-[140px]">
               Serviço
@@ -126,7 +131,7 @@ export default function BookingTable({
                 {/* Status */}
                 <td className="py-4 px-4 text-center whitespace-nowrap w-[100px] sm:py-5">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs sm:text-sm font-semibold ${
+                    className={`inline-block px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
                       b.status === "PENDENTE"
                         ? "bg-yellow-200 text-yellow-800"
                         : b.status === "CONCLUIDO"

@@ -317,9 +317,19 @@ export default function AdminPageClient() {
     <>
     <main className="max-w-6xl mx-auto px-4 py-8 pb-24">
       {/* Cabeçalho */}
-      <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
+      <div
+      className="
+        mb-8
+        bg-[#F5F3EB]/90
+        backdrop-blur-sm
+        rounded-2xl
+        p-5
+        border border-[#8D6A93]/20
+        shadow-[0_6px_22px_-12px_rgba(141,106,147,0.25)]
+        flex justify-between items-center flex-wrap gap-3
+      ">
         <div>
-          <h1 className="text-2xl font-bold text-[#1F3924]">
+          <h1 className="text-xl sm:text-2xl font-semibold text-[#1F3924]">
             🌿 Painel Administrativo
           </h1>
           <p className="text-sm text-[#8D6A93] mt-1">
@@ -342,11 +352,20 @@ export default function AdminPageClient() {
           <button
             key={key}
             onClick={() => handleCardClick(key)}
-            className={`rounded-lg py-4 shadow border transition text-sm sm:text-base ${
+            className={`
+            rounded-xl
+            shadow-sm
+            hover:shadow-md
+            transition
+            border
+            px-4
+            py-3
+            ${
               filter === key || statusFilter?.toLowerCase() === key
                 ? "bg-[#1F3924] text-white border-[#1F3924]"
                 : "bg-[#E4F0FD] text-[#1F3924] border-transparent hover:bg-[#dce7f9]"
-            }`}
+            }
+          `}
           >
             <p className="font-semibold">{label}</p>
             <p className="text-lg font-bold">
@@ -360,16 +379,29 @@ export default function AdminPageClient() {
       <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6">
         <input
           type="text"
-          placeholder="Buscar por nome ou telefone..."
+          placeholder="🔍 Buscar por nome ou telefone..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-1/2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+          className="
+          w-full sm:w-1/2
+          px-4 py-3
+          rounded-xl
+          border border-[#8D6A93]/30
+          bg-white
+          shadow-sm
+          placeholder:text-[#1F3924]/40
+          focus:outline-none
+          focus:ring-2
+          focus:ring-[#8D6A93]/40
+          focus:border-[#8D6A93]/40
+          transition
+        "
         />
       </div>
 
       {/* Tabela */}
       {loading ? (
-        <p className="text-center text-[#1F3924]">
+        <p className="animate-pulse text-center text-[#1F3924]/70">
           Carregando agendamentos...
         </p>
       ) : filteredBookings.length === 0 ? (
@@ -377,7 +409,13 @@ export default function AdminPageClient() {
           Nenhum agendamento encontrado.
         </p>
       ) : (
-        <div className="overflow-x-auto rounded-lg shadow-md">
+        <div className="
+          overflow-x-auto
+          rounded-2xl
+          bg-white
+          shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
+          border border-[#8D6A93]/20
+        ">
           <BookingTable
             bookings={filteredBookings}
             updateStatus={updateStatus}

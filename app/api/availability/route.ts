@@ -1,27 +1,46 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 
-// GET — Buscar disponibilidade
+// 🔓 GET — público (cliente precisa ver horários)
 export async function GET() {
-  const availability = await prisma.availability.findMany({
-    orderBy: { dayOfWeek: "asc" }
-  });
+  try {
+    const availability = await prisma.availability.findMany({
+      orderBy: { dayOfWeek: "asc" },
+    });
 
-  return NextResponse.json(availability);
+    return NextResponse.json(availability);
+  } catch (error) {
+    console.error("Erro ao buscar availability:", error);
+    return NextResponse.json(
+      { error: "Erro ao buscar disponibilidade" },
+      { status: 500 }
+    );
+  }
 }
 
-// PATCH — Atualizar disponibilidade
+// 🔒 PATCH — somente ADMIN
 export async function PATCH(req: Request) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
     const updates = await req.json();
 
+    if (!Array.isArray(updates)) {
+      return NextResponse.json(
+        { error: "Formato inválido." },
+        { status: 400 }
+      );
+    }
+
     for (const item of updates) {
       await prisma.availability.update({
-        where: { id: item.id },
+        where: { id: Number(item.id) },
         data: {
-          openHour: item.openHour,
-          closeHour: item.closeHour,
-          active: item.active,
+          openHour: Number(item.openHour),
+          closeHour: Number(item.closeHour),
+          active: Boolean(item.active),
         },
       });
     }
@@ -36,8 +55,11 @@ export async function PATCH(req: Request) {
   }
 }
 
-// POST — Apenas retorna a lista (ou remova se não usar)
+// 🔒 POST — somente ADMIN (se você realmente precisar)
 export async function POST() {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
     const items = await prisma.availability.findMany({
       orderBy: { dayOfWeek: "asc" },

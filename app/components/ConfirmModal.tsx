@@ -59,19 +59,39 @@ export default function ConfirmModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center border border-[#8D6A93]/30"
+            className="
+            bg-white
+            rounded-2xl
+            shadow-[0_12px_40px_-10px_rgba(0,0,0,0.25)]
+            p-7
+            max-w-sm
+            w-full
+            text-center
+            border border-[#8D6A93]/20
+          "
           >
-            <h2 className="text-2xl font-bold text-[#1F3924] mb-3">{title}</h2>
-            <p className="text-[#1F3924]/80 mb-6 leading-relaxed">{message}</p>
+            <h2 className="text-xl font-semibold text-[#1F3924] mb-2">
+            {title}</h2>
+            <p className="text-[#1F3924]/80 mb-6 leading-relaxed text-sm">
+            {message}</p>
 
-            <div className="flex flex-col sm:flex-row justify-center gap-3">
+            <div className="flex flex-col justify-center gap-3">
               <button
                 onClick={() => onConfirm(false)}
-                className={`px-4 py-2 rounded-lg text-white font-medium shadow transition ${
-                  type === "CONCLUIDO"
-                    ? "bg-green-700 hover:bg-green-800"
-                    : "bg-red-600 hover:bg-red-700"
-                }`}
+                className={`
+                  w-full
+                  py-2.5
+                  rounded-lg
+                  text-white
+                  font-medium
+                  shadow-sm
+                  transition
+                  ${
+                    type === "CONCLUIDO"
+                      ? "bg-[#1F3924] hover:bg-[#16301c]"
+                      : "bg-red-600 hover:bg-red-700"
+                  }
+                `}
               >
                 Confirmar
               </button>
@@ -81,17 +101,38 @@ export default function ConfirmModal({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => onConfirm(true)}
-                className="px-4 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white font-medium shadow transition"
+                className="
+                  w-full
+                  py-2.5
+                  rounded-lg
+                  border border-green-600
+                  text-green-700
+                  font-medium
+                  bg-green-50
+                  hover:bg-green-100
+                  transition
+                  text-center
+                "
               >
-                Confirmar e WhatsApp
+                Confirmar e enviar WhatsApp
               </a>
 
               <button
                 onClick={onClose}
-                className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-[#1F3924] font-medium shadow-sm transition"
+                className="
+                  w-full
+                  py-2.5
+                  rounded-lg
+                  text-[#1F3924]/70
+                  hover:text-[#1F3924]
+                  hover:bg-[#F5F3EB]
+                  transition
+                  text-sm
+                "
               >
                 Fechar
               </button>
+
             </div>
           </motion.div>
         </motion.div>

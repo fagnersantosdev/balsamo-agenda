@@ -65,11 +65,11 @@ export default function TestimonialSlider({ testimonials }: Props) {
   }, [testimonials]);
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="relative overflow-hidden select-none">
       {/* Faixa dos cards */}
       <div
         ref={trackRef}
-        className="flex transition-transform duration-700 ease-out"
+        className="flex transition-transform duration-700 ease-out will-change-transform"
       >
         {testimonials.map((t) => (
           <div
@@ -79,28 +79,35 @@ export default function TestimonialSlider({ testimonials }: Props) {
               w-full
               max-w-[90vw]
               sm:max-w-none
-              sm:w-1/2         /* Tablet */
-              md:w-1/3         /* Desktop */
+              sm:w-1/2
+              md:w-1/3
               px-3
+              transition-transform
+              hover:-translate-y-[2px]
             "
           >
             <div
               className="
-                bg-[#F5F3EB]/90 rounded-2xl h-full p-6
-                shadow-[0_8px_25px_-5px_rgba(141,106,147,0.25)]
+                bg-[#F5F3EB]/95
+                rounded-xl
+                h-full
+                p-6
                 border border-[#8D6A93]/20
+                shadow-sm
+                hover:shadow-md
+                transition-all
               "
             >
-              <p className="text-[#1F3924]/90 italic mb-4 leading-relaxed">
+              <p className="text-[#1F3924]/90 italic mb-5 leading-relaxed">
                 {t.message}
               </p>
 
-              <p className="text-[#8A4B2E] font-semibold">
+              <p className="text-[#8A4B2E] font-semibold text-sm">
                 — {t.author || "Anônimo"}
               </p>
 
 
-              <p className="text-sm text-[#1F3924]/50 mt-1">
+              <p className="text-sm text-[#1F3924]/45 mt-1">
                 {formatRelativeDate(t.createdAt)}
               </p>
             </div>

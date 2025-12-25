@@ -35,13 +35,19 @@ export default function FeedbackSection({ testimonials }: Props) {
         <button
           onClick={() => setOpenFeedback(true)}
           className="
-            px-6 py-3 bg-[#8D6A93] text-[#FFFEF9]
-            rounded-lg shadow-md hover:bg-[#1F3924]
-            transition font-medium
+            px-6 py-3
+            bg-[#8D6A93]
+            text-[#FFFEF9]
+            rounded-xl
+            shadow-sm
+            hover:bg-[#1F3924]
+            hover:shadow-md
+            transition-all
+            font-semibold
           "
         >
           ➕ Deixar minha avaliação
-        </button>
+      </button>
       </div>
 
       {/* Modal */}
