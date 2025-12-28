@@ -56,6 +56,19 @@ export default function AdminMobileNav() {
             <span className="text-[11px] mt-1">Serviços</span>
           </button>
 
+          {/* Disponibilidade */}
+          <button
+            onClick={() => (window.location.href = "/admin/availability")}
+            className={`flex flex-col items-center ${
+              isActive("/admin/availability")
+                ? "text-[#1F3924] font-semibold"
+                : "text-[#1F3924]/60"
+            }`}
+          >
+            ⏰
+            <span className="text-[11px] mt-1">Horários</span>
+          </button>
+
           {/* Avaliações */}
           <button
             onClick={() => (window.location.href = "/admin/testimonials")}

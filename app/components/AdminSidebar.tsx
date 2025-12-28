@@ -54,6 +54,7 @@ export default function AdminSidebar() {
         {item("/admin", "Agendamentos", "📅")}
         {item("/admin/services", "Serviços", "🛠")}
         {item("/admin/testimonials", "Avaliações", "💬")}
+        {item("/admin/availability", "Disponibilidade", "⏰")}
 
         {/* Futuras seções */}
         {/* {item("/admin/reports", "Relatórios", "📊") */}
