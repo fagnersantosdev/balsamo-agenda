@@ -1,221 +1,242 @@
 "use client";
-import React, { useState } from "react";
+import { useState} from "react"
+import { Booking } from "@/app/types/Booking";
 import ConfirmModal from "./ConfirmModal";
 
-type Booking = {
-  id: number;
-  clientName: string;
-  clientPhone: string;
-  clientEmail?: string | null;
-  startDateTime: string;
-  endDateTime: string;
-  status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
-  service?: { name: string };
-};
-
-type BookingTableProps = {
+type Props = {
   bookings: Booking[];
-  updateStatus: (
-    id: number,
-    status: "PENDENTE" | "CONCLUIDO" | "CANCELADO"
-  ) => Promise<void>;
   showActions?: boolean;
 };
 
-export default function BookingTable({
-  bookings,
-  showActions = false,
-  updateStatus,
-}: BookingTableProps) {
+export default function BookingTable({ bookings, showActions = true }: Props) {
   const [confirmData, setConfirmData] = useState<{
     show: boolean;
-    id: number | null;
-    type: "CONCLUIDO" | "CANCELADO" | null;
-    clientName: string;
-    clientPhone: string;
-    serviceName: string;
-    date: string;
-  }>({
-    show: false,
-    id: null,
-    type: null,
-    clientName: "",
-    clientPhone: "",
-    serviceName: "",
-    date: "",
-  });
+    id?: number;
+    type?: "CONCLUIDO" | "CANCELADO";
+    clientName?: string;
+    clientPhone?: string;
+    serviceName?: string;
+    date?: string;
+  }>({ show: false });
+
+  function formatDate(date: string) {
+    const d = new Date(date);
+    return {
+      date: d.toLocaleDateString("pt-BR"),
+      time: d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+    };
+  }
+
+  async function updateStatus(
+    id: number,
+    status: "CONCLUIDO" | "CANCELADO"
+  ) {
+    await fetch(`/api/bookings/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    window.location.reload();
+  }
 
   return (
-    <div className="w-full overflow-x-auto max-w-full">
-      <table
-        className="
-          w-full
-          min-w-[650px]
-          bg-white
-          border border-[#8D6A93]/20
-          rounded-xl
-          shadow-sm
-          transition
-          hover:shadow-md
-          overflow-hidden
-        "
-      >
-        <thead className="bg-[#F5F3EB] text-[#1F3924] border-b border-[#8D6A93]/20">
-          <tr
-            className="
-              border-t border-[#8D6A93]/10 hover:bg-[#FAF8F4] transition-colors
-            "
-          >
-            <th className="py-4 px-4 text-left w-[180px]">Cliente</th>
-            <th className="py-4 px-4 text-left hidden sm:table-cell w-[140px]">
-              Serviço
-            </th>
-            <th className="py-4 px-4 text-left w-[120px]">Data</th>
-            <th className="py-4 px-4 text-left hidden sm:table-cell w-[130px]">
-              Telefone
-            </th>
-            <th className="py-4 px-4 text-center w-[100px]">Status</th>
-            {showActions && (
-              <th className="py-4 px-4 text-center w-[90px]">Ações</th>
-            )}
-          </tr>
-        </thead>
+    <div className="w-full">
 
-        <tbody>
-          {bookings.map((b) => {
-            const start = new Date(b.startDateTime);
-            const dateStr = start.toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            });
-            const timeStr = start.toLocaleTimeString("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
+      {/* ================= MOBILE ================= */}
+      <div className="sm:hidden space-y-4">
+        {bookings.map((b) => {
+          const { date, time } = formatDate(b.startDateTime);
 
-            return (
-              <tr
-                key={b.id}
-                className="border-t border-[#8D6A93]/20 hover:bg-[#FAF8F4] transition"
-              >
-                {/* Cliente */}
-                <td className="py-4 px-4 break-words sm:py-5">
-                  <div className="font-medium">{b.clientName}</div>
+          return (
+            <div
+              key={b.id}
+              className="bg-white rounded-2xl border border-[#8D6A93]/20 shadow-sm p-4 space-y-3"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-[#1F3924]">
+                    {b.clientName}
+                  </p>
+                  <p className="text-sm text-[#1F3924]/70">
+                    {b.service?.name}
+                  </p>
+                </div>
 
-                  {/* Mobile detalhes */}
-                  <div className="text-xs text-[#1F3924]/70 sm:hidden mt-1 leading-5">
-                    📞 {b.clientPhone} <br />
-                    💆 {b.service?.name || "—"} <br />
-                    🕓 {dateStr} às {timeStr}
-                  </div>
-                </td>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    b.status === "PENDENTE"
+                      ? "bg-yellow-200 text-yellow-800"
+                      : b.status === "CONCLUIDO"
+                      ? "bg-green-200 text-green-800"
+                      : "bg-red-200 text-red-800"
+                  }`}
+                >
+                  {b.status}
+                </span>
+              </div>
 
-                {/* Serviço (desktop) */}
-                <td className="py-4 px-4 hidden sm:table-cell break-words sm:py-5">
-                  {b.service?.name || "—"}
-                </td>
+              <div className="text-sm text-[#1F3924]/70 space-y-1">
+                <p>📅 {date} às {time}</p>
+                <p>📞 {b.clientPhone}</p>
+              </div>
 
-                {/* Data */}
-                <td className="py-4 px-4 whitespace-nowrap sm:py-5">
-                  {dateStr}
-                  <br />
-                  <span className="text-sm text-[#1F3924]/70">{timeStr}</span>
-                </td>
-
-                {/* Telefone */}
-                <td className="py-4 px-4 hidden sm:table-cell whitespace-nowrap sm:py-5">
-                  {b.clientPhone}
-                </td>
-
-                {/* Status */}
-                <td className="py-4 px-4 text-center whitespace-nowrap w-[100px] sm:py-5">
-                  <span
-                    className={`inline-block px-3 py-1 rounded-full text-xs sm:text-sm font-medium ${
-                      b.status === "PENDENTE"
-                        ? "bg-yellow-200 text-yellow-800"
-                        : b.status === "CONCLUIDO"
-                        ? "bg-green-200 text-green-800"
-                        : "bg-red-200 text-red-800"
-                    }`}
+              {showActions && b.status === "PENDENTE" && (
+                <div className="flex gap-3 pt-2">
+                  <button
+                    className="flex-1 bg-green-600 text-white py-2 rounded-xl"
+                    onClick={() =>
+                      setConfirmData({
+                        show: true,
+                        id: b.id,
+                        type: "CONCLUIDO",
+                        clientName: b.clientName,
+                        clientPhone: b.clientPhone,
+                        serviceName: b.service?.name || "",
+                        date: `${date} ${time}`,
+                      })
+                    }
                   >
-                    {b.status}
-                  </span>
-                </td>
+                    Concluir
+                  </button>
 
-                {/* Ações */}
-                {showActions && (
-                  <td className="py-4 px-4 text-center w-[90px] whitespace-nowrap sm:py-5">
-                    {b.status === "PENDENTE" ? (
-                      <div className="flex justify-center gap-3">
-                        <button
-                          onClick={() =>
-                            setConfirmData({
-                              show: true,
-                              id: b.id,
-                              type: "CONCLUIDO",
-                              clientName: b.clientName,
-                              clientPhone: b.clientPhone,
-                              serviceName: b.service?.name || "—",
-                              date: new Date(b.startDateTime).toLocaleString("pt-BR"),
-                            })
-                          }
-                          title="Concluir atendimento"
-                        >
-                          ✅
-                        </button>
+                  <button
+                    className="flex-1 bg-red-600 text-white py-2 rounded-xl"
+                    onClick={() =>
+                      setConfirmData({
+                        show: true,
+                        id: b.id,
+                        type: "CANCELADO",
+                        clientName: b.clientName,
+                        clientPhone: b.clientPhone,
+                        serviceName: b.service?.name || "",
+                        date: `${date} ${time}`,
+                      })
+                    }
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
-                        <button
-                          onClick={() =>
-                            setConfirmData({
-                              show: true,
-                              id: b.id,
-                              type: "CANCELADO",
-                              clientName: b.clientName,
-                              clientPhone: b.clientPhone,
-                              serviceName: b.service?.name || "—",
-                              date: new Date(b.startDateTime).toLocaleString("pt-BR"),
-                            })
-                          }
-                          title="Cancelar agendamento"
-                        >
-                          ❌
-                        </button>
-                      </div>
-                    ) : (
-                      <span className="text-[#1F3924]/70 text-sm">—</span>
-                    )}
+      {/* ================= DESKTOP ================= */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr className="text-left text-sm text-[#1F3924]/70 border-b">
+              <th className="py-3 px-2">Cliente</th>
+              <th className="py-3 px-2">Data</th>
+              <th className="py-3 px-2">Serviço</th>
+              <th className="py-3 px-2">Status</th>
+              {showActions && <th className="py-3 px-2">Ações</th>}
+            </tr>
+          </thead>
+
+          <tbody>
+            {bookings.map((b) => {
+              const { date, time } = formatDate(b.startDateTime);
+
+              return (
+                <tr
+                  key={b.id}
+                  className="border-b hover:bg-[#F5F3EB]/40 transition"
+                >
+                  <td className="py-3 px-2">
+                    <p className="font-medium">{b.clientName}</p>
+                    <p className="text-sm text-[#1F3924]/60">
+                      {b.clientPhone}
+                    </p>
                   </td>
-                )}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
 
-      {/* Nenhum registro */}
-      {bookings.length === 0 && (
-        <p className="text-center text-[#1F3924]/60 py-6">
-          Nenhum agendamento encontrado.
-        </p>
-      )}
+                  <td className="py-3 px-2 text-sm">
+                    {date} às {time}
+                  </td>
 
-      {/* Modal */}
-      {confirmData.show && confirmData.id && confirmData.type && (
-        <ConfirmModal
-          show={confirmData.show}
-          type={confirmData.type}
-          clientName={confirmData.clientName}
-          clientPhone={confirmData.clientPhone}
-          serviceName={confirmData.serviceName}
-          date={confirmData.date}
-          onClose={() => setConfirmData({ ...confirmData, show: false })}
-          onConfirm={async () => {
-            await updateStatus(confirmData.id!, confirmData.type!);
-            setConfirmData({ ...confirmData, show: false });
-          }}
-        />
-      )}
+                  <td className="py-3 px-2 text-sm">
+                    {b.service?.name}
+                  </td>
+
+                  <td className="py-3 px-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        b.status === "PENDENTE"
+                          ? "bg-yellow-200 text-yellow-800"
+                          : b.status === "CONCLUIDO"
+                          ? "bg-green-200 text-green-800"
+                          : "bg-red-200 text-red-800"
+                      }`}
+                    >
+                      {b.status}
+                    </span>
+                  </td>
+
+                  {showActions && (
+                    <td className="py-3 px-2 space-x-2">
+                      {b.status === "PENDENTE" && (
+                        <>
+                          <button
+                            className="text-green-700 hover:underline"
+                            onClick={() =>
+                              setConfirmData({
+                                show: true,
+                                id: b.id,
+                                type: "CONCLUIDO",
+                                clientName: b.clientName,
+                                clientPhone: b.clientPhone,
+                                serviceName: b.service?.name || "",
+                                date: `${date} ${time}`,
+                              })
+                            }
+                          >
+                            Concluir
+                          </button>
+
+                          <button
+                            className="text-red-600 hover:underline"
+                            onClick={() =>
+                              setConfirmData({
+                                show: true,
+                                id: b.id,
+                                type: "CANCELADO",
+                                clientName: b.clientName,
+                                clientPhone: b.clientPhone,
+                                serviceName: b.service?.name || "",
+                                date: `${date} ${time}`,
+                              })
+                            }
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      )}
+                    </td>
+                  )}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      {/* ================= MODAL ================= */}
+      <ConfirmModal
+        show={confirmData.show}
+        onClose={() => setConfirmData({ show: false })}
+        onConfirm={(sendWhatsApp) => {
+          if (confirmData.id && confirmData.type) {
+            updateStatus(confirmData.id, confirmData.type);
+            if (sendWhatsApp) window.open("https://wa.me/", "_blank");
+          }
+        }}
+        type={confirmData.type!}
+        clientName={confirmData.clientName || ""}
+        clientPhone={confirmData.clientPhone || ""}
+        serviceName={confirmData.serviceName || ""}
+        date={confirmData.date || ""}
+      />
     </div>
   );
 }
