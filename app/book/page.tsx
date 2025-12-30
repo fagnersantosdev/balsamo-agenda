@@ -15,6 +15,7 @@ import { ptBR } from "date-fns/locale";
 type Service = { id: number; name: string; durationMin: number };
 
 type Availability = {
+  id: number;
   dayOfWeek: number; // 0=domingo ... 6=sábado (usando js getDay)
   openHour: number;
   closeHour: number;

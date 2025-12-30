@@ -1,6 +1,7 @@
 "use client";
+
 import { useEffect, useState } from "react";
-import Toast from "../../components/Toast";
+import Toast from "@/app/components/Toast";
 
 type Availability = {
   id: number;
@@ -10,7 +11,7 @@ type Availability = {
   active: boolean;
 };
 
-const weekDays = [
+const dayLabels = [
   "Domingo",
   "Segunda-feira",
   "Terça-feira",
@@ -22,55 +23,25 @@ const weekDays = [
 
 export default function AvailabilityPage() {
   const [availability, setAvailability] = useState<Availability[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   useEffect(() => {
-    fetchAvailability();
+    fetch("/api/availability")
+      .then((res) => res.json())
+      .then(setAvailability);
   }, []);
 
-  // 🔄 Buscar disponibilidade
-  async function fetchAvailability() {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/availability");
-      const data = await res.json();
-      setAvailability(Array.isArray(data) ? data : []);
-    } catch (error) {
-      console.error("Erro ao buscar disponibilidade:", error);
-      setToast({ message: "❌ Falha ao carregar dados.", type: "error" });
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // 📝 Atualiza campo em tempo real
-  function updateField<T extends keyof Availability>(id: number, field: T, value: Availability[T]) {
+  function updateItem(id: number, field: keyof Availability, value: number | boolean) {
     setAvailability((prev) =>
-      prev.map((day) =>
-        day.id === id ? { ...day, [field]: value } : day
+      prev.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item
       )
     );
   }
 
-  // 💾 Salvar todas as alterações
-  async function handleSave() {
-    setSaving(true);
-
-    // Validação: abertura < fechamento
-    const invalid = availability.find(
-      (d) => d.active && d.openHour >= d.closeHour
-    );
-    if (invalid) {
-      setToast({
-        message: `⚠️ O horário de abertura deve ser menor que o de fechamento em ${weekDays[invalid.dayOfWeek]}.`,
-        type: "error",
-      });
-      setSaving(false);
-      return;
-    }
-
+  async function saveChanges() {
+    setLoading(true);
     try {
       const res = await fetch("/api/availability", {
         method: "PATCH",
@@ -78,124 +49,142 @@ export default function AvailabilityPage() {
         body: JSON.stringify(availability),
       });
 
-      const data = await res.json();
+      if (!res.ok) throw new Error();
 
-      if (res.ok) {
-        setToast({ message: "✅ Horários atualizados com sucesso!", type: "success" });
-      } else {
-        setToast({
-          message: `❌ Erro ao salvar: ${data.error || "tente novamente."}`,
-          type: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Erro ao salvar:", error);
-      setToast({ message: "❌ Erro de conexão com o servidor.", type: "error" });
+      setToast({ message: "Horários atualizados com sucesso", type: "success" });
+    } catch {
+      setToast({ message: "Erro ao salvar horários", type: "error" });
     } finally {
-      setSaving(false);
-      setTimeout(() => setToast(null), 4000);
+      setLoading(false);
+      setTimeout(() => setToast(null), 3000);
     }
   }
 
-  if (loading)
-    return <p className="text-center text-[#1F3924] mt-10">Carregando disponibilidade...</p>;
-
   return (
-    <main className="
-      max-w-4xl mx-auto
-      bg-white/80 backdrop-blur
-      rounded-3xl
-      shadow-[0_10px_35px_-12px_rgba(141,106,147,0.25)]
-      p-8 mt-6
-      border border-[#8D6A93]/20
-    ">
-      <h1 className="text-2xl font-bold text-[#1F3924]">
-        ⏰ Disponibilidade de Atendimento
+    <main className="max-w-5xl mx-auto px-4 py-8 pb-28">
+      <h1 className="text-2xl font-bold text-[#1F3924] mb-6">
+        ⏰ Horários de Funcionamento
       </h1>
-      <p className="text-sm text-[#8D6A93] mt-1">
-        Configure os dias e horários disponíveis para agendamento
-      </p>
 
-      <table className="w-full border-collapse mb-6 text-sm sm:text-base">
-        <thead>
-          <tr className="bg-[#F5F3EB] text-[#1F3924] border-b border-[#8D6A93]/20">
-            <th className="p-3 font-semibold text-sm uppercase tracking-wide">Dia</th>
-            <th className="p-3 font-semibold text-sm uppercase tracking-wide">Abertura</th>
-            <th className="p-3 font-semibold text-sm uppercase tracking-wide">Fechamento</th>
-            <th className="p-3 font-semibold text-sm uppercase tracking-wide">Ativo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {availability.map((day) => (
-            <tr key={day.id} className="border-b border-[#8D6A93]/10 hover:bg-[#F5F3EB]/60 transition">
-              <td className="p-3 font-medium">{weekDays[day.dayOfWeek]}</td>
-              <td className="p-3 text-center">
+      {/* ===== MOBILE (CARDS) ===== */}
+      <div className="space-y-4 md:hidden">
+        {availability.map((item) => (
+          <div
+            key={item.id}
+            className="bg-[#F5F3EB] rounded-2xl border border-[#8D6A93]/25 p-4 shadow-sm"
+          >
+            <div className="flex justify-between items-center mb-3">
+              <span className="font-semibold text-[#1F3924]">
+                {dayLabels[item.dayOfWeek]}
+              </span>
+
+              <input
+                type="checkbox"
+                checked={item.active}
+                onChange={(e) => updateItem(item.id, "active", e.target.checked)}
+              />
+            </div>
+
+            <div className="flex gap-4">
+              <div className="flex flex-col">
+                <label className="text-xs text-[#1F3924]/60 mb-1">Abertura</label>
                 <input
                   type="number"
-                  min="0"
-                  max="23"
-                  value={day.openHour}
-                  disabled={!day.active}
-                  onChange={(e) => updateField(day.id, "openHour", Number(e.target.value))}
-                  className="w-20 text-center border rounded px-2 py-1"
+                  min={0}
+                  max={23}
+                  disabled={!item.active}
+                  value={item.openHour}
+                  onChange={(e) =>
+                    updateItem(item.id, "openHour", Number(e.target.value))
+                  }
+                  className="w-24 px-3 py-2 border rounded-lg"
                 />
-              </td>
-              <td className="p-3 text-center">
+              </div>
+
+              <div className="flex flex-col">
+                <label className="text-xs text-[#1F3924]/60 mb-1">Fechamento</label>
                 <input
                   type="number"
-                  min="0"
-                  max="23"
-                  value={day.closeHour}
-                  disabled={!day.active}
-                  onChange={(e) => updateField(day.id, "closeHour", Number(e.target.value))}
-                  className="
-                  w-20 text-center
-                  rounded-lg
-                  border border-[#8D6A93]/30
-                  bg-white
-                  px-2 py-1
-                  focus:outline-none
-                  focus:ring-2 focus:ring-[#8D6A93]
-                  disabled:bg-gray-100"
+                  min={0}
+                  max={23}
+                  disabled={!item.active}
+                  value={item.closeHour}
+                  onChange={(e) =>
+                    updateItem(item.id, "closeHour", Number(e.target.value))
+                  }
+                  className="w-24 px-3 py-2 border rounded-lg"
                 />
-              </td>
-              <td className="p-3 text-center">
-                <button
-                  onClick={() => updateField(day.id, "active", !day.active)}
-                  className={`
-                    w-11 h-6 rounded-full relative transition
-                    ${day.active ? "bg-green-600" : "bg-gray-300"}
-                  `}
-                >
-                  <span
-                    className={`
-                      absolute top-0.5 left-0.5
-                      w-5 h-5 bg-white rounded-full transition
-                      ${day.active ? "translate-x-5" : ""}
-                    `}
-                  />
-                </button>
-              </td>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* ===== DESKTOP (TABELA) ===== */}
+      <div className="hidden md:block bg-[#F5F3EB] rounded-2xl border border-[#8D6A93]/25 shadow-lg overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-[#EDE7F1]">
+            <tr>
+              <th className="text-left px-4 py-3">Dia</th>
+              <th className="px-4 py-3">Abertura</th>
+              <th className="px-4 py-3">Fechamento</th>
+              <th className="px-4 py-3 text-center">Ativo</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {availability.map((item) => (
+              <tr key={item.id} className="border-t">
+                <td className="px-4 py-3 font-medium">
+                  {dayLabels[item.dayOfWeek]}
+                </td>
 
-      <div className="flex justify-end">
+                <td className="px-4 py-3">
+                  <input
+                    type="number"
+                    disabled={!item.active}
+                    value={item.openHour}
+                    onChange={(e) =>
+                      updateItem(item.id, "openHour", Number(e.target.value))
+                    }
+                    className="w-20 px-2 py-1 border rounded-lg"
+                  />
+                </td>
+
+                <td className="px-4 py-3">
+                  <input
+                    type="number"
+                    disabled={!item.active}
+                    value={item.closeHour}
+                    onChange={(e) =>
+                      updateItem(item.id, "closeHour", Number(e.target.value))
+                    }
+                    className="w-20 px-2 py-1 border rounded-lg"
+                  />
+                </td>
+
+                <td className="px-4 py-3 text-center">
+                  <input
+                    type="checkbox"
+                    checked={item.active}
+                    onChange={(e) =>
+                      updateItem(item.id, "active", e.target.checked)
+                    }
+                  />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* BOTÃO */}
+      <div className="mt-8 flex justify-end">
         <button
-          onClick={handleSave}
-          disabled={saving}
-          className="
-          bg-[#1F3924] text-white
-          px-6 py-2
-          rounded-xl
-          shadow-md
-          hover:bg-[#16301c]
-          transition
-          disabled:opacity-50
-        "
+          onClick={saveChanges}
+          disabled={loading}
+          className="bg-[#1F3924] text-white px-8 py-3 rounded-xl hover:bg-green-900 transition disabled:opacity-50"
         >
-          {saving ? "Salvando..." : "💾 Salvar Alterações"}
+          💾 Salvar alterações
         </button>
       </div>
 
