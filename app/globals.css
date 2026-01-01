@@ -79,28 +79,36 @@ h1, h2, h3 {
     --border: 0 0% 89%;
   }
 
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  * {
-    @apply border-border;
-  }
+  body { @apply bg-background text-foreground; }
+  * { @apply border-border; }
 }
 
 /* =====================================================
-   📅 CALENDÁRIO — BÁLSAMO (DayPicker)
-   Correção total de overflow no mobile
+   📅 CALENDÁRIO — BÁLSAMO (react-day-picker)
+   Objetivo:
+   - NÃO cortar o DOM (sem overflow hidden no calendário)
+   - Garantir 7 colunas perfeitas no mobile
+   - Corrigir "segunda desfigurada" (botão interno)
+   - Manter setas clicáveis
    ===================================================== */
 
+/* 1) O container do componente */
+.balsamo-calendar {
+  width: 100%;
+  overflow: visible; /* ✅ nunca esconda interação do DayPicker */
+}
+
+/* 2) A raiz do DayPicker */
 .balsamo-calendar .rdp {
   width: 100%;
   max-width: 100%;
   margin: 0 auto;
   font-size: 0.95rem;
-  overflow: visible;
+  overflow: visible; /* ✅ setas e caption clicáveis */
+  position: relative;
 }
 
+/* 3) Estrutura geral */
 .balsamo-calendar .rdp-months {
   width: 100%;
   display: block !important;
@@ -110,112 +118,158 @@ h1, h2, h3 {
   width: 100%;
 }
 
+/* 4) Tabela com 7 colunas fixas (evita "dia torto") */
 .balsamo-calendar .rdp-table {
   width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
 }
 
-.balsamo-calendar .rdp-head_cell,
+/* Cabeçalho dos dias da semana */
+.balsamo-calendar .rdp-head_row {
+  width: 100%;
+}
+
+.balsamo-calendar .rdp-head_cell {
+  width: calc(100% / 7);
+  padding: 2px;
+  text-align: center;
+  font-weight: 600;
+  color: rgba(31, 57, 36, 0.7);
+  font-size: 0.85rem;
+  box-sizing: border-box;
+}
+
+/* Células */
+.balsamo-calendar .rdp-row {
+  width: 100%;
+}
+
 .balsamo-calendar .rdp-cell {
   width: calc(100% / 7);
   padding: 2px;
-  box-sizing: border-box;
   text-align: center;
   vertical-align: middle;
+  box-sizing: border-box;
 }
 
+/*
+  ✅ PONTO-CHAVE:
+  A classe .rdp-day é o container; o clique real é no .rdp-day_button.
+  Se você estiliza só .rdp-day, a área/calc do botão pode quebrar (segunda "estranha").
+*/
 .balsamo-calendar .rdp-day {
+  padding: 0;
+}
+
+/* Botão do dia (o "quadradinho" real) */
+.balsamo-calendar .rdp-day_button {
   width: 100%;
   height: 38px;
-  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 10px;
+  margin: 0;
+  line-height: 1;
+  font-size: 0.95rem;
+
+  /* evita quebra/offset no iOS */
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.balsamo-calendar {
-  overflow: visible;
-}
-
-/* =====================================================
-   📌 Cabeçalho do calendário
-   (mês à esquerda, setas à direita)
-   ===================================================== */
-
+/* 5) Caption (mês + setas) */
 .balsamo-calendar .rdp-caption {
   display: flex !important;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 0 0.75rem;
   margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 2; /* ✅ garante clique */
 }
 
 .balsamo-calendar .rdp-caption_label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 1.05rem;
+  color: #1F3924;
 }
 
+/* Nav + botões */
 .balsamo-calendar .rdp-nav {
   display: flex;
   gap: 0.4rem;
+  align-items: center;
 }
 
 .balsamo-calendar .rdp-nav_button {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   border: none;
   background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-}
-
-.balsamo-calendar .rdp-chevron {
-  width: 18px;
-  height: 18px;
-  fill: #8D6A93;
+  border-radius: 8px;
 }
 
 .balsamo-calendar .rdp-nav_button:hover {
   background: #f0eef3;
-  border-radius: 6px;
 }
 
-/* =====================================================
-   🎯 Estados do calendário
-   ===================================================== */
+/* Ícone */
+.balsamo-calendar .rdp-chevron {
+  width: 18px;
+  height: 18px;
+  fill: #8D6A93;
+  pointer-events: none;
+}
 
-.balsamo-calendar .rdp-day:hover {
+/* 6) Estados */
+.balsamo-calendar .rdp-day_button:hover {
   background-color: #f2f2f2;
   cursor: pointer;
 }
 
-.balsamo-calendar .rdp-day_selected,
-.balsamo-calendar .rdp-day_selected:hover {
+.balsamo-calendar .rdp-day_selected .rdp-day_button,
+.balsamo-calendar .rdp-day_selected .rdp-day_button:hover {
   background-color: #8D6A93 !important;
   color: #ffffff !important;
 }
 
-.balsamo-calendar .rdp-day_disabled {
+.balsamo-calendar .rdp-day_disabled .rdp-day_button {
   opacity: 0.35;
   cursor: not-allowed;
   text-decoration: line-through;
 }
 
-/* =====================================================
-   📱 Ajustes Mobile (iPhone)
-   ===================================================== */
+/* 7) Hoje (opcional, mas bonito) */
+.balsamo-calendar .rdp-day_today .rdp-day_button {
+  outline: 2px solid rgba(141, 106, 147, 0.25);
+  outline-offset: 2px;
+}
 
+/* 8) Mobile (iPhone) */
 @media (max-width: 480px) {
   .balsamo-calendar .rdp {
     font-size: 0.9rem;
   }
 
-  .balsamo-calendar .rdp-day {
-    height: 34px;
-  }
-
   .balsamo-calendar .rdp-caption {
     padding: 0 0.5rem;
+  }
+
+  .balsamo-calendar .rdp-day_button {
+    height: 34px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+  }
+
+  .balsamo-calendar .rdp-head_cell,
+  .balsamo-calendar .rdp-cell {
+    padding: 1px;
   }
 }

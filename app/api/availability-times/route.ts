@@ -151,7 +151,7 @@ export async function GET(req: Request) {
       }
 
       // Avança a cada 15 minutos
-      cursor = new Date(cursor.getTime() + 15 * 60000);
+      cursor = new Date(cursor.getTime() + durationMin * 60000);
     }
 
     return NextResponse.json(slots);

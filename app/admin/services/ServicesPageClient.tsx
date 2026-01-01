@@ -210,7 +210,7 @@ async function handleRestore(id: number) {
                         >
                           <td className="p-3 font-medium text-[#1F3924]">{s.name}</td>
                           <td className="p-3">R$ {s.price.toFixed(2)}</td>
-                          <td className="p-3">{s.durationMin} min</td>
+                          <td className="p-3">⏱ {s.durationMin} min</td>
                           <td className="p-3 text-center">
                             {s.active ? (
                               <span className="text-green-700 font-semibold">Ativo</span>

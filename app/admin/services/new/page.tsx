@@ -97,6 +97,9 @@ export default function NewServicePage() {
             placeholder="Ex.: 45"
             className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
+          <p className="text-xs text-[#1F3924]/60 mt-1">
+            ⏱ A duração define o tempo bloqueado na agenda.
+          </p>
         </div>
 
         {/* Detalhes */}

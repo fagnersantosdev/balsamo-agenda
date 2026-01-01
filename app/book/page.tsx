@@ -39,6 +39,7 @@ export default function BookPage() {
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
 
   const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const [msg, setMsg] = useState<string | null>(null);
@@ -81,43 +82,51 @@ export default function BookPage() {
      SUBMIT
   ============================================================ */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = new FormData(e.currentTarget);
+  e.preventDefault();
 
-    const payload = {
-      clientName: form.get("clientName"),
-      clientPhone: String(form.get("clientPhone")).replace(/\D/g, ""),
-      clientEmail: form.get("clientEmail") || null,
-      serviceId: Number(form.get("serviceId")),
-      startDateTime: form.get("startDateTime"),
-    };
+  const form = new FormData(e.currentTarget);
 
+  const time = String(form.get("startDateTime")); // "09:30"
+
+  if (!selectedDate || !time) {
+    setMsgType("error");
+    setMsg("Selecione data e horário.");
+    return;
+  }
+
+  const [hour, minute] = time.split(":").map(Number);
+
+  const startDateTime = new Date(selectedDate);
+  startDateTime.setHours(hour, minute, 0, 0);
+
+  const payload = {
+    clientName: form.get("clientName"),
+    clientPhone: String(form.get("clientPhone")).replace(/\D/g, ""),
+    clientEmail: form.get("clientEmail") || null,
+    serviceId: Number(form.get("serviceId")),
+    startDateTime: startDateTime.toISOString(),
+  };
+
+  try {
     const res = await fetch("/api/bookings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
 
-    const data = await res.json();
-
     if (!res.ok) {
-      setMsgType("error");
-      setMsg(data.error || "Erro ao criar agendamento.");
-      return;
+      const data = await res.json();
+      throw new Error(data.error || "Erro ao agendar");
     }
 
-    setSuccessData({
-      name: data.booking.clientName,
-      date: new Date(data.booking.startDateTime).toLocaleString("pt-BR"),
-      service: data.booking.service.name,
-    });
-
-    setAvailableTimes([]);
-    setSelectedDate(null);
-    setSelectedServiceId(null);
-    e.currentTarget.reset();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setMsgType("success");
+    setMsg("Agendamento realizado com sucesso!");
+  } catch (err) {
+    setMsgType("error");
+    setMsg("Erro ao realizar agendamento.");
   }
+}
+
 
   /* ============================================================
      UI
@@ -164,15 +173,20 @@ export default function BookPage() {
               value={selectedServiceId ?? ""}
               onChange={(e) => {
                 const id = Number(e.target.value);
+
+                const service = services.find((s) => s.id === id) || null;
+
                 setSelectedServiceId(id);
+                setSelectedService(service);
                 setAvailableTimes([]);
 
-                if (selectedDate) {
-                  loadAvailableTimes(selectedDate, id);
+                if (selectedDate && service) {
+                  loadAvailableTimes(selectedDate, service.id);
                 }
               }}
             >
               <option value="">Selecione um serviço</option>
+
               {services.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.name}
@@ -180,7 +194,12 @@ export default function BookPage() {
               ))}
             </select>
 
-            
+            {selectedService && (
+              <p className="text-sm text-[#1F3924]/70 mt-1">
+                ⏱ Duração do atendimento: {selectedService.durationMin} minutos
+              </p>
+            )}
+
             {/* Calendário */}
             <BookingCalendar
               selected={selectedDate}
@@ -206,10 +225,7 @@ export default function BookPage() {
                 <option value="">Selecione um horário</option>
                 {availableTimes.map((t) => (
                   <option key={t} value={t}>
-                    {new Date(t).toLocaleTimeString("pt-BR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
+                    {t}
                   </option>
                 ))}
               </select>

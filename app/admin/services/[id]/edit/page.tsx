@@ -127,7 +127,7 @@ export default function EditServicePage() {
             name="name"
             defaultValue={service.name}
             required
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+            className="w-full px-3 py-2 border border-[#8D6A93]/30 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
@@ -140,7 +140,7 @@ export default function EditServicePage() {
             step="0.01"
             defaultValue={service.price}
             required
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+            className="w-full px-3 py-2 border border-[#8D6A93]/30 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
         </div>
 
@@ -152,8 +152,12 @@ export default function EditServicePage() {
             type="number"
             defaultValue={service.durationMin}
             required
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+            className="w-full px-3 py-2 border border-[#8D6A93]/30 bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
+          <p className="text-xs text-[#1F3924]/70 mt-1">
+            O atendimento ocupará esse tempo na agenda.
+            O sistema adiciona automaticamente um intervalo de segurança entre atendimentos.
+          </p>
         </div>
 
         {/* Detalhes */}
@@ -162,7 +166,7 @@ export default function EditServicePage() {
           <textarea
             name="details"
             defaultValue={(service.details || []).join("\n")}
-            className="w-full px-3 py-2 border border-purple-300 rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
+            className="w-full px-3 py-2 border border-[#8D6A93]/30 bg-white rounded-lg h-32 resize-none focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
           />
           <p className="text-xs text-[#1F3924]/70 mt-1">
             Cada linha representa um item (ex.: 🌸 Aromaterapia, 💆 Massagem Relaxante)
