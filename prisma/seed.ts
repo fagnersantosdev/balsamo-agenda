@@ -3,6 +3,17 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
+function nextWeekday(day: number) {
+  const date = new Date();
+  const diff = (day + 7 - date.getDay()) % 7 || 7;
+  date.setDate(date.getDate() + diff);
+  date.setHours(10, 0, 0, 0);
+  return date;
+}
+
+
+
+
 async function main() {
   console.log("🌱 Iniciando seed de desenvolvimento...");
 
@@ -28,7 +39,7 @@ async function main() {
   /* =======================
      SERVIÇOS
   ======================= */
-  const services = await prisma.service.createMany({
+  await prisma.service.createMany({
     data: [
       {
         name: "Massagem Relaxante",
@@ -59,64 +70,66 @@ async function main() {
 
   const allServices = await prisma.service.findMany();
 
-  /* =======================
-     DISPONIBILIDADE
-  ======================= */
-  await prisma.availability.createMany({
-    data: [
-      { dayOfWeek: 1, openHour: 9, closeHour: 18, active: true },
-      { dayOfWeek: 2, openHour: 9, closeHour: 18, active: true },
-      { dayOfWeek: 3, openHour: 9, closeHour: 18, active: true },
-      { dayOfWeek: 4, openHour: 9, closeHour: 18, active: true },
-      { dayOfWeek: 5, openHour: 9, closeHour: 17, active: true },
-    ],
-  });
+ /* =======================
+   DISPONIBILIDADE
+======================= */
+await prisma.availability.createMany({
+  data: [
+    // Domingo
+    { dayOfWeek: 0, openHour: 0, closeHour: 0, active: false },
+
+    // Segunda a Quinta
+    { dayOfWeek: 1, openHour: 9, closeHour: 18, active: true },
+    { dayOfWeek: 2, openHour: 9, closeHour: 18, active: true },
+    { dayOfWeek: 3, openHour: 9, closeHour: 18, active: true },
+    { dayOfWeek: 4, openHour: 9, closeHour: 18, active: true },
+
+    // Sexta
+    { dayOfWeek: 5, openHour: 9, closeHour: 17, active: true },
+
+    // Sábado
+    { dayOfWeek: 6, openHour: 0, closeHour: 0, active: false },
+  ],
+});
+
 
   /* =======================
-     AGENDAMENTOS
-  ======================= */
-  const today = new Date();
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  const nextWeek = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+   AGENDAMENTOS
+======================= */
+const nextMonday = nextWeekday(1);
+const nextTuesday = nextWeekday(2);
+const nextWednesday = nextWeekday(3);
 
-  await prisma.booking.createMany({
-    data: [
-      {
-        clientName: "Maria Silva",
-        clientPhone: "24999999999",
-        clientEmail: "maria@email.com",
-        startDateTime: today,
-        endDateTime: new Date(today.getTime() + 60 * 60000),
-        serviceId: allServices[0].id,
-        status: BookingStatus.PENDENTE,
-      },
-      {
-        clientName: "Ana Paula",
-        clientPhone: "24988888888",
-        clientEmail: "ana@email.com",
-        startDateTime: tomorrow,
-        endDateTime: new Date(tomorrow.getTime() + 60 * 60000),
-        serviceId: allServices[1].id,
-        status: BookingStatus.PENDENTE,
-      },
-      {
-        clientName: "João Pedro",
-        clientPhone: "24977777777",
-        startDateTime: nextWeek,
-        endDateTime: new Date(nextWeek.getTime() + 30 * 60000),
-        serviceId: allServices[2].id,
-        status: BookingStatus.CONCLUIDO,
-      },
-      {
-        clientName: "Fernanda Lima",
-        clientPhone: "24966666666",
-        startDateTime: nextWeek,
-        endDateTime: new Date(nextWeek.getTime() + 60 * 60000),
-        serviceId: allServices[3].id,
-        status: BookingStatus.CANCELADO,
-      },
-    ],
-  });
+await prisma.booking.createMany({
+  data: [
+    {
+      clientName: "Maria Silva",
+      clientPhone: "24999999999",
+      clientEmail: "maria@email.com",
+      startDateTime: nextMonday,
+      endDateTime: new Date(nextMonday.getTime() + 60 * 60000),
+      serviceId: allServices[0].id,
+      status: BookingStatus.PENDENTE,
+    },
+    {
+      clientName: "Ana Paula",
+      clientPhone: "24988888888",
+      clientEmail: "ana@email.com",
+      startDateTime: nextTuesday,
+      endDateTime: new Date(nextTuesday.getTime() + 70 * 60000),
+      serviceId: allServices[1].id,
+      status: BookingStatus.PENDENTE,
+    },
+    {
+      clientName: "João Pedro",
+      clientPhone: "24977777777",
+      startDateTime: nextWednesday,
+      endDateTime: new Date(nextWednesday.getTime() + 30 * 60000),
+      serviceId: allServices[2].id,
+      status: BookingStatus.CONCLUIDO,
+    },
+  ],
+});
 
   /* =======================
      AVALIAÇÕES
