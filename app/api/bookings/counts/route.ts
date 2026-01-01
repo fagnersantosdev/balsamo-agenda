@@ -1,37 +1,36 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { requireAdminApiAuth } from "@/lib/adminApiAuth";
-
+import { BookingsCountDTO } from "@/app/types/BookingsCountDTO";
 
 export async function GET() {
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
 
   try {
-    // 🕒 Ajuste para fuso horário do Brasil (GMT-3)
+    // 🇧🇷 Horário local Brasil
     const nowUTC = new Date();
-    const timezoneOffsetMs = 3 * 60 * 60 * 1000; // 3h em milissegundos
+    const timezoneOffsetMs = 3 * 60 * 60 * 1000;
     const localNow = new Date(nowUTC.getTime() - timezoneOffsetMs);
 
-    // 📅 Início e fim do dia local
     const startOfTodayLocal = new Date(localNow);
     startOfTodayLocal.setHours(0, 0, 0, 0);
 
     const endOfTodayLocal = new Date(localNow);
     endOfTodayLocal.setHours(23, 59, 59, 999);
 
-    // 🔁 Converter de volta para UTC (banco usa UTC)
     const startOfTodayUTC = new Date(startOfTodayLocal.getTime() + timezoneOffsetMs);
     const endOfTodayUTC = new Date(endOfTodayLocal.getTime() + timezoneOffsetMs);
 
-    // 📊 Contagens paralelas para performance
-    const [pendentes, concluidos, cancelados, hoje, futuros] = await Promise.all([
-      prisma.booking.count({ where: { status: "PENDENTE" } }),
-      prisma.booking.count({ where: { status: "CONCLUIDO" } }),
-      prisma.booking.count({ where: { status: "CANCELADO" } }),
+    const [
+      todayPending,
+      futurePending,
+      completed,
+      canceled,
+    ] = await Promise.all([
       prisma.booking.count({
         where: {
-          status: "PENDENTE", // apenas pendentes do dia
+          status: "PENDENTE",
           startDateTime: {
             gte: startOfTodayUTC,
             lt: endOfTodayUTC,
@@ -40,21 +39,24 @@ export async function GET() {
       }),
       prisma.booking.count({
         where: {
-          status: "PENDENTE", // futuros pendentes
+          status: "PENDENTE",
           startDateTime: {
             gt: endOfTodayUTC,
           },
         },
       }),
+      prisma.booking.count({ where: { status: "CONCLUIDO" } }),
+      prisma.booking.count({ where: { status: "CANCELADO" } }),
     ]);
 
-    return NextResponse.json({
-      pendentes,
-      concluidos,
-      cancelados,
-      hoje,
-      futuros,
-    });
+    const response: BookingsCountDTO = {
+      todayPending,
+      futurePending,
+      completed,
+      canceled,
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("❌ Erro ao contar agendamentos:", error);
     return NextResponse.json(

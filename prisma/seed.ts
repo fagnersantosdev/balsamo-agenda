@@ -3,28 +3,23 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-function nextWeekday(day: number) {
+/* =====================================================
+   Utilitário: próximo dia da semana
+   ===================================================== */
+function nextWeekday(day: number, hour = 10) {
   const date = new Date();
   const diff = (day + 7 - date.getDay()) % 7 || 7;
   date.setDate(date.getDate() + diff);
-  date.setHours(10, 0, 0, 0);
+  date.setHours(hour, 0, 0, 0);
   return date;
 }
-
-
-
 
 async function main() {
   console.log("🌱 Iniciando seed de desenvolvimento...");
 
-
-  /*PARA EXECUTAR O BANCO USE ESSE COMANDO
-   npx prisma db seed --preview-feature
-  
-  */
-  /* =======================
+  /* =====================================================
      ADMIN
-  ======================= */
+     ===================================================== */
   const passwordHash = await bcrypt.hash("admin123", 10);
 
   await prisma.admin.upsert({
@@ -36,104 +31,120 @@ async function main() {
     },
   });
 
-  /* =======================
-     SERVIÇOS
-  ======================= */
-  await prisma.service.createMany({
-    data: [
-      {
-        name: "Massagem Relaxante",
-        price: 120,
-        durationMin: 60,
-        details: ["Redução do estresse", "Relaxamento profundo"],
+  /* =====================================================
+     SERVIÇOS (UPSERT por nome)
+     ===================================================== */
+  const servicesData = [
+    {
+      name: "Massagem Relaxante",
+      price: 120,
+      durationMin: 60,
+      details: ["Redução do estresse", "Relaxamento profundo"],
+    },
+    {
+      name: "Pedras Quentes",
+      price: 150,
+      durationMin: 70,
+      details: ["Alívio de tensões", "Circulação"],
+    },
+    {
+      name: "Quick Massage",
+      price: 80,
+      durationMin: 30,
+      details: ["Ideal para pausas rápidas"],
+    },
+    {
+      name: "Drenagem Linfática",
+      price: 130,
+      durationMin: 60,
+      details: ["Redução de inchaço", "Bem-estar"],
+    },
+  ];
+
+  for (const service of servicesData) {
+    await prisma.service.upsert({
+      where: { name: service.name }, // ⚠️ name precisa ser @unique
+      update: {
+        price: service.price,
+        durationMin: service.durationMin,
+        details: service.details,
       },
-      {
-        name: "Pedras Quentes",
-        price: 150,
-        durationMin: 70,
-        details: ["Alívio de tensões", "Circulação"],
-      },
-      {
-        name: "Quick Massage",
-        price: 80,
-        durationMin: 30,
-        details: ["Ideal para pausas rápidas"],
-      },
-      {
-        name: "Drenagem Linfática",
-        price: 130,
-        durationMin: 60,
-        details: ["Redução de inchaço", "Bem-estar"],
-      },
-    ],
-  });
+      create: service,
+    });
+  }
 
   const allServices = await prisma.service.findMany();
 
- /* =======================
-   DISPONIBILIDADE
-======================= */
-await prisma.availability.createMany({
-  data: [
-    // Domingo
-    { dayOfWeek: 0, openHour: 0, closeHour: 0, active: false },
-
-    // Segunda a Quinta
+  /* =====================================================
+     DISPONIBILIDADE (UPSERT por dayOfWeek)
+     ===================================================== */
+  const availabilityData = [
+    { dayOfWeek: 0, openHour: 0, closeHour: 0, active: false }, // Domingo
     { dayOfWeek: 1, openHour: 9, closeHour: 18, active: true },
     { dayOfWeek: 2, openHour: 9, closeHour: 18, active: true },
     { dayOfWeek: 3, openHour: 9, closeHour: 18, active: true },
     { dayOfWeek: 4, openHour: 9, closeHour: 18, active: true },
-
-    // Sexta
     { dayOfWeek: 5, openHour: 9, closeHour: 17, active: true },
+    { dayOfWeek: 6, openHour: 0, closeHour: 0, active: false }, // Sábado
+  ];
 
-    // Sábado
-    { dayOfWeek: 6, openHour: 0, closeHour: 0, active: false },
-  ],
-});
+  for (const item of availabilityData) {
+    await prisma.availability.upsert({
+      where: { dayOfWeek: item.dayOfWeek },
+      update: {
+        openHour: item.openHour,
+        closeHour: item.closeHour,
+        active: item.active,
+      },
+      create: item,
+    });
+  }
 
+  /* =====================================================
+     AGENDAMENTOS (DEV → limpa antes)
+     ===================================================== */
+  await prisma.booking.deleteMany();
 
-  /* =======================
-   AGENDAMENTOS
-======================= */
-const nextMonday = nextWeekday(1);
-const nextTuesday = nextWeekday(2);
-const nextWednesday = nextWeekday(3);
+  const nextMonday = nextWeekday(1, 10);
+  const nextTuesday = nextWeekday(2, 10);
+  const nextWednesday = nextWeekday(3, 14);
 
-await prisma.booking.createMany({
-  data: [
-    {
-      clientName: "Maria Silva",
-      clientPhone: "24999999999",
-      clientEmail: "maria@email.com",
-      startDateTime: nextMonday,
-      endDateTime: new Date(nextMonday.getTime() + 60 * 60000),
-      serviceId: allServices[0].id,
-      status: BookingStatus.PENDENTE,
-    },
-    {
-      clientName: "Ana Paula",
-      clientPhone: "24988888888",
-      clientEmail: "ana@email.com",
-      startDateTime: nextTuesday,
-      endDateTime: new Date(nextTuesday.getTime() + 70 * 60000),
-      serviceId: allServices[1].id,
-      status: BookingStatus.PENDENTE,
-    },
-    {
-      clientName: "João Pedro",
-      clientPhone: "24977777777",
-      startDateTime: nextWednesday,
-      endDateTime: new Date(nextWednesday.getTime() + 30 * 60000),
-      serviceId: allServices[2].id,
-      status: BookingStatus.CONCLUIDO,
-    },
-  ],
-});
+  await prisma.booking.createMany({
+    data: [
+      {
+        clientName: "Maria Silva",
+        clientPhone: "24999999999",
+        clientEmail: "maria@email.com",
+        startDateTime: nextMonday,
+        endDateTime: new Date(nextMonday.getTime() + 60 * 60000),
+        serviceId: allServices.find(s => s.name === "Massagem Relaxante")!.id,
+        status: BookingStatus.PENDENTE,
+      },
+      {
+        clientName: "Ana Paula",
+        clientPhone: "24988888888",
+        clientEmail: "ana@email.com",
+        startDateTime: nextTuesday,
+        endDateTime: new Date(nextTuesday.getTime() + 70 * 60000),
+        serviceId: allServices.find(s => s.name === "Pedras Quentes")!.id,
+        status: BookingStatus.PENDENTE,
+      },
+      {
+        clientName: "João Pedro",
+        clientPhone: "24977777777",
+        startDateTime: nextWednesday,
+        endDateTime: new Date(nextWednesday.getTime() + 30 * 60000),
+        serviceId: allServices.find(s => s.name === "Quick Massage")!.id,
+        status: BookingStatus.CONCLUIDO,
+      },
+    ],
+  });
 
-  /* =======================
-     AVALIAÇÕES
-  ======================= */
+  /* =====================================================
+     AVALIAÇÕES (DEV → limpa antes)
+     ===================================================== */
+  await prisma.testimonial.deleteMany();
+
   await prisma.testimonial.createMany({
     data: [
       {
@@ -152,7 +163,7 @@ await prisma.booking.createMany({
         author: "Cliente Anônimo",
         message: "Gostei bastante, recomendo.",
         rating: 5,
-        approved: false, // para testar moderação
+        approved: false,
       },
     ],
   });

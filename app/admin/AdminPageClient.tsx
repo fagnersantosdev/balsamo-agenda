@@ -1,200 +1,82 @@
 "use client";
 
-import { useEffect, useState } from "react";
-// import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import BookingTable from "../components/BookingTable";
 import Toast from "../components/Toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import AdminMenu from "../components/AdminMenu";
-// import AdminMobileNav from "../components/AdminMobileNav";
+import { BookingsCountDTO } from "@/app/types/BookingsCountDTO";
+import { Booking } from "@/app/types/Booking";
 
-// 🔹 Tipagem dos agendamentos
-type Booking = {
-  id: number;
-  clientName: string;
-  clientPhone: string;
-  clientEmail?: string | null;
-  startDateTime: string;
-  endDateTime: string;
-  status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
-  service?: { name: string };
-};
 
 export default function AdminPageClient() {
+  /* =====================================================
+     Estados
+  ===================================================== */
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [counts, setCounts] = useState({
-    hoje: 0,
-    futuros: 0,
-    pendentes: 0,
-    concluidos: 0,
-    cancelados: 0,
+  const [counts, setCounts] = useState<BookingsCountDTO>({
+    todayPending: 0,
+    futurePending: 0,
+    completed: 0,
+    canceled: 0,
   });
-  const [filter, setFilter] = useState("today");
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
+  const [filter, setFilter] = useState<"today" | "future" | "all">("today");
+  const [statusFilter, setStatusFilter] = useState<
+    "PENDENTE" | "CONCLUIDO" | "CANCELADO" | null
+  >(null);
+
   const [searchTerm, setSearchTerm] = useState("");
-  const [toast, setToast] =
-    useState<{ message: string; type: "success" | "error" } | null>(null);
   const [loading, setLoading] = useState(true);
-  // const router = useRouter();
 
-  // ===================================================================
-  // 📄 FUNÇÃO: EXPORTAR PDF
-  // ===================================================================
-  async function exportToPDF() {
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  /* =====================================================
+     Buscar contadores (DTO)
+  ===================================================== */
+ async function fetchCounts() {
   try {
-    // ===================================================================
-    // 📦 Recupera filtros atuais
-    // ===================================================================
-    const filter = sessionStorage.getItem("admin_filter") || "today";
-    const statusFilter = sessionStorage.getItem("admin_status") || null;
+    const res = await fetch("/api/bookings/counts");
 
-    const query = new URLSearchParams();
-    if (filter) query.set("filter", filter);
-    if (statusFilter) query.set("status", statusFilter);
-
-    // ===================================================================
-    // 📡 Busca os dados da API
-    // ===================================================================
-    const res = await fetch(`/api/bookings?${query.toString()}`);
-    if (!res.ok) throw new Error("Erro ao buscar agendamentos");
-
-    const bookings: Booking[] = await res.json();
-
-    // ===================================================================
-    // 🗂 Define intervalos de datas
-    // ===================================================================
-    const now = new Date();
-
-    const minDate = new Date();
-    minDate.setMonth(now.getMonth() - 3);
-
-    const maxDate = new Date();
-    maxDate.setMonth(now.getMonth() + 3);
-
-    // ===================================================================
-    // 🔍 Filtragem final por período
-    // ===================================================================
-    const filteredBookings = bookings.filter((b) => {
-      const start = new Date(b.startDateTime);
-
-      if (filter === "future") {
-        return start > now && start <= maxDate;
-      }
-
-      if (statusFilter === "CONCLUIDO" || statusFilter === "CANCELADO") {
-        return start >= minDate && start <= now;
-      }
-
-      return start >= minDate && start <= maxDate;
-    });
-
-    if (filteredBookings.length === 0) {
+    if (!res.ok) {
+      const err = await res.json().catch(() => null);
+      console.error("Erro /counts:", res.status, err);
       setToast({
-        message: "⚠️ Nenhum agendamento encontrado neste filtro.",
+        message: "❌ Erro ao carregar contadores.",
         type: "error",
       });
-      setTimeout(() => setToast(null), 3000);
       return;
     }
 
-    // ===================================================================
-    // 🧾 Criação do PDF
-    // ===================================================================
-    const doc = new jsPDF();
-
-    const titleMap: Record<string, string> = {
-      today: "Agendamentos de Hoje",
-      future: "Agendamentos Futuros (Próx. 3 meses)",
-      all: "Relatório Geral (Últimos 3 meses)",
-    };
-
-    const title =
-      statusFilter === "CONCLUIDO"
-        ? "Agendamentos Concluídos (Últimos 3 meses)"
-        : statusFilter === "CANCELADO"
-        ? "Agendamentos Cancelados (Últimos 3 meses)"
-        : titleMap[filter] || titleMap.all;
-
-    // Cabeçalho (cor suave Bálsamo)
-    doc.setTextColor(31, 57, 36); // Verde escuro
-    doc.setFontSize(14);
-    doc.text(title, 14, 18);
-
-    doc.setFontSize(10);
-    doc.setTextColor(80, 80, 80);
-    doc.text(`Emitido em: ${now.toLocaleString("pt-BR")}`, 14, 25);
-
-    // Dados da tabela
-    const tableData = filteredBookings.map((b) => [
-      b.clientName,
-      b.clientPhone,
-      b.service?.name || "—",
-      new Date(b.startDateTime).toLocaleString("pt-BR"),
-      b.status,
-    ]);
-
-    // Tabela com tom Bálsamo
-    autoTable(doc, {
-      startY: 30,
-      head: [["Cliente", "Telefone", "Serviço", "Data/Hora", "Status"]],
-      body: tableData,
-      styles: {
-        fontSize: 9,
-      },
-      headStyles: {
-        fillColor: [31, 57, 36], // Verde
-        textColor: 255,
-      },
-      alternateRowStyles: {
-        fillColor: [245, 243, 235], // Bege bálsamo suave
-      },
-    });
-
-    // Nome do arquivo final
-    const filename = `Balsamo_${title.replace(/\s+/g, "_")}.pdf`;
-    doc.save(filename);
-
-    // ===================================================================
-    // 🌿 Confirmação elegante
-    // ===================================================================
-    setToast({
-      message: "🌿 PDF gerado com sucesso!",
-      type: "success",
-    });
+    const data: BookingsCountDTO = await res.json();
+    setCounts(data);
   } catch (err) {
-    console.error(err);
-    setToast({
-      message: "❌ Erro ao gerar o PDF.",
-      type: "error",
-    });
+    console.error("Erro ao buscar contadores:", err);
+    setToast({ message: "❌ Erro ao buscar contadores.", type: "error" });
   }
 }
 
-  // ===================================================================
-  // 📡 Carregar contadores
-  // ===================================================================
-  async function fetchCounts() {
-    try {
-      const res = await fetch("/api/bookings/counts");
-      if (res.ok) setCounts(await res.json());
-    } catch (err) {
-      console.error("Erro ao buscar contadores:", err);
-    }
-  }
-
-  // ===================================================================
-  // 📡 Carregar agendamentos
-  // ===================================================================
-  async function fetchBookings(selectedFilter: string, status?: string | null) {
+  /* =====================================================
+     Buscar agendamentos
+  ===================================================== */
+  async function fetchBookings(
+    selectedFilter: "today" | "future" | "all",
+    status?: "PENDENTE" | "CONCLUIDO" | "CANCELADO" | null
+  ) {
     setLoading(true);
     try {
       const query = new URLSearchParams();
-      if (selectedFilter) query.set("filter", selectedFilter);
+      query.set("filter", selectedFilter);
       if (status) query.set("status", status);
 
       const res = await fetch(`/api/bookings?${query.toString()}`);
-      if (res.ok) setBookings(await res.json());
+      if (!res.ok) throw new Error();
+
+      setBookings(await res.json());
     } catch (err) {
       console.error("Erro ao buscar agendamentos:", err);
       setToast({
@@ -206,12 +88,12 @@ export default function AdminPageClient() {
     }
   }
 
-  // ===================================================================
-  // 🔁 Atualizar status (Confirmar / Cancelar)
-  // ===================================================================
+  /* =====================================================
+     Atualizar status
+  ===================================================== */
   async function updateStatus(
     id: number,
-    newStatus: "PENDENTE" | "CONCLUIDO" | "CANCELADO"
+    newStatus: "CONCLUIDO" | "CANCELADO"
   ) {
     try {
       const res = await fetch(`/api/bookings/${id}/status`, {
@@ -220,7 +102,7 @@ export default function AdminPageClient() {
         body: JSON.stringify({ status: newStatus }),
       });
 
-      if (!res.ok) throw new Error("Erro ao atualizar status");
+      if (!res.ok) throw new Error();
 
       setBookings((prev) =>
         prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
@@ -236,207 +118,213 @@ export default function AdminPageClient() {
             : "❌ Agendamento cancelado.",
         type: "success",
       });
-
-      setTimeout(() => setToast(null), 4000);
     } catch (err) {
       console.error(err);
       setToast({
         message: "❌ Erro ao atualizar status.",
         type: "error",
       });
-      setTimeout(() => setToast(null), 4000);
     }
   }
 
-  // ===================================================================
-  // 🔁 Ao montar a página
-  // ===================================================================
+  /* =====================================================
+     Exportar PDF
+  ===================================================== */
+  const exportToPDF = useCallback(async () => {
+  try {
+    const resBookings = await fetch(
+      `/api/bookings?filter=${filter}&status=${statusFilter || ""}`
+    );
+
+    if (!resBookings.ok) {
+      const err = await resBookings.json().catch(() => null);
+      console.error("Erro ao buscar agendamentos p/ PDF:", resBookings.status, err);
+      setToast({ message: "❌ Erro ao gerar PDF.", type: "error" });
+      return;
+    }
+
+    const data: Booking[] = await resBookings.json();
+
+    if (data.length === 0) {
+      setToast({ message: "⚠️ Nenhum agendamento encontrado.", type: "error" });
+      return;
+    }
+
+    const doc = new jsPDF();
+    doc.setFontSize(14);
+    doc.text("Relatório de Agendamentos", 14, 18);
+
+    autoTable(doc, {
+      startY: 26,
+      head: [["Cliente", "Telefone", "Serviço", "Data/Hora", "Status"]],
+      body: data.map((b) => [
+        b.clientName,
+        b.clientPhone,
+        b.service?.name || "—",
+        new Date(b.startDateTime).toLocaleString("pt-BR"),
+        b.status,
+      ]),
+      headStyles: { fillColor: [31, 57, 36], textColor: 255 },
+    });
+
+    doc.save("Balsamo_Agendamentos.pdf");
+    setToast({ message: "📄 PDF gerado com sucesso!", type: "success" });
+  } catch (err) {
+    console.error(err);
+    setToast({ message: "❌ Erro ao gerar PDF.", type: "error" });
+  }
+}, [filter, statusFilter]);
+
+  /* =====================================================
+     Effects
+  ===================================================== */
+  
   useEffect(() => {
     fetchCounts();
     fetchBookings(filter, statusFilter);
   }, [filter, statusFilter]);
 
-  // ===================================================================
-  // 💾 Salvar filtro atual
-  // ===================================================================
   useEffect(() => {
-    sessionStorage.setItem("admin_filter", filter);
-    sessionStorage.setItem("admin_status", statusFilter || "");
-  }, [filter, statusFilter]);
+  function handlePDF() {
+    exportToPDF();
+  }
 
-  // ===================================================================
-  // 📣 Listener para Exportar PDF no Mobile
-  // ===================================================================
-  // 🔔 Listener para o menu disparar o PDF
-  useEffect(() => {
-    function handlePDF() {
-      exportToPDF(); // chama sua função de fato
-    }
+  window.addEventListener("admin:exportPDF", handlePDF);
+  return () => window.removeEventListener("admin:exportPDF", handlePDF);
+}, [exportToPDF]);
 
-    window.addEventListener("admin:exportPDF", handlePDF);
-    return () => window.removeEventListener("admin:exportPDF", handlePDF);
-  }, []);
-
-  // ===================================================================
-  // 🔍 Busca local
-  // ===================================================================
+  /* =====================================================
+     Busca local
+  ===================================================== */
   const filteredBookings = bookings.filter(
     (b) =>
       b.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.clientPhone.includes(searchTerm)
   );
 
-  // ===================================================================
-  // 📦 Botões dos cards
-  // ===================================================================
-  function handleCardClick(type: string) {
-    switch (type) {
-      case "hoje":
-        setFilter("today");
-        setStatusFilter(null);
-        break;
-      case "futuros":
-        setFilter("future");
-        setStatusFilter("PENDENTE");
-        break;
-      case "concluidos":
-        setFilter("all");
-        setStatusFilter("CONCLUIDO");
-        break;
-      case "cancelados":
-        setFilter("all");
-        setStatusFilter("CANCELADO");
-        break;
-    }
-  }
+  /* =====================================================
+     Handlers dos cards
+  ===================================================== */
+  type DashboardFilter =
+  | "todayPending"
+  | "futurePending"
+  | "completed"
+  | "canceled";
 
-  // ===================================================================
-  // 🖥️ JSX
-  // ===================================================================
+function handleCardClick(type: DashboardFilter) {
+  switch (type) {
+    case "todayPending":
+      setFilter("today");
+      setStatusFilter("PENDENTE");
+      break;
+
+    case "futurePending":
+      setFilter("future");
+      setStatusFilter("PENDENTE");
+      break;
+
+    case "completed":
+      setFilter("all");
+      setStatusFilter("CONCLUIDO");
+      break;
+
+    case "canceled":
+      setFilter("all");
+      setStatusFilter("CANCELADO");
+      break;
+  }
+}
+
+  /* =====================================================
+     JSX
+  ===================================================== */
   return (
-    <>
     <main className="max-w-6xl mx-auto px-4 py-8 pb-24">
-      {/* Cabeçalho */}
-      <div
-      className="
-        mb-8
-        bg-[#F5F3EB]/90
-        backdrop-blur-sm
-        rounded-2xl
-        p-5
-        border border-[#8D6A93]/20
-        shadow-[0_6px_22px_-12px_rgba(141,106,147,0.25)]
-        flex justify-between items-center flex-wrap gap-3
-      ">
+      {/* Header */}
+      <div className="mb-8 bg-[#F5F3EB]/90 rounded-2xl p-5 border shadow flex justify-between">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-[#1F3924]">
+          <h1 className="text-2xl font-semibold text-[#1F3924]">
             🌿 Painel Administrativo
           </h1>
-          <p className="text-sm text-[#8D6A93] mt-1">
-            Bem-vinda de volta, <strong>Administradora</strong>.
+          <p className="text-sm text-[#8D6A93]">
+            Bem-vinda de volta, <strong>Administradora</strong>
           </p>
         </div>
-
-        {/* Menu Desktop */}
         <AdminMenu />
       </div>
 
       {/* Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 text-center">
-        {[
-          { label: "Hoje", key: "hoje" },
-          { label: "Futuros", key: "futuros" },
-          { label: "Concluídos", key: "concluidos" },
-          { label: "Cancelados", key: "cancelados" },
-        ].map(({ label, key }) => (
-          <button
-            key={key}
-            onClick={() => handleCardClick(key)}
-            className={`
-            rounded-xl
-            shadow-sm
-            hover:shadow-md
-            transition
-            border
-            px-4
-            py-3
-            ${
-              filter === key || statusFilter?.toLowerCase() === key
-                ? "bg-[#1F3924] text-white border-[#1F3924]"
-                : "bg-[#E4F0FD] text-[#1F3924] border-transparent hover:bg-[#dce7f9]"
-            }
-          `}
-          >
-            <p className="font-semibold">{label}</p>
-            <p className="text-lg font-bold">
-              {counts[key as keyof typeof counts]}
-            </p>
-          </button>
-        ))}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+        <Card
+        label="Hoje"
+        value={counts.todayPending}
+        onClick={() => handleCardClick("todayPending")}
+      />
+
+      <Card
+        label="Futuros"
+        value={counts.futurePending}
+        onClick={() => handleCardClick("futurePending")}
+      />
+
+      <Card
+        label="Concluídos"
+        value={counts.completed}
+        onClick={() => handleCardClick("completed")}
+      />
+
+      <Card
+        label="Cancelados"
+        value={counts.canceled}
+        onClick={() => handleCardClick("canceled")}
+      />
       </div>
 
       {/* Busca */}
-      <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="🔍 Buscar por nome ou telefone..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="
-          w-full sm:w-1/2
-          px-4 py-3
-          rounded-xl
-          border border-[#8D6A93]/30
-          bg-white
-          shadow-sm
-          placeholder:text-[#1F3924]/40
-          focus:outline-none
-          focus:ring-2
-          focus:ring-[#8D6A93]/40
-          focus:border-[#8D6A93]/40
-          transition
-        "
-        />
-      </div>
+      <input
+        className="w-full sm:w-1/2 mb-6 p-3 rounded-xl border"
+        placeholder="Buscar por nome ou telefone"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
 
       {/* Tabela */}
       {loading ? (
-        <p className="animate-pulse text-center text-[#1F3924]/70">
-          Carregando agendamentos...
-        </p>
-      ) : filteredBookings.length === 0 ? (
-        <p className="text-center text-[#1F3924]/70">
-          Nenhum agendamento encontrado.
-        </p>
+        <p className="text-center">Carregando...</p>
       ) : (
-        <div className="
-          overflow-x-auto
-          rounded-2xl
-          bg-white
-          shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
-          border border-[#8D6A93]/20
-        ">
-          <BookingTable
-            bookings={filteredBookings}
-            updateStatus={updateStatus}
-            showActions={filter === "today" || filter === "future"}
-          />
-        </div>
-      )}
-
-      {/* Mobile Bottom Menu */}
-      {/* <AdminMobileNav /> */}
-
-    </main>
-    {/* Toast */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-          // position="top"
+        <BookingTable
+          bookings={filteredBookings}
+          updateStatus={updateStatus}
+          showActions={filter !== "all"}
         />
       )}
-      </>
+
+      {toast && (
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
+      )}
+    </main>
+  );
+}
+
+/* =====================================================
+   Card Component
+===================================================== */
+function Card({
+  label,
+  value,
+  onClick,
+}: {
+  label: string;
+  value: number;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="rounded-xl bg-[#E4F0FD] p-4 shadow hover:shadow-md transition"
+    >
+      <p className="font-semibold">{label}</p>
+      <p className="text-2xl font-bold">{value}</p>
+    </button>
   );
 }

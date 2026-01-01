@@ -6,6 +6,7 @@ import ConfirmModal from "./ConfirmModal";
 type Props = {
   bookings: Booking[];
   showActions?: boolean;
+  updateStatus?: (id: number, status: "CONCLUIDO" | "CANCELADO") => Promise<void>;
 };
 
 export default function BookingTable({ bookings, showActions = true }: Props) {

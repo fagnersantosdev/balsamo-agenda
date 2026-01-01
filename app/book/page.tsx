@@ -122,9 +122,11 @@ export default function BookPage() {
     setMsgType("success");
     setMsg("Agendamento realizado com sucesso!");
   } catch (err) {
-    setMsgType("error");
-    setMsg("Erro ao realizar agendamento.");
-  }
+  console.error("Erro ao realizar agendamento:", err);
+  setMsgType("error");
+  setMsg("Erro ao realizar agendamento.");
+}
+
 }
 
 

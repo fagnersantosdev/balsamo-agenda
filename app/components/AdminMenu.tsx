@@ -92,6 +92,13 @@ export default function AdminMenu() {
             </button>
 
             <button
+              onClick={() => go("/admin/availability")}
+              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]/70 transition"
+            >
+              ⏰ Gerenciar Horários
+            </button>
+
+            <button
               onClick={() => go("/admin/change-password")}
               className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]/70 transition"
             >

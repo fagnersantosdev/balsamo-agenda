@@ -6,6 +6,7 @@ export type Booking = {
   clientPhone: string;
   clientEmail?: string | null;
   startDateTime: string;
+  endDateTime: string;
   status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
   service?: Service | null;
 };
