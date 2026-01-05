@@ -106,6 +106,13 @@ export default function AdminMenu() {
             </button>
 
             <button
+              onClick={() => go("/admin/settings")}
+              className="block w-full text-left px-4 py-2 text-[#1F3924] hover:bg-[#F5F3EB]/70 transition"
+            >
+              ⚙️ Configurações
+            </button>
+
+            <button
               onClick={async () => {
                 await fetch("/api/auth/logout", { method: "POST" });
                 window.location.href = "/login";

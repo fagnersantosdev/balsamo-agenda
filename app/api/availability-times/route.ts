@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import {
+  startOfBrazilDay,
+  endOfBrazilDay,
+  //toUTCFromBrazil,
+} from "@/lib/timezone";
 
 /**
- * ⏱ Buffer entre atendimentos (em minutos)
- * Ex: tempo de limpeza, organização, descanso
+ * ⏱ Buffer entre atendimentos (minutos)
  */
-const BUFFER_MINUTES = 15;
+const settings = await prisma.settings.findUnique({
+  where: { id: 1 },
+});
+
+const bufferMinutes = settings?.bufferMinutes ?? 15;
+const durationMin = service.durationMin + bufferMinutes;
+
+
+/**
+ * ⏱ Intervalo visual dos horários (UX)
+ */
+const SLOT_INTERVAL_MINUTES = 15;
 
 /**
  * GET /api/availability-times
@@ -19,7 +34,7 @@ export async function GET(req: Request) {
     const serviceIdParam = searchParams.get("serviceId");
 
     /* ============================
-       🔎 Validação de parâmetros
+       🔎 Validação
     ============================ */
     if (!dateParam || !serviceIdParam) {
       return NextResponse.json(
@@ -37,31 +52,26 @@ export async function GET(req: Request) {
     }
 
     /* ============================
-       📅 Data base (local)
+       📅 Data base (Brasil)
     ============================ */
-    const baseDate = new Date(`${dateParam}T00:00:00`);
-    if (isNaN(baseDate.getTime())) {
+    const brazilBaseDate = new Date(`${dateParam}T00:00:00`);
+    if (isNaN(brazilBaseDate.getTime())) {
       return NextResponse.json(
         { error: "Data inválida." },
         { status: 400 }
       );
     }
 
-    const dayOfWeek = baseDate.getDay();
-    const now = new Date();
+    const dayOfWeek = brazilBaseDate.getDay();
 
     /* ============================
-       🕒 Availability do dia
+       🕒 Availability
     ============================ */
-    const availability = await prisma.availability.findFirst({
-      where: {
-        dayOfWeek,
-        active: true,
-      },
+    const availability = await prisma.availability.findUnique({
+      where: { dayOfWeek },
     });
 
-    // Dia não disponível
-    if (!availability) {
+    if (!availability || !availability.active) {
       return NextResponse.json([]);
     }
 
@@ -72,29 +82,27 @@ export async function GET(req: Request) {
       where: { id: serviceId },
     });
 
-    if (!service) {
+    if (!service || !service.active) {
       return NextResponse.json(
-        { error: "Serviço não encontrado." },
+        { error: "Serviço inválido ou inativo." },
         { status: 404 }
       );
     }
 
-    // Duração do atendimento + buffer
-    const durationMin = service.durationMin + BUFFER_MINUTES;
-
     /* ============================
-       ⏰ Intervalo do dia
+       ⏰ Intervalo do dia (UTC)
     ============================ */
-    const startOfDay = new Date(baseDate);
-    startOfDay.setHours(availability.openHour, 0, 0, 0);
+    const startOfDayUTC = startOfBrazilDay(brazilBaseDate);
+    const endOfDayUTC = endOfBrazilDay(brazilBaseDate);
 
-    const endOfDay = new Date(baseDate);
-    endOfDay.setHours(availability.closeHour, 0, 0, 0);
+    const dayStartUTC = new Date(startOfDayUTC);
+    dayStartUTC.setUTCHours(availability.openHour, 0, 0, 0);
+
+    const dayEndUTC = new Date(startOfDayUTC);
+    dayEndUTC.setUTCHours(availability.closeHour, 0, 0, 0);
 
     /* ============================
        📋 Agendamentos do dia
-       - PENDENTE e CONCLUIDO bloqueiam horário
-       - CANCELADO não bloqueia
     ============================ */
     const bookings = await prisma.booking.findMany({
       where: {
@@ -102,8 +110,8 @@ export async function GET(req: Request) {
           in: ["PENDENTE", "CONCLUIDO"],
         },
         startDateTime: {
-          gte: startOfDay,
-          lt: endOfDay,
+          gte: startOfDayUTC,
+          lte: endOfDayUTC,
         },
       },
       select: {
@@ -113,45 +121,52 @@ export async function GET(req: Request) {
     });
 
     /* ============================
-       🔁 Geração de horários
+       🔁 Geração dos horários
     ============================ */
     const slots: string[] = [];
-    let cursor = new Date(startOfDay);
+    let cursorUTC = new Date(dayStartUTC);
+
+    const nowUTC = new Date();
 
     while (true) {
-      const slotStart = new Date(cursor);
-      const slotEnd = new Date(
-        slotStart.getTime() + durationMin * 60000
+      const slotStartUTC = new Date(cursorUTC);
+
+      const slotEndUTC = new Date(
+        slotStartUTC.getTime() +
+          (service.durationMin + BUFFER_MINUTES) * 60_000
       );
 
-      // Estoura o expediente
-      if (slotEnd > endOfDay) break;
+      if (slotEndUTC > dayEndUTC) break;
 
-      // Evita horários no passado (caso seja hoje)
-      if (slotStart < now) {
-        cursor = new Date(cursor.getTime() + 15 * 60000);
+      // Evita horários passados (apenas se for hoje)
+      if (slotStartUTC < nowUTC) {
+        cursorUTC = new Date(
+          cursorUTC.getTime() + SLOT_INTERVAL_MINUTES * 60_000
+        );
         continue;
       }
 
-      // Verifica conflito com agendamentos existentes
       const hasConflict = bookings.some((b) => {
-        const bookingStart = new Date(b.startDateTime);
-        const bookingEnd = new Date(b.endDateTime);
-
         return (
-          slotStart < bookingEnd &&
-          slotEnd > bookingStart
+          slotStartUTC < b.endDateTime &&
+          slotEndUTC > b.startDateTime
         );
       });
 
       if (!hasConflict) {
-        const h = String(slotStart.getHours()).padStart(2, "0");
-        const m = String(slotStart.getMinutes()).padStart(2, "0");
+        const localSlot = new Date(
+          slotStartUTC.getTime() - 3 * 60 * 60 * 1000
+        );
+
+        const h = String(localSlot.getHours()).padStart(2, "0");
+        const m = String(localSlot.getMinutes()).padStart(2, "0");
+
         slots.push(`${h}:${m}`);
       }
 
-      // Avança a cada 15 minutos
-      cursor = new Date(cursor.getTime() + durationMin * 60000);
+      cursorUTC = new Date(
+        cursorUTC.getTime() + SLOT_INTERVAL_MINUTES * 60_000
+      );
     }
 
     return NextResponse.json(slots);

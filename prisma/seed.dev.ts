@@ -27,6 +27,18 @@ async function main() {
   await prisma.testimonial.deleteMany();
   await prisma.availability.deleteMany();
   await prisma.service.deleteMany();
+  
+  await prisma.settings.upsert({
+  where: { id: 1 },
+  update: {
+    bufferMinutes: 15,
+  },
+  create: {
+    id: 1,
+    bufferMinutes: 15,
+  },
+});
+
 
   /* =====================================================
      ADMIN

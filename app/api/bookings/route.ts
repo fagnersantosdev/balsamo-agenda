@@ -128,10 +128,15 @@ export async function POST(req: Request) {
 
     const startUTC = toUTCFromBrazil(startLocal);
 
-    const BUFFER_MINUTES = 15;
+    const settings = await prisma.settings.findUnique({
+      where: { id: 1 },
+    });
+
+    const bufferMinutes = settings?.bufferMinutes ?? 15;
+
     const endUTC = new Date(
       startUTC.getTime() +
-        (service.durationMin + BUFFER_MINUTES) * 60_000
+        (service.durationMin + bufferMinutes) * 60_000
     );
 
     /* =====================================================
@@ -153,7 +158,7 @@ export async function POST(req: Request) {
     const startHour =
       startLocal.getHours() + startLocal.getMinutes() / 60;
     const endHour =
-      (startHour * 60 + service.durationMin + BUFFER_MINUTES) / 60;
+      (startHour * 60 + service.durationMin + bufferMinutes) / 60;
 
     if (
       startHour < availability.openHour ||

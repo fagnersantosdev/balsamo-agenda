@@ -64,3 +64,9 @@ model Testimonial {
   createdAt DateTime @default(now())
   approved  Boolean  @default(false)
 }
+
+model Settings {
+  id            Int @id @default(1)
+  bufferMinutes Int @default(15)
+  updatedAt     DateTime @updatedAt
+}

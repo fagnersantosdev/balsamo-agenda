@@ -55,10 +55,11 @@ export default function AdminSidebar() {
         {item("/admin/services", "Serviços", "🛠")}
         {item("/admin/testimonials", "Avaliações", "💬")}
         {item("/admin/availability", "Disponibilidade", "⏰")}
+        {item("/admin/settings", "Configurações", "⚙️")}
 
         {/* Futuras seções */}
         {/* {item("/admin/reports", "Relatórios", "📊") */}
-        {/* {item("/admin/config", "Configurações", "⚙️")} */}
+        
 
       </nav>
 

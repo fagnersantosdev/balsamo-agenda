@@ -77,7 +77,18 @@ export default function AdminSidebar() {
         >
           💬 <span> Avaliações</span>
         </Link>
+
+        <Link
+          href="/admin/settings"
+          className={navClass(
+            "px-3 py-2 rounded-xl flex items-center gap-2 transition-colors duration-200",
+            pathname.startsWith("/admin/settings")
+          )}
+        >
+          ⚙️ <span>Configurações</span>
+        </Link>
       </nav>
+      
 
       {/* Sair */}
       <button
