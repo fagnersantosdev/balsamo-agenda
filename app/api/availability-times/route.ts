@@ -1,24 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getTotalDuration } from "@/lib/lib.scheduling";
 import {
   startOfBrazilDay,
   endOfBrazilDay,
-  //toUTCFromBrazil,
+  toBrazilDate,
 } from "@/lib/timezone";
 
 /**
- * ⏱ Buffer entre atendimentos (minutos)
- */
-const settings = await prisma.settings.findUnique({
-  where: { id: 1 },
-});
-
-const bufferMinutes = settings?.bufferMinutes ?? 15;
-const durationMin = service.durationMin + bufferMinutes;
-
-
-/**
- * ⏱ Intervalo visual dos horários (UX)
+ * ⏱ Passo visual dos horários (UX)
+ * Não influencia conflito nem duração real
  */
 const SLOT_INTERVAL_MINUTES = 15;
 
@@ -76,18 +67,9 @@ export async function GET(req: Request) {
     }
 
     /* ============================
-       🛠 Serviço
+       ⏱ Duração total (serviço + buffer global)
     ============================ */
-    const service = await prisma.service.findUnique({
-      where: { id: serviceId },
-    });
-
-    if (!service || !service.active) {
-      return NextResponse.json(
-        { error: "Serviço inválido ou inativo." },
-        { status: 404 }
-      );
-    }
+    const { total } = await getTotalDuration(serviceId);
 
     /* ============================
        ⏰ Intervalo do dia (UTC)
@@ -106,9 +88,7 @@ export async function GET(req: Request) {
     ============================ */
     const bookings = await prisma.booking.findMany({
       where: {
-        status: {
-          in: ["PENDENTE", "CONCLUIDO"],
-        },
+        status: { in: ["PENDENTE", "CONCLUIDO"] },
         startDateTime: {
           gte: startOfDayUTC,
           lte: endOfDayUTC,
@@ -125,20 +105,17 @@ export async function GET(req: Request) {
     ============================ */
     const slots: string[] = [];
     let cursorUTC = new Date(dayStartUTC);
-
     const nowUTC = new Date();
 
     while (true) {
       const slotStartUTC = new Date(cursorUTC);
-
       const slotEndUTC = new Date(
-        slotStartUTC.getTime() +
-          (service.durationMin + BUFFER_MINUTES) * 60_000
+        slotStartUTC.getTime() + total * 60_000
       );
 
       if (slotEndUTC > dayEndUTC) break;
 
-      // Evita horários passados (apenas se for hoje)
+      // Evita horários no passado (apenas se for hoje)
       if (slotStartUTC < nowUTC) {
         cursorUTC = new Date(
           cursorUTC.getTime() + SLOT_INTERVAL_MINUTES * 60_000
@@ -154,9 +131,7 @@ export async function GET(req: Request) {
       });
 
       if (!hasConflict) {
-        const localSlot = new Date(
-          slotStartUTC.getTime() - 3 * 60 * 60 * 1000
-        );
+        const localSlot = toBrazilDate(slotStartUTC);
 
         const h = String(localSlot.getHours()).padStart(2, "0");
         const m = String(localSlot.getMinutes()).padStart(2, "0");

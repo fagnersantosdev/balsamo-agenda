@@ -7,6 +7,7 @@ import {
   endOfBrazilDay,
   toUTCFromBrazil,
 } from "@/lib/timezone";
+import { getTotalDuration } from "@/lib/lib.scheduling";
 
 /* ============================================================
    GET — Buscar agendamentos (ADMIN)
@@ -20,7 +21,7 @@ export async function GET(req: Request) {
   const status = searchParams.get("status"); // PENDENTE | CONCLUIDO | CANCELADO
 
   try {
-    // 🇧🇷 Intervalos base (em UTC)
+    // 🇧🇷 Intervalos base (UTC calculado a partir do Brasil)
     const todayStart = startOfBrazilDay();
     const todayEnd = endOfBrazilDay();
 
@@ -48,20 +49,13 @@ export async function GET(req: Request) {
 
     if (filter === "future") {
       where.startDateTime = {
-        gte: todayEnd,
+        gt: todayEnd,
         lt: futureLimit,
       };
       where.status = "PENDENTE";
     }
 
-    if (filter === "all" && status === "CONCLUIDO") {
-      where.startDateTime = {
-        gte: threeMonthsAgo,
-        lt: todayEnd,
-      };
-    }
-
-    if (filter === "all" && status === "CANCELADO") {
+    if (filter === "all" && (status === "CONCLUIDO" || status === "CANCELADO")) {
       where.startDateTime = {
         gte: threeMonthsAgo,
         lt: todayEnd,
@@ -109,6 +103,9 @@ export async function POST(req: Request) {
       );
     }
 
+    /* ============================
+       🛠 Serviço
+    ============================ */
     const service = await prisma.service.findUnique({
       where: { id: Number(data.serviceId) },
     });
@@ -120,28 +117,24 @@ export async function POST(req: Request) {
       );
     }
 
-    /* =====================================================
+    /* ============================
+       ⏱ Duração total (serviço + buffer)
+       👉 FONTE ÚNICA DA REGRA
+    ============================ */
+    const { total } = await getTotalDuration(Number(data.serviceId));
+
+    /* ============================
        🕒 Horário escolhido (Brasil → UTC)
-    ===================================================== */
+    ============================ */
     const startLocal = new Date(data.startDateTime);
     startLocal.setSeconds(0, 0);
 
     const startUTC = toUTCFromBrazil(startLocal);
+    const endUTC = new Date(startUTC.getTime() + total * 60_000);
 
-    const settings = await prisma.settings.findUnique({
-      where: { id: 1 },
-    });
-
-    const bufferMinutes = settings?.bufferMinutes ?? 15;
-
-    const endUTC = new Date(
-      startUTC.getTime() +
-        (service.durationMin + bufferMinutes) * 60_000
-    );
-
-    /* =====================================================
-       📅 Disponibilidade
-    ===================================================== */
+    /* ============================
+       📅 Disponibilidade do dia
+    ============================ */
     const dayOfWeek = startLocal.getDay(); // 0..6
 
     const availability = await prisma.availability.findUnique({
@@ -157,8 +150,13 @@ export async function POST(req: Request) {
 
     const startHour =
       startLocal.getHours() + startLocal.getMinutes() / 60;
-    const endHour =
-      (startHour * 60 + service.durationMin + bufferMinutes) / 60;
+
+    const endMinutes =
+      startLocal.getHours() * 60 +
+      startLocal.getMinutes() +
+      total;
+
+    const endHour = endMinutes / 60;
 
     if (
       startHour < availability.openHour ||
@@ -170,9 +168,9 @@ export async function POST(req: Request) {
       );
     }
 
-    /* =====================================================
+    /* ============================
        🔁 Verificar conflito
-    ===================================================== */
+    ============================ */
     const startOfDayUTC = startOfBrazilDay(startLocal);
     const endOfDayUTC = endOfBrazilDay(startLocal);
 
@@ -197,9 +195,9 @@ export async function POST(req: Request) {
       );
     }
 
-    /* =====================================================
+    /* ============================
        ✅ Criar agendamento
-    ===================================================== */
+    ============================ */
     const booking = await prisma.booking.create({
       data: {
         clientName: data.clientName,
