@@ -1,15 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTotalDuration } from "@/lib/lib.scheduling";
-import {
-  startOfBrazilDay,
-  endOfBrazilDay,
-  toBrazilDate,
-} from "@/lib/timezone";
 
 /**
  * ⏱ Passo visual dos horários (UX)
- * Não influencia conflito nem duração real
+ * Não interfere em conflito nem duração real
  */
 const SLOT_INTERVAL_MINUTES = 15;
 
@@ -43,20 +38,20 @@ export async function GET(req: Request) {
     }
 
     /* ============================
-       📅 Data base (Brasil)
+       📅 Data base (HORÁRIO LOCAL)
     ============================ */
-    const brazilBaseDate = new Date(`${dateParam}T00:00:00`);
-    if (isNaN(brazilBaseDate.getTime())) {
+    const baseDate = new Date(`${dateParam}T00:00:00`);
+    if (isNaN(baseDate.getTime())) {
       return NextResponse.json(
         { error: "Data inválida." },
         { status: 400 }
       );
     }
 
-    const dayOfWeek = brazilBaseDate.getDay();
+    const dayOfWeek = baseDate.getDay();
 
     /* ============================
-       🕒 Availability
+       🕒 Disponibilidade
     ============================ */
     const availability = await prisma.availability.findUnique({
       where: { dayOfWeek },
@@ -72,26 +67,23 @@ export async function GET(req: Request) {
     const { total } = await getTotalDuration(serviceId);
 
     /* ============================
-       ⏰ Intervalo do dia (UTC)
+       ⏰ Expediente (HORÁRIO LOCAL)
     ============================ */
-    const startOfDayUTC = startOfBrazilDay(brazilBaseDate);
-    const endOfDayUTC = endOfBrazilDay(brazilBaseDate);
+    const dayStart = new Date(baseDate);
+    dayStart.setHours(availability.openHour, 0, 0, 0);
 
-    const dayStartUTC = new Date(startOfDayUTC);
-    dayStartUTC.setUTCHours(availability.openHour, 0, 0, 0);
-
-    const dayEndUTC = new Date(startOfDayUTC);
-    dayEndUTC.setUTCHours(availability.closeHour, 0, 0, 0);
+    const dayEnd = new Date(baseDate);
+    dayEnd.setHours(availability.closeHour, 0, 0, 0);
 
     /* ============================
-       📋 Agendamentos do dia
+       📋 Agendamentos do dia (UTC no banco)
     ============================ */
     const bookings = await prisma.booking.findMany({
       where: {
         status: { in: ["PENDENTE", "CONCLUIDO"] },
         startDateTime: {
-          gte: startOfDayUTC,
-          lte: endOfDayUTC,
+          gte: dayStart,
+          lt: dayEnd,
         },
       },
       select: {
@@ -104,43 +96,41 @@ export async function GET(req: Request) {
        🔁 Geração dos horários
     ============================ */
     const slots: string[] = [];
-    let cursorUTC = new Date(dayStartUTC);
-    const nowUTC = new Date();
+    let cursor = new Date(dayStart);
+    const now = new Date();
 
     while (true) {
-      const slotStartUTC = new Date(cursorUTC);
-      const slotEndUTC = new Date(
-        slotStartUTC.getTime() + total * 60_000
-      );
+      const slotStart = new Date(cursor);
+      const slotEnd = new Date(slotStart.getTime() + total * 60_000);
 
-      if (slotEndUTC > dayEndUTC) break;
+      if (slotEnd > dayEnd) break;
 
-      // Evita horários no passado (apenas se for hoje)
-      if (slotStartUTC < nowUTC) {
-        cursorUTC = new Date(
-          cursorUTC.getTime() + SLOT_INTERVAL_MINUTES * 60_000
+      // Evita horários passados (apenas se for hoje)
+      if (slotStart < now) {
+        cursor = new Date(
+          cursor.getTime() + SLOT_INTERVAL_MINUTES * 60_000
         );
         continue;
       }
 
       const hasConflict = bookings.some((b) => {
         return (
-          slotStartUTC < b.endDateTime &&
-          slotEndUTC > b.startDateTime
+          slotStart < b.endDateTime &&
+          slotEnd > b.startDateTime
         );
       });
 
       if (!hasConflict) {
-        const localSlot = toBrazilDate(slotStartUTC);
+        const label = slotStart.toLocaleTimeString("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
 
-        const h = String(localSlot.getHours()).padStart(2, "0");
-        const m = String(localSlot.getMinutes()).padStart(2, "0");
-
-        slots.push(`${h}:${m}`);
+        slots.push(label);
       }
 
-      cursorUTC = new Date(
-        cursorUTC.getTime() + SLOT_INTERVAL_MINUTES * 60_000
+      cursor = new Date(
+        cursor.getTime() + SLOT_INTERVAL_MINUTES * 60_000
       );
     }
 
