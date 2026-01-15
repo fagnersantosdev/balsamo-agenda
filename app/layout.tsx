@@ -2,9 +2,10 @@ import "./globals.css";
 import Image from "next/image";
 import Link from "next/link";
 import { Oooh_Baby, Outfit } from "next/font/google";
-import BackgroundButterflies from "./components/BackgroundButterflies";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import SiteFooter from "./components/SiteFooter";
+import ClientEfeccts from "./components/ClientEfects";
+
 
 const ooohBaby = Oooh_Baby({
   subsets: ["latin"],
@@ -35,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${ooohBaby.variable} ${outfit.variable} font-sans bg-[#FFFEF9] text-[#1F3924] relative`}
       >
         {/* ❧ Fundo de borboletas */}
-        <BackgroundButterflies />
+        <ClientEfeccts />
 
         {/* ╔══════════════╗
            HEADER PREMIUM
