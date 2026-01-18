@@ -119,15 +119,23 @@ export default function BookPage() {
       throw new Error(data.error || "Erro ao agendar");
     }
 
+    setSuccessData({
+      name: String(form.get("clientName")),
+      date: startDateTime.toLocaleString("pt-BR", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }),
+      service: selectedService?.name || "",
+    });
+
     setMsgType("success");
     setMsg("Agendamento realizado com sucesso!");
-  } catch (err) {
-  console.error("Erro ao realizar agendamento:", err);
-  setMsgType("error");
-  setMsg("Erro ao realizar agendamento.");
-}
-
-}
+      } catch (err) {
+        console.error("Erro ao realizar agendamento:", err);
+        setMsgType("error");
+        setMsg("Erro ao realizar agendamento.");
+      }
+    }
 
 
   /* ============================================================

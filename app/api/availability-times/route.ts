@@ -2,26 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getTotalDuration } from "@/lib/lib.scheduling";
 
-/**
- * ⏱ Passo visual dos horários (UX)
- * Não interfere em conflito nem duração real
- */
 const SLOT_INTERVAL_MINUTES = 15;
 
-/**
- * GET /api/availability-times
- * ?date=YYYY-MM-DD
- * &serviceId=number
- */
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const dateParam = searchParams.get("date");
     const serviceIdParam = searchParams.get("serviceId");
 
-    /* ============================
-       🔎 Validação
-    ============================ */
     if (!dateParam || !serviceIdParam) {
       return NextResponse.json(
         { error: "Parâmetros obrigatórios ausentes." },
@@ -38,9 +26,9 @@ export async function GET(req: Request) {
     }
 
     /* ============================
-       📅 Data base (HORÁRIO LOCAL)
+       📅 Data base (Brasil)
     ============================ */
-    const baseDate = new Date(`${dateParam}T00:00:00`);
+    const baseDate = new Date(`${dateParam}T00:00:00-03:00`);
     if (isNaN(baseDate.getTime())) {
       return NextResponse.json(
         { error: "Data inválida." },
@@ -62,28 +50,28 @@ export async function GET(req: Request) {
     }
 
     /* ============================
-       ⏱ Duração total (serviço + buffer global)
+       ⏱ Duração total (serviço + buffer)
     ============================ */
     const { total } = await getTotalDuration(serviceId);
 
     /* ============================
-       ⏰ Expediente (HORÁRIO LOCAL)
+       ⏰ Expediente (UTC REAL)
     ============================ */
-    const dayStart = new Date(baseDate);
-    dayStart.setHours(availability.openHour, 0, 0, 0);
+    const dayStartUTC = new Date(baseDate);
+    dayStartUTC.setUTCHours(availability.openHour + 3, 0, 0, 0);
 
-    const dayEnd = new Date(baseDate);
-    dayEnd.setHours(availability.closeHour, 0, 0, 0);
+    const dayEndUTC = new Date(baseDate);
+    dayEndUTC.setUTCHours(availability.closeHour + 3, 0, 0, 0);
 
     /* ============================
-       📋 Agendamentos do dia (UTC no banco)
+       📋 Agendamentos do dia (UTC)
     ============================ */
     const bookings = await prisma.booking.findMany({
       where: {
         status: { in: ["PENDENTE", "CONCLUIDO"] },
         startDateTime: {
-          gte: dayStart,
-          lt: dayEnd,
+          gte: dayStartUTC,
+          lt: dayEndUTC,
         },
       },
       select: {
@@ -92,36 +80,36 @@ export async function GET(req: Request) {
       },
     });
 
+    const bookingsUTC = bookings.map((b) => ({
+      start: b.startDateTime.getTime(),
+      end: b.endDateTime.getTime(),
+    }));
+
     /* ============================
        🔁 Geração dos horários
     ============================ */
     const slots: string[] = [];
-    let cursor = new Date(dayStart);
-    const now = new Date();
+    let cursorUTC = new Date(dayStartUTC);
+    const nowUTC = new Date();
 
     while (true) {
-      const slotStart = new Date(cursor);
-      const slotEnd = new Date(slotStart.getTime() + total * 60_000);
+      const slotStart = cursorUTC.getTime();
+      const slotEnd = slotStart + total * 60_000;
 
-      if (slotEnd > dayEnd) break;
+      if (slotEnd > dayEndUTC.getTime()) break;
 
-      // Evita horários passados (apenas se for hoje)
-      if (slotStart < now) {
-        cursor = new Date(
-          cursor.getTime() + SLOT_INTERVAL_MINUTES * 60_000
-        );
+      if (slotStart < nowUTC.getTime()) {
+        cursorUTC = new Date(slotStart + SLOT_INTERVAL_MINUTES * 60_000);
         continue;
       }
 
-      const hasConflict = bookings.some((b) => {
-        return (
-          slotStart < b.endDateTime &&
-          slotEnd > b.startDateTime
-        );
-      });
+      const hasConflict = bookingsUTC.some(
+        (b) => slotStart < b.end && slotEnd > b.start
+      );
 
       if (!hasConflict) {
-        const label = slotStart.toLocaleTimeString("pt-BR", {
+        const label = new Date(slotStart).toLocaleTimeString("pt-BR", {
+          timeZone: "America/Sao_Paulo",
           hour: "2-digit",
           minute: "2-digit",
         });
@@ -129,9 +117,7 @@ export async function GET(req: Request) {
         slots.push(label);
       }
 
-      cursor = new Date(
-        cursor.getTime() + SLOT_INTERVAL_MINUTES * 60_000
-      );
+      cursorUTC = new Date(slotStart + SLOT_INTERVAL_MINUTES * 60_000);
     }
 
     return NextResponse.json(slots);

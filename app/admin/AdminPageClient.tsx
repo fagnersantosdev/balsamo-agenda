@@ -235,6 +235,8 @@ function handleCardClick(type: DashboardFilter) {
   }
 }
 
+const hasBookings = filteredBookings.length > 0;
+
   /* =====================================================
      JSX
   ===================================================== */
@@ -291,12 +293,24 @@ function handleCardClick(type: DashboardFilter) {
       {/* Tabela */}
       {loading ? (
         <p className="text-center">Carregando...</p>
-      ) : (
+      ) : hasBookings ? (
         <BookingTable
           bookings={filteredBookings}
           updateStatus={updateStatus}
           showActions={filter !== "all"}
         />
+      ) : (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="text-5xl mb-4">📭</div>
+
+          <h3 className="text-lg font-semibold text-[#1F3924]">
+            Nenhum agendamento encontrado
+          </h3>
+
+          <p className="text-sm text-[#1F3924]/70 mt-2 max-w-sm">
+            Não há registros para o filtro selecionado no momento.
+          </p>
+        </div>
       )}
 
       {toast && (
