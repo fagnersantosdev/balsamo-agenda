@@ -65,7 +65,7 @@ export default function BookPage() {
   async function loadAvailableTimes(date: Date, serviceId: number) {
   setAvailableTimes([]);
 
-  const dayISO = date.toISOString().split("T")[0];
+  const dayISO = date.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo", });
 
   const res = await fetch(
     `/api/availability-times?date=${dayISO}&serviceId=${serviceId}`
@@ -84,9 +84,11 @@ export default function BookPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
   e.preventDefault();
 
-  const form = new FormData(e.currentTarget);
+  // ✅ REGRA DE OURO: Salve a referência do form ANTES de qualquer await
+  const formElement = e.currentTarget; 
+  const formData = new FormData(formElement);
 
-  const time = String(form.get("startDateTime")); // "09:30"
+  const time = String(formData.get("startDateTime"));
 
   if (!selectedDate || !time) {
     setMsgType("error");
@@ -95,15 +97,14 @@ export default function BookPage() {
   }
 
   const [hour, minute] = time.split(":").map(Number);
-
   const startDateTime = new Date(selectedDate);
   startDateTime.setHours(hour, minute, 0, 0);
 
   const payload = {
-    clientName: form.get("clientName"),
-    clientPhone: String(form.get("clientPhone")).replace(/\D/g, ""),
-    clientEmail: form.get("clientEmail") || null,
-    serviceId: Number(form.get("serviceId")),
+    clientName: formData.get("clientName"),
+    clientPhone: String(formData.get("clientPhone")).replace(/\D/g, ""),
+    clientEmail: formData.get("clientEmail") || null,
+    serviceId: Number(formData.get("serviceId")),
     startDateTime: startDateTime.toISOString(),
   };
 
@@ -114,13 +115,17 @@ export default function BookPage() {
       body: JSON.stringify(payload),
     });
 
+    // ✅ TRATAMENTO DE ERRO SEM "TRAVAR" A TELA
     if (!res.ok) {
       const data = await res.json();
-      throw new Error(data.error || "Erro ao agendar");
+      setMsgType("error");
+      setMsg(data.error || "Este horário não está mais disponível.");
+      return; // Para a execução aqui e não tenta resetar o form
     }
 
+    // ✅ SUCESSO
     setSuccessData({
-      name: String(form.get("clientName")),
+      name: String(formData.get("clientName")),
       date: startDateTime.toLocaleString("pt-BR", {
         dateStyle: "short",
         timeStyle: "short",
@@ -128,14 +133,23 @@ export default function BookPage() {
       service: selectedService?.name || "",
     });
 
+    // 🔄 LIMPAR FORMULÁRIO USANDO A REFERÊNCIA SALVA
+    formElement.reset(); 
+
+    setSelectedServiceId(null);
+    setSelectedService(null);
+    setSelectedDate(null);
+    setAvailableTimes([]);
+
     setMsgType("success");
     setMsg("Agendamento realizado com sucesso!");
-      } catch (err) {
-        console.error("Erro ao realizar agendamento:", err);
-        setMsgType("error");
-        setMsg("Erro ao realizar agendamento.");
-      }
-    }
+
+  } catch (err) {
+    console.error("Erro ao realizar agendamento:", err);
+    setMsgType("error");
+    setMsg("Erro ao conectar com o servidor.");
+  }
+}
 
 
   /* ============================================================

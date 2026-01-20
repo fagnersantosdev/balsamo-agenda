@@ -4,16 +4,17 @@ import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 
 export async function PATCH(
   _: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // Ajustado para Promise
 ) {
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
 
   try {
-    const id = Number(params.id);
+    const { id } = await context.params; // Aguarda o ID
+    const serviceId = Number(id);
 
     const restored = await prisma.service.update({
-      where: { id },
+      where: { id: serviceId },
       data: { active: true },
     });
 

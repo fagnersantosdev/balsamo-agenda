@@ -161,7 +161,9 @@ export default function AdminPageClient() {
         b.clientName,
         b.clientPhone,
         b.service?.name || "—",
-        new Date(b.startDateTime).toLocaleString("pt-BR"),
+        new Date(b.startDateTime).toLocaleString("pt-BR",{
+          timeZone: "America/Sao_Paulo", month: "2-digit", day: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
+        }),
         b.status,
       ]),
       headStyles: { fillColor: [31, 57, 36], textColor: 255 },

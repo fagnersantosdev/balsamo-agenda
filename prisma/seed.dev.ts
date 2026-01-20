@@ -10,7 +10,11 @@ function nextWeekday(day: number, hour = 10) {
   const date = new Date();
   const diff = (day + 7 - date.getDay()) % 7 || 7;
   date.setDate(date.getDate() + diff);
-  date.setHours(hour, 0, 0, 0);
+  
+  // Definimos a hora exata. O JavaScript tratará isso como 
+  // "Horário de Brasília" se rodado localmente, e o Prisma 
+  // converterá para UTC ao salvar.
+  date.setHours(hour, 0, 0, 0); 
   return date;
 }
 
@@ -111,9 +115,9 @@ async function main() {
   /* =====================================================
      AGENDAMENTOS (casos reais)
   ===================================================== */
-  const monday = nextWeekday(1, 10);
-  const tuesday = nextWeekday(2, 14);
-  const wednesday = nextWeekday(3, 9);
+  const monday = nextWeekday(1, 10);   // 10:00 da próxima segunda
+  const tuesday = nextWeekday(2, 14);  // 14:00 da próxima terça
+  const wednesday = nextWeekday(3, 9); // 09:00 da próxima quarta
 
   await prisma.booking.createMany({
     data: [
@@ -121,7 +125,7 @@ async function main() {
         clientName: "Maria Silva",
         clientPhone: "24999999999",
         clientEmail: "maria@email.com",
-        startDateTime: monday,
+        startDateTime: monday, 
         endDateTime: new Date(monday.getTime() + 60 * 60000),
         serviceId: services[0].id,
         status: BookingStatus.PENDENTE,

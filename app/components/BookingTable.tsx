@@ -21,10 +21,17 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
   }>({ show: false });
 
   function formatDate(date: string) {
+    // Criamos o objeto Date. O JS entende que a string ISO vinda do banco é UTC.
     const d = new Date(date);
+    
     return {
+      // Converte automaticamente para o horário de Brasília (ou do PC do admin)
       date: d.toLocaleDateString("pt-BR"),
-      time: d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
+      time: d.toLocaleTimeString("pt-BR", { 
+        hour: "2-digit", 
+        minute: "2-digit", 
+        hour12: false 
+      }),
     };
   }
 

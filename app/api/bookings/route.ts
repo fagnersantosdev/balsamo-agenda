@@ -5,7 +5,7 @@ import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 import {
   startOfBrazilDay,
   endOfBrazilDay,
-  toUTCFromBrazil,
+  // toUTCFromBrazil,
 } from "@/lib/timezone";
 import { getTotalDuration } from "@/lib/lib.scheduling";
 
@@ -129,7 +129,8 @@ export async function POST(req: Request) {
     const startLocal = new Date(data.startDateTime);
     startLocal.setSeconds(0, 0);
 
-    const startUTC = toUTCFromBrazil(startLocal);
+    const startUTC = new Date(data.startDateTime);
+    startUTC.setSeconds(0, 0);
     const endUTC = new Date(startUTC.getTime() + total * 60_000);
 
     /* ============================
@@ -174,13 +175,12 @@ export async function POST(req: Request) {
     const startOfDayUTC = startOfBrazilDay(startLocal);
     const endOfDayUTC = endOfBrazilDay(startLocal);
 
+    /* ============================
+      🔁 Verificar conflito (CORRETO)
+    ============================ */
     const conflict = await prisma.booking.findFirst({
       where: {
-        status: "PENDENTE",
-        startDateTime: {
-          gte: startOfDayUTC,
-          lt: endOfDayUTC,
-        },
+        status: { in: ["PENDENTE", "CONCLUIDO"] },
         AND: [
           { startDateTime: { lt: endUTC } },
           { endDateTime: { gt: startUTC } },

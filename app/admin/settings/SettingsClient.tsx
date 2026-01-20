@@ -15,20 +15,20 @@ export default function SettingsClient() {
      Carregar configurações
   ===================================================== */
   useEffect(() => {
-    fetch("/api/admin/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (typeof data.bufferMinutes === "number") {
-          setBuffer(data.bufferMinutes);
-        }
-      })
-      .catch(() => {
-        setToast({
-          message: "❌ Erro ao carregar configurações.",
-          type: "error",
-        });
-      });
-  }, []);
+  fetch("/api/settings")
+    .then((res) => {
+      if (!res.ok) throw new Error(); // Força o catch se der 404 ou 500
+      return res.json();
+    })
+    .then((data) => {
+      if (data && typeof data.bufferMinutes === "number") {
+        setBuffer(data.bufferMinutes);
+      }
+    })
+    .catch(() => {
+      setToast({ message: "❌ Erro ao carregar configurações.", type: "error" });
+    });
+}, []);
 
   /* =====================================================
      Salvar configurações
@@ -45,7 +45,7 @@ export default function SettingsClient() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/admin/settings", {
+      const res = await fetch("/api/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ bufferMinutes: buffer }),

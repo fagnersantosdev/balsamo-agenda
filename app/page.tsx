@@ -5,6 +5,7 @@ import { Testimonial } from "@/app/types/Testimonial";
 // import TestimonialSlider from "./components/TestimonialSlider";
 import BalsamoVideoPlayer from "./components/BalsamoVideoPlayer";
 import FeedbackSection from "./components/FeedbackSection";
+import { getBaseUrl } from "@/lib/getBaseUrl";
 //import { useState } from "react";
 
 type Service = {
@@ -19,7 +20,7 @@ export default async function HomePage() {
   let services: Service[] = [];
 
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/services`, {
+    const res = await fetch(`${getBaseUrl()}/api/services`, {
       cache: "no-store",
     });
 
@@ -34,9 +35,10 @@ export default async function HomePage() {
 
   try {
     const resTestimonials = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/testimonials`,
+      `${getBaseUrl()}/api/testimonials`,
       { cache: "no-store" }
     );
+
 
     if (resTestimonials.ok) {
       testimonials = await resTestimonials.json();
