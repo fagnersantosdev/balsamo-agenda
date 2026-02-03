@@ -106,12 +106,12 @@ export default async function HomePage() {
                   overflow-hidden
                   shadow-[0_12px_40px_-10px_rgba(141,106,147,0.35)]
                   border border-[#8D6A93]/30
-                  bg-gradient-to-br from-[#F5F3EB]/60 to-[#D6A77A]/20
-                  p-[3px]
-                  backdrop-blur-sm
+                  bg-[#F5F3EB] 
+                  /* Removido o gradient complexo e blur para testar performance */
                   transition-transform
                   duration-700
                   hover:scale-[1.015]
+                  will-change-transform
                 "
               >
                 <BalsamoVideoPlayer />

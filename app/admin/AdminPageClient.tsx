@@ -128,54 +128,74 @@ export default function AdminPageClient() {
   }
 
   /* =====================================================
-     Exportar PDF
+      Exportar PDF (Versão Final sem Warnings)
   ===================================================== */
   const exportToPDF = useCallback(async () => {
-  try {
-    const resBookings = await fetch(
-      `/api/bookings?filter=${filter}&status=${statusFilter || ""}`
-    );
+    try {
+      // 1. Buscamos os dados direto da API para garantir que o PDF reflita os filtros atuais
+      const resBookings = await fetch(
+        `/api/bookings?filter=${filter}&status=${statusFilter || ""}`
+      );
 
-    if (!resBookings.ok) {
-      const err = await resBookings.json().catch(() => null);
-      console.error("Erro ao buscar agendamentos p/ PDF:", resBookings.status, err);
-      setToast({ message: "❌ Erro ao gerar PDF.", type: "error" });
-      return;
-    }
+      if (!resBookings.ok) {
+        setToast({ message: "❌ Erro ao buscar dados para o PDF.", type: "error" });
+        return;
+      }
 
-    const data: Booking[] = await resBookings.json();
+      // Tipamos explicitamente a constante 'data'
+      const data: Booking[] = await resBookings.json();
 
-    if (data.length === 0) {
-      setToast({ message: "⚠️ Nenhum agendamento encontrado.", type: "error" });
-      return;
-    }
+      if (data.length === 0) {
+        setToast({ message: "⚠️ Nenhum agendamento para exportar.", type: "error" });
+        return;
+      }
 
-    const doc = new jsPDF();
-    doc.setFontSize(14);
-    doc.text("Relatório de Agendamentos", 14, 18);
+      const doc = new jsPDF();
+      doc.setFontSize(14);
+      doc.text("Relatório de Agendamentos - Bálsamo", 14, 18);
 
-    autoTable(doc, {
-      startY: 26,
-      head: [["Cliente", "Telefone", "Serviço", "Data/Hora", "Status"]],
-      body: data.map((b) => [
-        b.clientName,
-        b.clientPhone,
-        b.service?.name || "—",
-        new Date(b.startDateTime).toLocaleString("pt-BR",{
-          timeZone: "America/Sao_Paulo", month: "2-digit", day: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false,
+      autoTable(doc, {
+        startY: 26,
+        head: [["Cliente", "Telefone", "Serviço", "Início", "Fim", "Status"]],
+        // Tipamos o parâmetro 'b' como Booking para remover o warning de 'any'
+        body: data.map((b: Booking) => {
+          const start = new Date(b.startDateTime);
+          
+          // Cálculo do Fim Real (Sem Buffer)
+          const duration = b.service?.durationMin || 0;
+          const endReal = new Date(start.getTime() + duration * 60000);
+
+          const formatOptions: Intl.DateTimeFormatOptions = {
+            timeZone: "America/Sao_Paulo",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          };
+
+          const dateStr = start.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
+          const startTimeStr = start.toLocaleTimeString("pt-BR", formatOptions);
+          const endTimeStr = endReal.toLocaleTimeString("pt-BR", formatOptions);
+
+          return [
+            b.clientName,
+            b.clientPhone,
+            b.service?.name || "—",
+            `${dateStr} ${startTimeStr}`,
+            endTimeStr,
+            b.status,
+          ];
         }),
-        b.status,
-      ]),
-      headStyles: { fillColor: [31, 57, 36], textColor: 255 },
-    });
+        headStyles: { fillColor: [31, 57, 36], textColor: 255 },
+        styles: { fontSize: 9 }, // Ajuste leve para caber todas as colunas
+      });
 
-    doc.save("Balsamo_Agendamentos.pdf");
-    setToast({ message: "📄 PDF gerado com sucesso!", type: "success" });
-  } catch (err) {
-    console.error(err);
-    setToast({ message: "❌ Erro ao gerar PDF.", type: "error" });
-  }
-}, [filter, statusFilter]);
+      doc.save(`Balsamo_Relatorio_${filter}.pdf`);
+      setToast({ message: "📄 PDF gerado com sucesso!", type: "success" });
+    } catch (err) {
+      console.error("Erro PDF:", err);
+      setToast({ message: "❌ Erro ao gerar PDF.", type: "error" });
+    }
+  }, [filter, statusFilter]); 
 
   /* =====================================================
      Effects

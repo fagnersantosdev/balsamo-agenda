@@ -5,7 +5,6 @@ import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 import {
   startOfBrazilDay,
   endOfBrazilDay,
-  // toUTCFromBrazil,
 } from "@/lib/timezone";
 import { getTotalDuration } from "@/lib/lib.scheduling";
 
@@ -21,7 +20,6 @@ export async function GET(req: Request) {
   const status = searchParams.get("status"); // PENDENTE | CONCLUIDO | CANCELADO
 
   try {
-    // 🇧🇷 Intervalos base (UTC calculado a partir do Brasil)
     const todayStart = startOfBrazilDay();
     const todayEnd = endOfBrazilDay();
 
@@ -33,12 +31,10 @@ export async function GET(req: Request) {
 
     const where: Prisma.BookingWhereInput = {};
 
-    /* ---------------- Status explícito ---------------- */
     if (status && status !== "ALL") {
       where.status = status as BookingStatus;
     }
 
-    /* ---------------- Filtros por período ---------------- */
     if (filter === "today") {
       where.startDateTime = {
         gte: todayStart,
@@ -62,7 +58,6 @@ export async function GET(req: Request) {
       };
     }
 
-    /* ---------------- Ordenação ---------------- */
     const orderBy: Prisma.BookingOrderByWithRelationInput =
       status === "CONCLUIDO" || status === "CANCELADO"
         ? { startDateTime: "desc" }
@@ -104,7 +99,7 @@ export async function POST(req: Request) {
     }
 
     /* ============================
-       🛠 Serviço
+      🛠 Serviço e Configurações
     ============================ */
     const service = await prisma.service.findUnique({
       where: { id: Number(data.serviceId) },
@@ -118,26 +113,27 @@ export async function POST(req: Request) {
     }
 
     /* ============================
-       ⏱ Duração total (serviço + buffer)
-       👉 FONTE ÚNICA DA REGRA
+      ⏱ Duração (Fonte única da regra)
+      Aqui, 'total' já retorna (duração do serviço + buffer do banco)
     ============================ */
     const { total } = await getTotalDuration(Number(data.serviceId));
 
     /* ============================
-       🕒 Horário escolhido (Brasil → UTC)
+       🕒 Horários (Brasil → UTC)
     ============================ */
     const startLocal = new Date(data.startDateTime);
     startLocal.setSeconds(0, 0);
 
     const startUTC = new Date(data.startDateTime);
     startUTC.setSeconds(0, 0);
-    const endUTC = new Date(startUTC.getTime() + total * 60_000);
+    
+    // Bloqueio total na agenda: Início + (Duração Serviço + Buffer)
+    const endWithBufferUTC = new Date(startUTC.getTime() + total * 60_000);
 
     /* ============================
-       📅 Disponibilidade do dia
+       📅 Disponibilidade Semanal
     ============================ */
-    const dayOfWeek = startLocal.getDay(); // 0..6
-
+    const dayOfWeek = startLocal.getDay();
     const availability = await prisma.availability.findUnique({
       where: { dayOfWeek },
     });
@@ -149,20 +145,10 @@ export async function POST(req: Request) {
       );
     }
 
-    const startHour =
-      startLocal.getHours() + startLocal.getMinutes() / 60;
+    const startHour = startLocal.getHours() + startLocal.getMinutes() / 60;
+    const endHour = (startLocal.getHours() * 60 + startLocal.getMinutes() + total) / 60;
 
-    const endMinutes =
-      startLocal.getHours() * 60 +
-      startLocal.getMinutes() +
-      total;
-
-    const endHour = endMinutes / 60;
-
-    if (
-      startHour < availability.openHour ||
-      endHour > availability.closeHour
-    ) {
+    if (startHour < availability.openHour || endHour > availability.closeHour) {
       return NextResponse.json(
         { error: "Horário fora do expediente." },
         { status: 400 }
@@ -172,17 +158,11 @@ export async function POST(req: Request) {
     /* ============================
        🔁 Verificar conflito
     ============================ */
-    const startOfDayUTC = startOfBrazilDay(startLocal);
-    const endOfDayUTC = endOfBrazilDay(startLocal);
-
-    /* ============================
-      🔁 Verificar conflito (CORRETO)
-    ============================ */
     const conflict = await prisma.booking.findFirst({
       where: {
         status: { in: ["PENDENTE", "CONCLUIDO"] },
         AND: [
-          { startDateTime: { lt: endUTC } },
+          { startDateTime: { lt: endWithBufferUTC } },
           { endDateTime: { gt: startUTC } },
         ],
       },
@@ -205,7 +185,7 @@ export async function POST(req: Request) {
         clientEmail: data.clientEmail || null,
         serviceId: Number(data.serviceId),
         startDateTime: startUTC,
-        endDateTime: endUTC,
+        endDateTime: endWithBufferUTC, // Salvamos o bloco total ocupado
         status: "PENDENTE",
       },
       include: { service: true },

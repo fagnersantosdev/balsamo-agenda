@@ -9,49 +9,56 @@ export default function BalsamoVideoPlayer() {
   const indexRef = useRef(0);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const v = videoRef.current;
+    if (!v) return;
 
-    // Pré-carregar vídeos
-    const cache = VIDEO_SOURCES.map((src) => {
-      const v = document.createElement("video");
-      v.src = src;
-      v.preload = "auto";
-      return v;
-    });
+    // Configuração inicial
+    v.src = VIDEO_SOURCES[0];
 
-    // Inicia com o primeiro vídeo
-    video.src = cache[0].src;
-    video.load();
-    video.play().catch(() => {});
-
-    function handleEnded() {
-      const v = videoRef.current;
-      if (!v) return;
-
-      v.style.transition = "opacity 0.4s ease";
+    // Lógica para tocar o próximo vídeo ao acabar
+    const handleEnded = () => {
       v.style.opacity = "0";
-
       setTimeout(() => {
         indexRef.current = (indexRef.current + 1) % VIDEO_SOURCES.length;
-
-        v.src = cache[indexRef.current].src;
-        v.load();
-
-        const onCanPlay = () => {
-          v.removeEventListener("canplay", onCanPlay);
-          v.play().catch(() => {});
+        v.src = VIDEO_SOURCES[indexRef.current];
+        
+        const onLoaded = () => {
+          v.removeEventListener("loadeddata", onLoaded);
+          // Só toca se estiver visível no momento que carregou
+          if (v.getAttribute("data-visible") === "true") {
+            v.play().catch(() => {});
+          }
           v.style.opacity = "1";
         };
-
-        v.addEventListener("canplay", onCanPlay);
+        v.addEventListener("loadeddata", onLoaded);
       }, 400);
-    }
+    };
 
-    video.addEventListener("ended", handleEnded);
+    // Intersection Observer: O comportamento de "Rede Social"
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            v.setAttribute("data-visible", "true");
+            v.play().catch(() => {});
+          } else {
+            v.setAttribute("data-visible", "false");
+            v.pause();
+          }
+        });
+      },
+      { 
+        threshold: 0.2, // Toca quando 20% do vídeo aparecer
+        rootMargin: "100px" // "Pre-warming": começa a carregar 100px antes de aparecer
+      }
+    );
+
+    observer.observe(v);
+    v.addEventListener("ended", handleEnded);
 
     return () => {
-      video.removeEventListener("ended", handleEnded);
+      observer.disconnect();
+      v.removeEventListener("ended", handleEnded);
     };
   }, []);
 
@@ -59,20 +66,14 @@ export default function BalsamoVideoPlayer() {
     <video
       ref={videoRef}
       className="
-        w-full
-        sm:max-w-[300px]
-        md:max-w-[280px]
-        lg:max-w-[300px]
-        xl:max-w-[320px]
-        rounded-3xl
-        shadow-[0_8px_25px_-5px_rgba(141,106,147,0.35)]
-        border border-[#8D6A93]/30
-        opacity-100
-        transition-opacity duration-700
+        w-full sm:max-w-[320px] rounded-3xl border border-[#8D6A93]/30 
+        shadow-lg transition-opacity duration-700
+        will-change-transform
       "
-      autoPlay
       muted
       playsInline
+      preload="auto" // Mudamos para auto para ele tentar carregar a nitidez antes do play
+      poster="/capa-video-hd.jpg" // 👈 ESSENCIAL: Uma imagem HD de 600x600px
     />
   );
 }
