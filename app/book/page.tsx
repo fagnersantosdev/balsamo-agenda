@@ -159,12 +159,23 @@ export default function BookPage() {
     <>
       <main className="max-w-6xl mx-auto px-4 py-10">
         <div className="max-w-xl mx-auto bg-[#F5F3EB] px-6 py-6 rounded-2xl shadow-xl border border-[#D6A77A]/40">
-          {/* Header */}
-          <div className="text-center mb-6">
-            <Image src="/borboleta.png" width={48} height={48} alt="Bálsamo" />
-            <h1 className="text-2xl font-bold text-[#1F3924] mt-2">
+          {/* Header da Logo e Título */}
+          <div className="flex flex-col items-center text-center mb-8">
+            <div className="bg-white p-3 rounded-full shadow-sm border border-[#D6A77A]/20 mb-4 transition-transform hover:rotate-6">
+              <Image 
+                src="/logo-balsamo.png" 
+                width={64} // Aumentado levemente para melhor visibilidade
+                height={64} 
+                alt="Bálsamo Massoterapia" 
+                className="object-contain"
+              />
+            </div>
+            <h1 className="text-2xl font-bold text-[#1F3924]">
               Agende seu atendimento 🌿
             </h1>
+            <p className="text-sm text-[#1F3924]/60 mt-1">
+              Escolha o melhor horário para o seu bem-estar
+            </p>
           </div>
 
           {/* Form */}

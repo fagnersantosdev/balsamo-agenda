@@ -53,7 +53,7 @@ export default async function HomePage() {
       <main className="max-w-6xl mx-auto px-6 py-8 bg-gradient-to-b from-[#F5F3EB] to-[#D6A77A]/20">
 
         {/* Saudação */}
-        <section className="grid md:grid-cols-2 gap-10 items-center py-20">
+        <section className="grid md:grid-cols-2 gap-10 items-center py-18">
           <div className="text-center md:text-left space-y-4">
             <Image
               src="/logo-balsamo.png"
@@ -97,20 +97,15 @@ export default async function HomePage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
 
-            {/* Vídeo */}
-            <div className="flex justify-center">
+            {/* Vídeo na Home */}
+            <div className="flex justify-center py-4">
               <div
                 className="
                   relative
-                  rounded-3xl
-                  overflow-hidden
-                  shadow-[0_12px_40px_-10px_rgba(141,106,147,0.35)]
-                  border border-[#8D6A93]/30
-                  bg-[#F5F3EB] 
-                  /* Removido o gradient complexo e blur para testar performance */
-                  transition-transform
-                  duration-700
-                  hover:scale-[1.015]
+                  rounded-[2.5rem] 
+                  p-[2px]
+                  bg-gradient-to-b from-[#8D6A93]/20 to-transparent
+                  shadow-2xl
                   will-change-transform
                 "
               >

@@ -1,27 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { Testimonial } from "@/app/types/Testimonial";
-
-// export type Testimonial = {
-//   id: number;
-//   author: string;
-//   message: string;
-//   createdAt: string;
-// };
+import React from "react";
 
 interface Props {
   testimonials: Testimonial[];
 }
 
 export default function TestimonialSlider({ testimonials }: Props) {
-  const trackRef = useRef<HTMLDivElement | null>(null);
+  // ✅ Triplicamos a lista para garantir que o carrossel nunca fique vazio durante o loop
+  const tripleTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
-  // Função para formatar datas (agora no Client Component)
   function formatRelativeDate(dateString: string) {
     const date = new Date(dateString);
     const now = new Date();
-
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
@@ -34,82 +26,35 @@ export default function TestimonialSlider({ testimonials }: Props) {
     if (diffWeeks < 4) return `Há ${diffWeeks} semanas`;
 
     const diffMonths = Math.floor(diffDays / 30);
-    if (diffMonths === 1) return "Há 1 mês";
-
-    return `Há ${diffMonths} meses`;
+    return diffMonths <= 1 ? "Há 1 mês" : `Há ${diffMonths} meses`;
   }
 
-  // Slider automático
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || testimonials.length === 0) return;
-
-    let index = 0;
-    const total = testimonials.length;
-
-    function slide() {
-      if (!track) return;
-
-      const firstCard = track.children[0] as HTMLElement | undefined;
-      if (!firstCard) return;
-
-      const width = firstCard.clientWidth;
-      index = (index + 1) % total;
-
-      track.style.transform = `translateX(-${index * width}px)`;
-    }
-
-    const interval = setInterval(slide, 5000);
-
-    return () => clearInterval(interval);
-  }, [testimonials]);
-
   return (
-    <div className="relative overflow-hidden select-none">
-      {/* Faixa dos cards */}
-      <div
-        ref={trackRef}
-        className="flex transition-transform duration-700 ease-out will-change-transform"
-      >
-        {testimonials.map((t) => (
+    <div className="relative overflow-hidden select-none py-4">
+      {/* 🟢 Máscaras de Gradiente para suavizar as bordas (Opcional, estilo Premium) */}
+      <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#FFFEF9] to-transparent z-10" />
+      <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#FFFEF9] to-transparent z-10" />
+
+      {/* Faixa que se move continuamente */}
+      <div className="flex gap-6 animate-scroll-infinite hover:pause-on-hover w-max">
+        {tripleTestimonials.map((t, index) => (
           <div
-            key={t.id}
-            className="
-              flex-shrink-0
-              w-full
-              max-w-[90vw]
-              sm:max-w-none
-              sm:w-1/2
-              md:w-1/3
-              px-3
-              transition-transform
-              hover:-translate-y-[2px]
-            "
+            key={`${t.id}-${index}`}
+            className="flex-shrink-0 w-[280px] sm:w-[350px]"
           >
-            <div
-              className="
-                bg-[#F5F3EB]/95
-                rounded-xl
-                h-full
-                p-6
-                border border-[#8D6A93]/20
-                shadow-sm
-                hover:shadow-md
-                transition-all
-              "
-            >
+            <div className="bg-[#F5F3EB]/95 rounded-2xl h-full p-6 border border-[#8D6A93]/20 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
+              {/* ✅ Correto: usando entidades HTML */}
               <p className="text-[#1F3924]/90 italic mb-5 leading-relaxed">
-                {t.message}
+                &ldquo;{t.message}&rdquo;
               </p>
-
-              <p className="text-[#8A4B2E] font-semibold text-sm">
-                — {t.author || "Anônimo"}
-              </p>
-
-
-              <p className="text-sm text-[#1F3924]/45 mt-1">
-                {formatRelativeDate(t.createdAt)}
-              </p>
+              <div>
+                <p className="text-[#8D6A93] font-bold text-sm">
+                  — {t.author || "Anônimo"}
+                </p>
+                <p className="text-[10px] uppercase tracking-widest text-[#1F3924]/40 mt-1">
+                  {formatRelativeDate(t.createdAt)}
+                </p>
+              </div>
             </div>
           </div>
         ))}
