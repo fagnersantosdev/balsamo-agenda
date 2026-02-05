@@ -31,20 +31,34 @@ export default function TestimonialSlider({ testimonials }: Props) {
 
   return (
     <div className="relative overflow-hidden select-none py-4">
-      {/* 🟢 Máscaras de Gradiente para suavizar as bordas (Opcional, estilo Premium) */}
-      <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#FFFEF9] to-transparent z-10" />
-      <div className="absolute inset-y-0 right-0 w-20 bg-gradient-to-l from-[#FFFEF9] to-transparent z-10" />
+      {/* 🟢 Máscaras de Gradiente - Reduzidas no mobile para não cobrir o texto */}
+      <div className="absolute inset-y-0 left-0 w-8 sm:w-20 bg-gradient-to-r from-[#FFFEF9] to-transparent z-10" />
+      <div className="absolute inset-y-0 right-0 w-8 sm:w-20 bg-gradient-to-l from-[#FFFEF9] to-transparent z-10" />
 
       {/* Faixa que se move continuamente */}
-      <div className="flex gap-6 animate-scroll-infinite hover:pause-on-hover w-max">
+      <div className="flex gap-4 sm:gap-6 animate-scroll-infinite hover:pause-on-hover w-max px-10">
         {tripleTestimonials.map((t, index) => (
           <div
             key={`${t.id}-${index}`}
-            className="flex-shrink-0 w-[280px] sm:w-[350px]"
+            className="
+              flex-shrink-0 
+              w-[75vw]           /* 📱 Ocupa 75% da largura da tela no mobile */
+              sm:w-[350px]       /* 💻 Largura fixa no desktop */
+            "
           >
-            <div className="bg-[#F5F3EB]/95 rounded-2xl h-full p-6 border border-[#8D6A93]/20 shadow-sm transition-transform duration-500 hover:scale-[1.02]">
-              {/* ✅ Correto: usando entidades HTML */}
-              <p className="text-[#1F3924]/90 italic mb-5 leading-relaxed">
+            <div className="
+              bg-[#F5F3EB]/95 
+              rounded-2xl 
+              h-full 
+              p-6 
+              border border-[#8D6A93]/20 
+              shadow-sm 
+              transition-transform 
+              duration-500 
+              hover:scale-[1.02]
+              mx-1               /* Pequena margem para a borda não colar no card vizinho */
+            ">
+              <p className="text-[#1F3924]/90 italic mb-5 leading-relaxed text-sm sm:text-base">
                 &ldquo;{t.message}&rdquo;
               </p>
               <div>
