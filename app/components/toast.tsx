@@ -1,71 +1,79 @@
 "use client";
 import { useEffect, useState } from "react";
+import { CheckCircle2, AlertCircle, X } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 type ToastProps = {
   message: string;
   type?: "success" | "error";
-  position?: "top" | "bottom"; // <-- NOVO
+  position?: "top" | "bottom";
   onClose: () => void;
 };
 
 export default function Toast({
   message,
   type = "success",
-  position = "bottom",  // <-- padrão mantém tudo como era
+  position = "bottom",
   onClose
 }: ToastProps) {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setVisible(false), 3000);
+    const timer = setTimeout(() => setVisible(false), 3500);
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (!visible) {
-      const timer = setTimeout(onClose, 300);
+      const timer = setTimeout(onClose, 400);
       return () => clearTimeout(timer);
     }
   }, [visible, onClose]);
 
+  const isSuccess = type === "success";
+
+  // Classes de posicionamento dinâmico
+  const positionClasses = position === "top"
+    ? "top-6 left-1/2 -translate-x-1/2" 
+    : "bottom-24 right-6 sm:bottom-10 sm:right-10"; // Sobe no mobile para não cobrir o nav
+
   return (
-    <div
-      className={`
-        fixed z-[9999] flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white text-sm
-        transform transition-all duration-300
-        ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}
-
-        ${type === "success" ? "bg-green-700" : "bg-red-600"}
-
-        ${position === "top"
-          ? "top-6 left-1/2 -translate-x-1/2"        // ⬆ topo central
-          : "bottom-5 right-5"}                      // ⬇ posição padrão
-      `}
-    >
-      {type === "success" ? (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-5 h-5 text-white"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+    <AnimatePresence>
+      {visible && (
+        <motion.div
+          initial={{ 
+            opacity: 0, 
+            y: position === "top" ? -20 : 20,
+            scale: 0.9 
+          }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+          className={`
+            fixed z-[10000] flex items-center gap-3 px-5 py-4 rounded-[1.25rem] 
+            shadow-[0_15px_30px_-5px_rgba(0,0,0,0.15)] backdrop-blur-md border
+            ${positionClasses}
+            ${isSuccess 
+              ? "bg-emerald-600/95 border-emerald-500/20 text-emerald-50" 
+              : "bg-red-600/95 border-red-500/20 text-red-50"
+            }
+          `}
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-        </svg>
-      ) : (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="w-5 h-5 text-white"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+          <div className="shrink-0">
+            {isSuccess ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          </div>
+          
+          <span className="font-bold text-sm tracking-tight pr-4 border-r border-white/10">
+            {message}
+          </span>
+
+          <button 
+            onClick={() => setVisible(false)}
+            className="hover:rotate-90 transition-transform p-1 opacity-60 hover:opacity-100"
+          >
+            <X size={16} />
+          </button>
+        </motion.div>
       )}
-      <span>{message}</span>
-    </div>
+    </AnimatePresence>
   );
 }

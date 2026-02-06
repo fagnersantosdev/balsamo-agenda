@@ -1,5 +1,7 @@
 "use client";
 import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle2, MessageCircle, Calendar, Sparkles, X } from "lucide-react";
 
 type SuccessCardProps = {
   show: boolean;
@@ -16,78 +18,107 @@ export default function SuccessCard({
   name,
   date,
   service,
-  //phone,
 }: SuccessCardProps) {
-  if (!show) return null;
+  const balsamoPhone = "5524992640951";
 
-  const balsamoPhone = "5524992640951"; // DDD + número sem espaços ou símbolos
-
-  // Gera o link do WhatsApp se o número estiver disponível
-    const whatsappLink = `https://wa.me/${balsamoPhone}?text=${encodeURIComponent(
-        `Olá! 🌿 Fiz um agendamento no site da Bálsamo Massoterapia.\n\n🧘‍♀️ Nome: ${name}\n🗓 Data: ${date}\n💆 Serviço: ${service}\n\nGostaria de confirmar o atendimento.`
-      )}`;
+  const whatsappLink = `https://wa.me/${balsamoPhone}?text=${encodeURIComponent(
+    `Olá! 🌿 Fiz um agendamento no site da Bálsamo Massoterapia.\n\n🧘‍♀️ Nome: ${name}\n🗓 Data: ${date}\n💆 Serviço: ${service}\n\nGostaria de confirmar o atendimento.`
+  )}`;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 p-4">
-      <div className="
-        bg-white
-        rounded-xl
-        shadow-lg
-        p-6
-        max-w-md
-        w-full
-        text-center
-        border border-[#8D6A93]/20
-        animate-scaleIn
-      ">
-        <h2 className="text-2xl font-bold text-[#1F3924] mb-3">
-          🌿 Agendamento Confirmado!
-        </h2>
+    <AnimatePresence>
+      {show && (
+        <div className="fixed inset-0 flex items-center justify-center z-[100] p-4">
+          {/* Overlay com desfoque suave */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="absolute inset-0 bg-[#1F3924]/40 backdrop-blur-md"
+          />
 
-        <p className="text-[#1F3924] mb-5 leading-relaxed">
-          <strong>{name}</strong>, seu atendimento foi agendado com sucesso para:
-        </p>
-
-        <div className="
-          bg-[#F5F3EB]/90
-          border border-[#D6A77A]/30
-          rounded-xl
-          p-4
-          mb-5
-        ">
-          <p className="text-[#1F3924] font-medium">{service}</p>
-          <p className="text-sm text-[#8D6A93] mt-1">{date}</p>
-        </div>
-
-        {whatsappLink && (
-          <a
-            href={whatsappLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="
-              inline-flex items-center justify-center gap-2
-              bg-green-600
-              text-white
-              px-5
-              py-3
-              rounded-xl
-              shadow-sm
-              hover:bg-green-700
-              hover:shadow-md
-              transition
-              w-full
-            "
+          {/* Card de Sucesso */}
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="relative bg-[#FFFEF9] rounded-[2.5rem] shadow-2xl p-8 md:p-10 max-w-md w-full text-center border border-[#8D6A93]/10 overflow-hidden"
           >
-          💬 Enviar confirmação a Bálsamo no WhatsApp
-        </a>
-        )}
-        <button
-          onClick={onClose}
-          className="mt-4 block w-full rounded-xl border border-[#8D6A93] py-2 hover:bg-[#8D6A93]/10 transition"
-        >
-          Fechar
-        </button>
-      </div>
-    </div>
+            {/* Elemento Decorativo */}
+            <div className="absolute top-0 right-0 p-6 text-[#8D6A93]/5 pointer-events-none">
+              <Sparkles size={80} />
+            </div>
+
+            <button
+              onClick={onClose}
+              className="absolute top-6 right-6 text-[#1F3924]/20 hover:text-[#1F3924] transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Ícone de Sucesso Animado */}
+            <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-sm">
+              <CheckCircle2 size={40} />
+            </div>
+
+            <h2 className="text-2xl md:text-3xl font-bold text-[#1F3924] mb-2 tracking-tight">
+              Tudo pronto, {name.split(" ")[0]}!
+            </h2>
+            <p className="text-[#1F3924]/60 text-sm mb-8 font-medium">
+              Seu momento de relaxamento está reservado.
+            </p>
+
+            {/* Voucher do Agendamento */}
+            <div className="bg-[#F5F3EB] rounded-3xl p-6 mb-8 border border-[#D6A77A]/20 relative">
+              <div className="flex flex-col items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8D6A93]">Tratamento Selecionado</span>
+                <p className="text-lg font-bold text-[#1F3924]">{service}</p>
+                <div className="flex items-center gap-2 mt-2 text-[#1F3924]/70 font-semibold bg-white/50 px-4 py-1.5 rounded-full text-sm shadow-sm border border-white">
+                  <Calendar size={14} className="text-[#8D6A93]" />
+                  {date}
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <a
+                href={whatsappLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  flex items-center justify-center gap-3
+                  bg-[#25D366] text-white
+                  w-full py-4 rounded-2xl
+                  font-bold text-sm uppercase tracking-widest
+                  shadow-xl shadow-green-200
+                  hover:bg-[#20bd5a] hover:scale-[1.02]
+                  active:scale-95 transition-all
+                "
+              >
+                <MessageCircle size={18} />
+                Confirmar no WhatsApp
+              </a>
+
+              <button
+                onClick={onClose}
+                className="
+                  w-full py-3 rounded-2xl
+                  text-[#1F3924]/60 font-bold text-xs uppercase tracking-widest
+                  hover:text-[#1F3924] hover:bg-gray-100
+                  transition-all
+                "
+              >
+                Agora não, obrigado
+              </button>
+            </div>
+            
+            <p className="mt-8 text-[9px] text-[#1F3924]/30 font-bold uppercase tracking-[0.3em]">
+              Bálsamo Massoterapia • Bem-estar Real
+            </p>
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>
   );
 }
