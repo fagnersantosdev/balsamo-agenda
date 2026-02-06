@@ -56,7 +56,7 @@ export default function AvailabilityPage() {
           <h1 className="text-3xl font-bold text-[#1F3924] flex items-center gap-2">
             <Clock className="text-[#8D6A93]" /> Horários
           </h1>
-          <p className="text-[#1F3924]/60 text-sm mt-1">
+          <p className="text-[#1F3924]/80 text-sm mt-1">
             Defina os períodos em que os clientes podem realizar agendamentos.
           </p>
         </div>

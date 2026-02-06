@@ -77,8 +77,8 @@ export default function EditServicePage() {
     }
   }
 
-  const labelClass = "block text-xs font-bold uppercase tracking-widest text-[#1F3924]/60 mb-2 ml-1";
-  const inputClass = "w-full pl-10 pr-4 py-3 bg-white border border-[#8D6A93]/20 rounded-2xl focus:ring-2 focus:ring-[#8D6A93] focus:border-transparent outline-none transition-all text-[#1F3924]";
+  const labelClass = "block text-xs font-bold uppercase tracking-widest text-[#1F3924]/80 mb-2 ml-1";
+  const inputClass = "w-full pl-10 pr-4 py-3 bg-white border border-[#8D6A93]/30 rounded-2xl focus:ring-2 focus:ring-[#8D6A93] focus:border-transparent outline-none transition-all text-[#1F3924]";
 
   if (loading) {
     return (
@@ -115,7 +115,7 @@ export default function EditServicePage() {
           <div>
             <label className={labelClass}>Nome do Serviço</label>
             <div className="relative">
-              <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8D6A93]/40 w-5 h-5" />
+              <Sparkles className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8D6A93]/80 w-5 h-5" />
               <input name="name" defaultValue={service.name} required className={inputClass} />
             </div>
           </div>
@@ -125,7 +125,7 @@ export default function EditServicePage() {
             <div>
               <label className={labelClass}>Preço (R$)</label>
               <div className="relative">
-                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8D6A93]/40 w-5 h-5" />
+                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8D6A93]/80 w-5 h-5" />
                 <input name="price" type="number" step="0.01" defaultValue={service.price} required className={inputClass} />
               </div>
             </div>
@@ -134,7 +134,7 @@ export default function EditServicePage() {
             <div>
               <label className={labelClass}>Duração (minutos)</label>
               <div className="relative">
-                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8D6A93]/40 w-5 h-5" />
+                <Clock className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8D6A93]/80 w-5 h-5" />
                 <input name="durationMin" type="number" defaultValue={service.durationMin} required className={inputClass} />
               </div>
             </div>
@@ -144,7 +144,7 @@ export default function EditServicePage() {
           <div>
             <label className={labelClass}>Detalhes (um por linha)</label>
             <div className="relative">
-              <ListPlus className="absolute left-3 top-4 text-[#8D6A93]/40 w-5 h-5" />
+              <ListPlus className="absolute left-3 top-4 text-[#8D6A93]/80 w-5 h-5" />
               <textarea
                 name="details"
                 defaultValue={(service.details || []).join("\n")}

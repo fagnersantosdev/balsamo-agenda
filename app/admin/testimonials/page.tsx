@@ -123,7 +123,7 @@ export default function AdminTestimonialsPage() {
               </span>
             </div>
 
-            <p className="text-[#1F3924]/80 text-sm leading-relaxed mb-6 italic">
+            <p className="text-[#1F3924]/100 text-sm leading-relaxed mb-6 italic">
               &ldquo;{t.message}&rdquo;
             </p>
 

@@ -80,7 +80,7 @@ export default function ServicesAdminPage() {
           <h1 className="text-3xl font-bold text-[#1F3924] flex items-center gap-2">
             <Sparkles className="text-[#8D6A93]" /> Serviços
           </h1>
-          <p className="text-[#1F3924]/60 text-sm mt-1">Configure o menu de tratamentos do Bálsamo.</p>
+          <p className="text-[#1F3924]/80 text-sm mt-1">Configure o menu de tratamentos do Bálsamo.</p>
         </div>
 
         <Link
@@ -126,7 +126,7 @@ export default function ServicesAdminPage() {
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {services.length === 0 ? (
-              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-[#8D6A93]/30">
+              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-[#8D6A93]/60">
                 <p className="text-[#1F3924]/40 font-medium italic">Nenhum serviço encontrado nesta categoria.</p>
               </div>
             ) : (
