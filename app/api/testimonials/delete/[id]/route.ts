@@ -4,13 +4,15 @@ import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 
 export async function DELETE(
   _: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params; // ⬅️ 1. Await no params
+  const id = Number(params.id);
+
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
 
   try {
-    const id = Number(params.id);
     if (isNaN(id)) {
       return NextResponse.json(
         { error: "ID inválido" },
@@ -18,6 +20,7 @@ export async function DELETE(
       );
     }
 
+    // Verifica se existe
     const exists = await prisma.testimonial.findUnique({ where: { id } });
     if (!exists) {
       return NextResponse.json(
@@ -26,6 +29,10 @@ export async function DELETE(
       );
     }
 
+    // ⬅️ 2. Faltava esta linha! Agora deleta de verdade.
+    await prisma.testimonial.delete({
+      where: { id },
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

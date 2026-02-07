@@ -1,57 +1,44 @@
 import Image from "next/image";
 import Link from "next/link";
 import EventPromo from "./components/EventPromo";
-import { Testimonial } from "@/app/types/Testimonial";
-// import TestimonialSlider from "./components/TestimonialSlider";
 import BalsamoVideoPlayer from "./components/BalsamoVideoPlayer";
 import FeedbackSection from "./components/FeedbackSection";
-import { getBaseUrl } from "@/lib/getBaseUrl";
-//import { useState } from "react";
+import { prisma } from "@/lib/prisma";
 
-type Service = {
-  id: number;
-  name: string;
-  price: number;
-  durationMin: number;
-  details?: string[];
-};
+// 🚀 Garante que a página sempre carregue dados atualizados
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  let services: Service[] = [];
+  // ✅ Busca direta no banco
+  const [servicesData, testimonialsData] = await Promise.all([
+    prisma.service.findMany({
+      orderBy: { price: "asc" },
+    }),
+    prisma.testimonial.findMany({
+      where: { approved: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
-  try {
-    const res = await fetch(`${getBaseUrl()}/api/services`, {
-      cache: "no-store",
-    });
+  // 🔧 Formatações para evitar erros de tipagem
+  const testimonials = testimonialsData.map((t) => ({
+    ...t,
+    author: t.author || "Anônimo",
+    photoUrl: t.photoUrl || null,
+    createdAt: t.createdAt.toISOString(),
+  }));
 
-    if (res.ok) {
-      services = await res.json();
-    }
-  } catch (error) {
-    console.error("Erro ao carregar serviços:", error);
-  }
-
-  let testimonials: Testimonial[] = [];
-
-  try {
-    const resTestimonials = await fetch(
-      `${getBaseUrl()}/api/testimonials`,
-      { cache: "no-store" }
-    );
-
-
-    if (resTestimonials.ok) {
-      testimonials = await resTestimonials.json();
-    }
-  } catch (error) {
-    console.error("Erro ao carregar depoimentos:", error);
-  }
-
+  const services = servicesData.map((s) => ({
+    ...s,
+    price: Number(s.price),
+    // Converte JsonValue para string[]
+    details: Array.isArray(s.details) ? (s.details as string[]) : [], 
+  }));
 
   return (
     <>
       <main className="max-w-6xl mx-auto px-6 py-8 bg-gradient-to-b from-[#F5F3EB] to-[#D6A77A]/20">
-
+        
         {/* Saudação */}
         <section className="grid md:grid-cols-2 gap-10 items-center py-18">
           <div className="text-center md:text-left space-y-4">
@@ -85,6 +72,7 @@ export default async function HomePage() {
                 transition-all duration-500
                 hover:scale-[1.02]
               "
+              priority
             />
           </div>
         </section>
@@ -96,7 +84,6 @@ export default async function HomePage() {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
-
             {/* Vídeo na Home */}
             <div className="flex justify-center py-4">
               <div
@@ -157,7 +144,6 @@ export default async function HomePage() {
                 📅 Agendar uma sessão
               </a>
             </div>
-
           </div>
         </section>
 
@@ -182,78 +168,29 @@ export default async function HomePage() {
           </a>
         </div>
 
-
-        {/* Aqui abaixo, sozinho */}
+        {/* Feedback Section */}
         <FeedbackSection testimonials={testimonials} />
 
-        {/* Benefícios da Massoterapia */}
+        {/* Benefícios */}
         <section className="max-w-6xl mx-auto px-4 py-20">
           <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
             Benefícios da Massoterapia 🌿
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
-
-            {/* Benefício 1 - Relaxamento profundo */}
-            <div className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
-              <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
-                <Image 
-                  src="/img1.png"
-                  alt="Relaxamento profundo"
-                  width={300}
-                  height={200}
-                  className="w-full h-full object-cover rounded-xl shadow-sm"
-                />
+            {[
+              { img: "/img1.png", title: "Relaxamento profundo", desc: "Reduz o estresse, acalma o corpo e melhora a qualidade do sono." },
+              { img: "/img2.png", title: "Equilíbrio mental", desc: "Ajuda na ansiedade, foco e sensação de bem-estar emocional." },
+              { img: "/img3.png", title: "Saúde do corpo", desc: "Melhora circulação, alivia dores e libera tensões acumuladas." }
+            ].map((item, i) => (
+              <div key={i} className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
+                <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
+                  <Image src={item.img} alt={item.title} width={300} height={200} className="w-full h-full object-cover rounded-xl shadow-sm" />
+                </div>
+                <h3 className="text-lg font-semibold text-[#1F3924] mb-2">{item.title}</h3>
+                <p className="text-[#1F3924]/80 text-sm">{item.desc}</p>
               </div>
-
-              <h3 className="text-lg font-semibold text-[#1F3924] mb-2">
-                Relaxamento profundo
-              </h3>
-              <p className="text-[#1F3924]/80 text-sm">
-                Reduz o estresse, acalma o corpo e melhora a qualidade do sono.
-              </p>
-            </div>
-
-            {/* Benefício 2 - Equilíbrio mental */}
-            <div className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
-              <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
-                <Image 
-                  src="/img2.png"
-                  alt="Equilíbrio mental"
-                  width={300}
-                  height={200}
-                  className="w-full h-full object-cover rounded-xl shadow-sm"
-                />
-              </div>
-
-              <h3 className="text-lg font-semibold text-[#1F3924] mb-2">
-                Equilíbrio mental
-              </h3>
-              <p className="text-[#1F3924]/80 text-sm">
-                Ajuda na ansiedade, foco e sensação de bem-estar emocional.
-              </p>
-            </div>
-
-            {/* Benefício 3 - Saúde do corpo */}
-            <div className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
-              <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
-                <Image 
-                  src="/img3.png"
-                  alt="Saúde do corpo"
-                  width={300}
-                  height={200}
-                  className="w-full h-full object-cover rounded-xl shadow-sm"
-                />
-              </div>
-
-              <h3 className="text-lg font-semibold text-[#1F3924] mb-2">
-                Saúde do corpo
-              </h3>
-              <p className="text-[#1F3924]/80 text-sm">
-                Melhora circulação, alivia dores e libera tensões acumuladas.
-              </p>
-            </div>
-
+            ))}
           </div>
         </section>
 
@@ -286,15 +223,13 @@ export default async function HomePage() {
                     💰 R$ {service.price.toFixed(2)} — ⏱ {service.durationMin} min
                   </p>
 
-                  {service.details &&
-                    Array.isArray(service.details) &&
-                    service.details.length > 0 && (
-                      <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
-                        {service.details.map((d, i) => (
-                          <li key={i}>{d}</li>
-                        ))}
-                      </ul>
-                    )}
+                  {service.details && service.details.length > 0 && (
+                    <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
+                      {service.details.map((d, i) => (
+                        <li key={i}>{d}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               ))}
             </div>
@@ -315,88 +250,42 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Promoções e eventos */}
+        {/* Promo e Sobre */}
         <EventPromo />
 
-        {/* Sobre a Profissional */}
         <section className="max-w-6xl mx-auto px-4 py-16">
           <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
             Sobre a Profissional 🌿
           </h2>
 
-          <div
-            className="
-              grid grid-cols-1 md:grid-cols-3 gap-12 items-start
-              animate-[fadeInUp_0.9s_ease-out]
-            "
-          >
-            {/* Foto menor estilo biografia */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start animate-[fadeInUp_0.9s_ease-out]">
             <div className="flex justify-center md:justify-start">
-              <div
-                className="
-                  rounded-2xl overflow-hidden
-                  shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
-                  border border-[#8D6A93]/20
-                  bg-[#F5F3EB]/70
-                  w-[190px] h-[260px]
-                "
-              >
-                <Image
-                  src="/proprietaria2.jpg"
-                  alt="Profissional da Bálsamo Massoterapia"
-                  width={190}
-                  height={260}
-                  className="w-full h-full object-cover rounded-2xl"
-                />
+              <div className="rounded-2xl overflow-hidden shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)] border border-[#8D6A93]/20 bg-[#F5F3EB]/70 w-[190px] h-[260px]">
+                <Image src="/proprietaria2.jpg" alt="Profissional" width={190} height={260} className="w-full h-full object-cover rounded-2xl" />
               </div>
             </div>
-
-            {/* Texto da biografia */}
             <div className="md:col-span-2">
-              <h3 className="text-xl md:text-2xl font-semibold text-[#1F3924] mb-4">
-                Maria da Penha — Massoterapeuta Especialista
-              </h3>
-
+              <h3 className="text-xl md:text-2xl font-semibold text-[#1F3924] mb-4">Maria da Penha — Massoterapeuta Especialista</h3>
               <p className="text-[#1F3924]/90 leading-relaxed text-base md:text-lg mb-4">
-                Com uma trajetória construída com dedicação e amor pelo cuidado, Maria da Penha 
-                atua na área da massoterapia oferecendo acolhimento, técnica e sensibilidade em cada sessão.
+                Com uma trajetória construída com dedicação e amor pelo cuidado, Maria da Penha atua na área da massoterapia oferecendo acolhimento, técnica e sensibilidade em cada sessão.
               </p>
-
               <ul className="space-y-3 text-[#1F3924]/90 text-base md:text-lg mb-6">
                 <li>🌱 <strong>Formação em Massoterapia</strong>, com foco em práticas terapêuticas e relaxantes.</li>
                 <li>💆‍♀️ Especialização em <strong>Pedras Quentes, Quick Massage e Massagem Relaxante</strong>.</li>
                 <li>🌿 Experiência em atendimento humanizado e abordagem integrada corpo–mente.</li>
                 <li>✨ Propósito voltado ao bem-estar, equilíbrio emocional e qualidade de vida.</li>
               </ul>
-
               <p className="text-[#1F3924]/80 leading-relaxed text-base md:text-lg">
-                Na Bálsamo Massoterapia, cada toque é guiado pela empatia, pela presença e pelo compromisso 
-                de transformar o dia de cada cliente, trazendo mais leveza e bem-estar.
+                Na Bálsamo Massoterapia, cada toque é guiado pela empatia, pela presença e pelo compromisso de transformar o dia de cada cliente, trazendo mais leveza e bem-estar.
               </p>
             </div>
           </div>
         </section>
 
-        {/* CTA Final */}
         <section className="max-w-4xl mx-auto text-center py-20 px-4">
-          <h2 className="text-3xl font-bold text-[#1F3924] mb-6">
-            Pronto para cuidar de você hoje? 🌿
-          </h2>
-          <p className="text-[#1F3924]/80 text-lg mb-8">
-            A Bálsamo Massoterapia está preparada para oferecer uma experiência acolhedora,
-            relaxante e transformadora. Reserve seu momento de bem-estar agora mesmo.
-          </p>
-          <Link
-            href="/book"
-            className="
-              inline-block bg-[#8A4B2E] text-[#F5F3EB]
-              px-10 py-4 rounded-xl shadow-lg
-              hover:bg-[#1F3924] transition-all
-              text-lg font-medium
-            "
-          >
-            📅 Agendar minha sessão
-          </Link>
+          <h2 className="text-3xl font-bold text-[#1F3924] mb-6">Pronto para cuidar de você hoje? 🌿</h2>
+          <p className="text-[#1F3924]/80 text-lg mb-8">A Bálsamo Massoterapia está preparada para oferecer uma experiência acolhedora, relaxante e transformadora.</p>
+          <Link href="/book" className="inline-block bg-[#8A4B2E] text-[#F5F3EB] px-10 py-4 rounded-xl shadow-lg hover:bg-[#1F3924] transition-all text-lg font-medium">📅 Agendar minha sessão</Link>
         </section>
 
       </main>

@@ -3,9 +3,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params; // ⬅️ Await obrigatório no Next.js 15
   const id = Number(params.id);
+
   if (Number.isNaN(id)) {
     return NextResponse.json({ error: "ID inválido" }, { status: 400 });
   }

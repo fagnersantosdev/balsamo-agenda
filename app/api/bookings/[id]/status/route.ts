@@ -9,12 +9,13 @@ const VALID_STATUS = ["PENDENTE", "CONCLUIDO", "CANCELADO"] as const;
 ========================= */
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params; // ⬅️ Await obrigatório no Next.js 15
+  const id = Number(params.id);
+
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
-
-  const id = Number(params.id);
 
   try {
     const { status } = await req.json();
@@ -58,14 +59,17 @@ export async function PATCH(
 ========================= */
 export async function GET(
   _: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params; // ⬅️ Await obrigatório
+  const id = Number(params.id);
+
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
 
   try {
     const booking = await prisma.booking.findUnique({
-      where: { id: Number(params.id) },
+      where: { id },
       include: { service: true },
     });
 
@@ -91,12 +95,13 @@ export async function GET(
 ========================= */
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params; // ⬅️ Await obrigatório
+  const id = Number(params.id);
+
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
-
-  const id = Number(params.id);
 
   try {
     const { clientName, clientPhone, clientEmail, startDateTime, serviceId } =
@@ -144,12 +149,13 @@ export async function PUT(
 ========================= */
 export async function DELETE(
   _: Request,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params; // ⬅️ Await obrigatório
+  const id = Number(params.id);
+
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
-
-  const id = Number(params.id);
 
   try {
     // ✅ evita P2025

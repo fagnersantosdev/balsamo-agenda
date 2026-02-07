@@ -1,5 +1,8 @@
-import { prisma} from "@/lib/prisma";
+import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+
+// 🚀 Garante que a rota seja dinâmica e não estática (cacheada)
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
