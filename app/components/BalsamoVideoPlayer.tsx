@@ -1,108 +1,75 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Loader2 } from "lucide-react"; 
-
-const VIDEO_SOURCES = ["/video1.mp4", "/video2.mp4"];
+import { useRef, useState } from "react";
+import { Play, Pause } from "lucide-react";
 
 export default function BalsamoVideoPlayer() {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isBuffering, setIsBuffering] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Pausa se o usuário sair de perto do vídeo para poupar o celular
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting && !v.paused) {
-          v.pause();
-          setIsPlaying(false);
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(v);
-    return () => observer.disconnect();
-  }, []);
+  // Se quiser trocar para o video2, basta mudar aqui para "/video2.mp4"
+  const videoSrc = "/video3.mp4"; 
 
   const togglePlay = () => {
-    const v = videoRef.current;
-    if (!v) return;
+    const video = videoRef.current;
+    if (!video) return;
 
-    if (v.paused) {
-      setIsBuffering(true);
-      v.play()
-        .then(() => {
-          setIsPlaying(true);
-          setIsBuffering(false);
-        })
-        .catch(() => setIsBuffering(false));
+    if (video.paused) {
+      video.play()
+        .then(() => setIsPlaying(true))
+        .catch((err) => console.error("Erro ao dar play:", err));
     } else {
-      v.pause();
+      video.pause();
       setIsPlaying(false);
     }
   };
 
-  // Lógica para reproduzir o próximo vídeo automaticamente
-  const handleEnded = () => {
-    const v = videoRef.current;
-    if (!v) return;
-
-    const nextIndex = (currentIndex + 1) % VIDEO_SOURCES.length;
-    setCurrentIndex(nextIndex);
-
-    // Pequeno delay para a troca de fonte não "piscar"
-    setTimeout(() => {
-      v.play()
-        .then(() => setIsPlaying(true))
-        .catch(() => setIsPlaying(false));
-    }, 100);
-  };
-
   return (
     <div 
-      className="relative group cursor-pointer overflow-hidden rounded-3xl bg-black" 
+      className="relative w-full h-full group cursor-pointer overflow-hidden rounded-[2.5rem] bg-black shadow-2xl touch-pan-y" 
       onClick={togglePlay}
     >
       <video
         ref={videoRef}
-        src={VIDEO_SOURCES[currentIndex]}
-        onEnded={handleEnded}
-        onWaiting={() => setIsBuffering(true)}
-        onPlaying={() => setIsBuffering(false)}
-        className={`w-full sm:max-w-[320px] shadow-lg transition-all duration-500 object-cover ${
-          isPlaying ? "opacity-100" : "opacity-90"
-        }`}
-        playsInline
-        preload="auto" // Carrega o vídeo em background para evitar travamento ao dar play
-        poster="/capa-video-hd.jpg" // Imagem de capa para melhorar a experiência inicial
+        className="w-full h-full object-cover"
+        src={videoSrc}
+        playsInline // Obrigatório para iPhone
+        preload="metadata"
+        onEnded={() => setIsPlaying(false)}
+        // controls removido propositalmente para não travar o scroll!
       />
 
-      {/* Overlay de Controle */}
-      <div className={`absolute inset-0 flex items-center justify-center bg-black/10 transition-opacity duration-300 ${
-        isPlaying && !isBuffering ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'
-      }`}>
-        
-        <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center shadow-2xl transform transition-transform group-hover:scale-110">
-          {isBuffering ? (
-            <Loader2 className="w-8 h-8 text-[#1F3924] animate-spin" />
-          ) : isPlaying ? (
-            <Pause className="w-8 h-8 text-[#1F3924]" />
+      {/* Camada de Botão Play/Pause */}
+      <div 
+        className={`
+          absolute inset-0 flex items-center justify-center 
+          transition-all duration-500
+          ${isPlaying ? "opacity-0 group-hover:opacity-100" : "bg-black/20 backdrop-blur-[1px]"}
+        `}
+      >
+        <div 
+          className={`
+            w-20 h-20 rounded-full flex items-center justify-center
+            text-white shadow-2xl transition-transform duration-300
+            ${isPlaying 
+              ? "bg-black/50 hover:scale-110" 
+              : "bg-white/20 backdrop-blur-md border border-white/30 hover:scale-110"
+            }
+          `}
+        >
+          {isPlaying ? (
+            <Pause size={32} fill="currentColor" className="text-white" />
           ) : (
-            <Play className="w-8 h-8 text-[#1F3924] fill-current ml-1" />
+            <Play size={32} fill="currentColor" className="text-white ml-1" />
           )}
         </div>
       </div>
 
-      {!isPlaying && !isBuffering && (
-        <div className="absolute bottom-6 left-0 right-0 text-center">
-          <span className="bg-white/80 text-[#1F3924] text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">
-            {currentIndex === 0 ? "Assistir Apresentação" : "Continuar Assistindo"}
+      {/* Texto "Toque para Assistir" */}
+      {!isPlaying && (
+        <div className="absolute bottom-8 left-0 right-0 text-center animate-pulse pointer-events-none">
+          <span className="bg-black/40 backdrop-blur-md text-white text-[10px] font-bold px-4 py-2 rounded-full uppercase tracking-[0.2em] border border-white/10">
+            Assista a Experiência
           </span>
         </div>
       )}
