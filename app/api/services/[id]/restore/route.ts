@@ -1,15 +1,20 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 
-interface Params {
-  params: { id: string };
-}
+export async function PATCH(
+  _: Request,
+  context: { params: Promise<{ id: string }> } // Ajustado para Promise
+) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
 
-export async function PATCH(req: Request, { params }: Params) {
   try {
-    const id = Number(params.id);
+    const { id } = await context.params; // Aguarda o ID
+    const serviceId = Number(id);
+
     const restored = await prisma.service.update({
-      where: { id },
+      where: { id: serviceId },
       data: { active: true },
     });
 

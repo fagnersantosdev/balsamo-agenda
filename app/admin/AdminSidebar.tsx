@@ -20,9 +20,22 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="w-60 border-r border-[#8D6A93]/20 bg-[#F5F3EB]/80 px-4 py-6 flex flex-col gap-6">
+    <aside
+  className="
+    w-60
+    bg-[#F5F3EB]/90
+    px-4
+    py-6
+    flex
+    flex-col
+    gap-6
+    border-r border-[#8D6A93]/15
+    rounded-tr-xl
+    rounded-br-xl
+  "
+>
       {/* Marca */}
-      <div>
+      <div className="bg-white/70 rounded-2xl p-3 shadow-sm border border-[#8D6A93]/20">
         <Link href="/admin" className="block">
           <span className="block text-xs text-[#1F3924]/60">
             Painel administrativo
@@ -38,7 +51,7 @@ export default function AdminSidebar() {
         <Link
           href="/admin"
           className={navClass(
-            "px-3 py-2 rounded-lg flex items-center gap-2",
+            "px-3 py-2 rounded-xl flex items-center gap-2 transition-colors duration-200",
             pathname === "/admin"
           )}
         >
@@ -48,7 +61,7 @@ export default function AdminSidebar() {
         <Link
           href="/admin/services"
           className={navClass(
-            "px-3 py-2 rounded-lg flex items-center gap-2",
+            "px-3 py-2 rounded-xl flex items-center gap-2 transition-colors duration-200",
             pathname.startsWith("/admin/services")
           )}
         >
@@ -58,20 +71,37 @@ export default function AdminSidebar() {
         <Link
           href="/admin/testimonials"
           className={navClass(
-            "px-3 py-2 rounded-lg flex items-center gap-2",
+            "px-3 py-2 rounded-xl flex items-center gap-2 transition-colors duration-200",
             pathname.startsWith("/admin/testimonials")
           )}
         >
           💬 <span> Avaliações</span>
         </Link>
+
+        <Link
+          href="/admin/settings"
+          className={navClass(
+            "px-3 py-2 rounded-xl flex items-center gap-2 transition-colors duration-200",
+            pathname.startsWith("/admin/settings")
+          )}
+        >
+          ⚙️ <span>Configurações</span>
+        </Link>
       </nav>
+      
 
       {/* Sair */}
       <button
         onClick={async () => {
-          await fetch("/api/auth/logout", { method: "POST" });
+        await fetch("/api/auth/logout", { method: "POST" });
+        window.__adminToast?.({
+          message: "Sessão encerrada com sucesso",
+          type: "success",
+        });
+        setTimeout(() => {
           window.location.href = "/login";
-        }}
+        }, 800);
+      }}
         className="mt-auto text-xs text-red-600 hover:underline text-left"
       >
         Sair

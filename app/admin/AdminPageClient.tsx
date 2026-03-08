@@ -1,404 +1,192 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 import BookingTable from "../components/BookingTable";
 import Toast from "../components/Toast";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import AdminMenu from "../components/AdminMenu";
-import AdminMobileNav from "../components/AdminMobileNav";
-
-// 🔹 Tipagem dos agendamentos
-type Booking = {
-  id: number;
-  clientName: string;
-  clientPhone: string;
-  clientEmail?: string | null;
-  startDateTime: string;
-  endDateTime: string;
-  status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
-  service?: { name: string };
-};
+import { BookingsCountDTO } from "@/app/types/BookingsCountDTO";
+import { Booking } from "@/app/types/Booking";
+import { Search, Calendar, CheckCircle, XCircle, FileText, Loader2, User, Clock } from "lucide-react";
 
 export default function AdminPageClient() {
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [counts, setCounts] = useState({
-    hoje: 0,
-    futuros: 0,
-    pendentes: 0,
-    concluidos: 0,
-    cancelados: 0,
+  const [counts, setCounts] = useState<BookingsCountDTO>({
+    todayPending: 0,
+    futurePending: 0,
+    completed: 0,
+    canceled: 0,
   });
-  const [filter, setFilter] = useState("today");
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+
+  const [filter, setFilter] = useState<"today" | "future" | "all">("today");
+  const [statusFilter, setStatusFilter] = useState<"PENDENTE" | "CONCLUIDO" | "CANCELADO" | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [toast, setToast] =
-    useState<{ message: string; type: "success" | "error" } | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
-  // ===================================================================
-  // 📄 FUNÇÃO: EXPORTAR PDF
-  // ===================================================================
-  async function exportToPDF() {
-  try {
-    // ===================================================================
-    // 📦 Recupera filtros atuais
-    // ===================================================================
-    const filter = sessionStorage.getItem("admin_filter") || "today";
-    const statusFilter = sessionStorage.getItem("admin_status") || null;
-
-    const query = new URLSearchParams();
-    if (filter) query.set("filter", filter);
-    if (statusFilter) query.set("status", statusFilter);
-
-    // ===================================================================
-    // 📡 Busca os dados da API
-    // ===================================================================
-    const res = await fetch(`/api/bookings?${query.toString()}`);
-    if (!res.ok) throw new Error("Erro ao buscar agendamentos");
-
-    const bookings: Booking[] = await res.json();
-
-    // ===================================================================
-    // 🗂 Define intervalos de datas
-    // ===================================================================
-    const now = new Date();
-
-    const minDate = new Date();
-    minDate.setMonth(now.getMonth() - 3);
-
-    const maxDate = new Date();
-    maxDate.setMonth(now.getMonth() + 3);
-
-    // ===================================================================
-    // 🔍 Filtragem final por período
-    // ===================================================================
-    const filteredBookings = bookings.filter((b) => {
-      const start = new Date(b.startDateTime);
-
-      if (filter === "future") {
-        return start > now && start <= maxDate;
-      }
-
-      if (statusFilter === "CONCLUIDO" || statusFilter === "CANCELADO") {
-        return start >= minDate && start <= now;
-      }
-
-      return start >= minDate && start <= maxDate;
-    });
-
-    if (filteredBookings.length === 0) {
-      setToast({
-        message: "⚠️ Nenhum agendamento encontrado neste filtro.",
-        type: "error",
-      });
-      setTimeout(() => setToast(null), 3000);
-      return;
-    }
-
-    // ===================================================================
-    // 🧾 Criação do PDF
-    // ===================================================================
-    const doc = new jsPDF();
-
-    const titleMap: Record<string, string> = {
-      today: "Agendamentos de Hoje",
-      future: "Agendamentos Futuros (Próx. 3 meses)",
-      all: "Relatório Geral (Últimos 3 meses)",
-    };
-
-    const title =
-      statusFilter === "CONCLUIDO"
-        ? "Agendamentos Concluídos (Últimos 3 meses)"
-        : statusFilter === "CANCELADO"
-        ? "Agendamentos Cancelados (Últimos 3 meses)"
-        : titleMap[filter] || titleMap.all;
-
-    // Cabeçalho (cor suave Bálsamo)
-    doc.setTextColor(31, 57, 36); // Verde escuro
-    doc.setFontSize(14);
-    doc.text(title, 14, 18);
-
-    doc.setFontSize(10);
-    doc.setTextColor(80, 80, 80);
-    doc.text(`Emitido em: ${now.toLocaleString("pt-BR")}`, 14, 25);
-
-    // Dados da tabela
-    const tableData = filteredBookings.map((b) => [
-      b.clientName,
-      b.clientPhone,
-      b.service?.name || "—",
-      new Date(b.startDateTime).toLocaleString("pt-BR"),
-      b.status,
-    ]);
-
-    // Tabela com tom Bálsamo
-    autoTable(doc, {
-      startY: 30,
-      head: [["Cliente", "Telefone", "Serviço", "Data/Hora", "Status"]],
-      body: tableData,
-      styles: {
-        fontSize: 9,
-      },
-      headStyles: {
-        fillColor: [31, 57, 36], // Verde
-        textColor: 255,
-      },
-      alternateRowStyles: {
-        fillColor: [245, 243, 235], // Bege bálsamo suave
-      },
-    });
-
-    // Nome do arquivo final
-    const filename = `Balsamo_${title.replace(/\s+/g, "_")}.pdf`;
-    doc.save(filename);
-
-    // ===================================================================
-    // 🌿 Confirmação elegante
-    // ===================================================================
-    setToast({
-      message: "🌿 PDF gerado com sucesso!",
-      type: "success",
-    });
-  } catch (err) {
-    console.error(err);
-    setToast({
-      message: "❌ Erro ao gerar o PDF.",
-      type: "error",
-    });
-  }
-}
-
-  // ===================================================================
-  // 📡 Carregar contadores
-  // ===================================================================
-  async function fetchCounts() {
+  // --- Lógica de Busca de Dados ---
+  const fetchCounts = useCallback(async () => {
     try {
       const res = await fetch("/api/bookings/counts");
       if (res.ok) setCounts(await res.json());
-    } catch (err) {
-      console.error("Erro ao buscar contadores:", err);
+    } catch {
+      setToast({ message: "Erro ao carregar contadores.", type: "error" });
     }
-  }
+  }, []);
 
-  // ===================================================================
-  // 📡 Carregar agendamentos
-  // ===================================================================
-  async function fetchBookings(selectedFilter: string, status?: string | null) {
+  const fetchBookings = useCallback(async (f: string, s: string | null) => {
     setLoading(true);
     try {
-      const query = new URLSearchParams();
-      if (selectedFilter) query.set("filter", selectedFilter);
-      if (status) query.set("status", status);
-
+      const query = new URLSearchParams({ filter: f });
+      if (s) query.set("status", s);
       const res = await fetch(`/api/bookings?${query.toString()}`);
       if (res.ok) setBookings(await res.json());
-    } catch (err) {
-      console.error("Erro ao buscar agendamentos:", err);
-      setToast({
-        message: "❌ Erro ao carregar agendamentos.",
-        type: "error",
-      });
+    } catch {
+      setToast({ message: "Erro ao carregar agendamentos.", type: "error" });
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  // ===================================================================
-  // 🔁 Atualizar status (Confirmar / Cancelar)
-  // ===================================================================
-  async function updateStatus(
-    id: number,
-    newStatus: "PENDENTE" | "CONCLUIDO" | "CANCELADO"
-  ) {
+  useEffect(() => {
+    fetchCounts();
+    fetchBookings(filter, statusFilter);
+  }, [filter, statusFilter, fetchCounts, fetchBookings]);
+
+  // --- Funções de Ação ---
+  async function updateStatus(id: number, newStatus: "CONCLUIDO" | "CANCELADO") {
     try {
       const res = await fetch(`/api/bookings/${id}/status`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-
-      if (!res.ok) throw new Error("Erro ao atualizar status");
-
-      setBookings((prev) =>
-        prev.map((b) => (b.id === id ? { ...b, status: newStatus } : b))
-      );
-
-      fetchCounts();
-      fetchBookings(filter, statusFilter);
-
-      setToast({
-        message:
-          newStatus === "CONCLUIDO"
-            ? "✅ Agendamento concluído!"
-            : "❌ Agendamento cancelado.",
-        type: "success",
-      });
-
-      setTimeout(() => setToast(null), 4000);
-    } catch (err) {
-      console.error(err);
-      setToast({
-        message: "❌ Erro ao atualizar status.",
-        type: "error",
-      });
-      setTimeout(() => setToast(null), 4000);
+      if (res.ok) {
+        setToast({ message: "Status atualizado!", type: "success" });
+        fetchCounts();
+        fetchBookings(filter, statusFilter);
+      }
+    } catch {
+      setToast({ message: "Erro ao atualizar status.", type: "error" });
     }
   }
 
-  // ===================================================================
-  // 🔁 Ao montar a página
-  // ===================================================================
-  useEffect(() => {
-    fetchCounts();
-    fetchBookings(filter, statusFilter);
-  }, [filter, statusFilter]);
+  const exportToPDF = useCallback(() => {
+    if (bookings.length === 0) return;
+    const doc = new jsPDF();
+    doc.text("Relatório de Agendamentos - Bálsamo", 14, 15);
+    autoTable(doc, {
+      startY: 20,
+      head: [["Cliente", "Serviço", "Data/Hora", "Status"]],
+      body: bookings.map((b) => [
+        b.clientName,
+        b.service?.name || "N/A",
+        new Date(b.startDateTime).toLocaleString("pt-BR"),
+        b.status,
+      ]),
+    });
+    doc.save("relatorio-balsamo.pdf");
+  }, [bookings]);
 
-  // ===================================================================
-  // 💾 Salvar filtro atual
-  // ===================================================================
+  // Escuta o evento do AdminMenu para exportar PDF
   useEffect(() => {
-    sessionStorage.setItem("admin_filter", filter);
-    sessionStorage.setItem("admin_status", statusFilter || "");
-  }, [filter, statusFilter]);
+    const handleExport = () => exportToPDF();
+    window.addEventListener("admin:exportPDF", handleExport);
+    return () => window.removeEventListener("admin:exportPDF", handleExport);
+  }, [exportToPDF]);
 
-  // ===================================================================
-  // 📣 Listener para Exportar PDF no Mobile
-  // ===================================================================
-  // 🔔 Listener para o menu disparar o PDF
-  useEffect(() => {
-    function handlePDF() {
-      exportToPDF(); // chama sua função de fato
+  function handleCardClick(type: "todayPending" | "futurePending" | "completed" | "canceled") {
+    switch (type) {
+      case "todayPending": setFilter("today"); setStatusFilter("PENDENTE"); break;
+      case "futurePending": setFilter("future"); setStatusFilter("PENDENTE"); break;
+      case "completed": setFilter("all"); setStatusFilter("CONCLUIDO"); break;
+      case "canceled": setFilter("all"); setStatusFilter("CANCELADO"); break;
     }
+  }
 
-    window.addEventListener("admin:exportPDF", handlePDF);
-    return () => window.removeEventListener("admin:exportPDF", handlePDF);
-  }, []);
-
-  // ===================================================================
-  // 🔍 Busca local
-  // ===================================================================
   const filteredBookings = bookings.filter(
     (b) =>
       b.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       b.clientPhone.includes(searchTerm)
   );
 
-  // ===================================================================
-  // 📦 Botões dos cards
-  // ===================================================================
-  function handleCardClick(type: string) {
-    switch (type) {
-      case "hoje":
-        setFilter("today");
-        setStatusFilter(null);
-        break;
-      case "futuros":
-        setFilter("future");
-        setStatusFilter("PENDENTE");
-        break;
-      case "concluidos":
-        setFilter("all");
-        setStatusFilter("CONCLUIDO");
-        break;
-      case "cancelados":
-        setFilter("all");
-        setStatusFilter("CANCELADO");
-        break;
-    }
-  }
-
-  // ===================================================================
-  // 🖥️ JSX
-  // ===================================================================
   return (
-    <>
-    <main className="max-w-6xl mx-auto px-4 py-8 pb-24">
-      {/* Cabeçalho */}
-      <div className="flex justify-between items-center mb-8 flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1F3924]">
-            🌿 Painel Administrativo
-          </h1>
-          <p className="text-sm text-[#8D6A93] mt-1">
-            Bem-vinda de volta, <strong>Administradora</strong>.
-          </p>
+    <main className="max-w-7xl mx-auto px-4 py-8 pb-32">
+      <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-[2.5rem] p-8 border border-[#8D6A93]/10 shadow-xl shadow-[#8D6A93]/5">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-[#1F3924] rounded-2xl flex items-center justify-center text-white">
+            <User size={28} />
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold text-[#1F3924] tracking-tight">Painel de Gestão</h1>
+            <p className="text-[#8D6A93] text-sm font-medium">Bem-vinda, <span className="text-[#1F3924]">Administradora</span></p>
+          </div>
         </div>
+        <div className="mt-4 md:mt-0 hidden md:block">
+          <AdminMenu />
+        </div>
+      </header>
 
-        {/* Menu Desktop */}
-        <AdminMenu />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <StatusCard label="Hoje" value={counts.todayPending} icon={<Clock size={20} />} color="bg-[#8D6A93]" onClick={() => handleCardClick("todayPending")} isActive={filter === "today" && statusFilter === "PENDENTE"} />
+        <StatusCard label="Próximos" value={counts.futurePending} icon={<Calendar size={20} />} color="bg-[#D6A77A]" onClick={() => handleCardClick("futurePending")} isActive={filter === "future" && statusFilter === "PENDENTE"} />
+        <StatusCard label="Concluídos" value={counts.completed} icon={<CheckCircle size={20} />} color="bg-[#1F3924]" onClick={() => handleCardClick("completed")} isActive={statusFilter === "CONCLUIDO"} />
+        <StatusCard label="Cancelados" value={counts.canceled} icon={<XCircle size={20} />} color="bg-red-500" onClick={() => handleCardClick("canceled")} isActive={statusFilter === "CANCELADO"} />
       </div>
 
-      {/* Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8 text-center">
-        {[
-          { label: "Hoje", key: "hoje" },
-          { label: "Futuros", key: "futuros" },
-          { label: "Concluídos", key: "concluidos" },
-          { label: "Cancelados", key: "cancelados" },
-        ].map(({ label, key }) => (
-          <button
-            key={key}
-            onClick={() => handleCardClick(key)}
-            className={`rounded-lg py-4 shadow border transition text-sm sm:text-base ${
-              filter === key || statusFilter?.toLowerCase() === key
-                ? "bg-[#1F3924] text-white border-[#1F3924]"
-                : "bg-[#E4F0FD] text-[#1F3924] border-transparent hover:bg-[#dce7f9]"
-            }`}
-          >
-            <p className="font-semibold">{label}</p>
-            <p className="text-lg font-bold">
-              {counts[key as keyof typeof counts]}
-            </p>
-          </button>
-        ))}
-      </div>
-
-      {/* Busca */}
-      <div className="flex flex-col sm:flex-row justify-between gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Buscar por nome ou telefone..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-1/2 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8D6A93]"
-        />
-      </div>
-
-      {/* Tabela */}
-      {loading ? (
-        <p className="text-center text-[#1F3924]">
-          Carregando agendamentos...
-        </p>
-      ) : filteredBookings.length === 0 ? (
-        <p className="text-center text-[#1F3924]/70">
-          Nenhum agendamento encontrado.
-        </p>
-      ) : (
-        <div className="overflow-x-auto rounded-lg shadow-md">
-          <BookingTable
-            bookings={filteredBookings}
-            updateStatus={updateStatus}
-            showActions={filter === "today" || filter === "future"}
+      <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1F3924]/30 w-5 h-5" />
+          <input
+            className="w-full pl-12 pr-4 py-4 rounded-2xl border border-[#8D6A93]/10 bg-white shadow-sm outline-none transition-all"
+            placeholder="Buscar por nome ou telefone..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-      )}
+        <div className="text-xs font-black uppercase tracking-widest text-[#8D6A93] bg-[#8D6A93]/5 px-4 py-2 rounded-full border border-[#8D6A93]/10">
+           Exibindo: {statusFilter || "Todos"} ({filter})
+        </div>
+      </div>
 
-      {/* Mobile Bottom Menu */}
-      {/* <AdminMobileNav /> */}
+      <div className="bg-white rounded-[2.5rem] border border-[#8D6A93]/10 shadow-2xl shadow-[#8D6A93]/5 overflow-hidden">
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-24 opacity-30">
+            <Loader2 className="animate-spin w-12 h-12 text-[#1F3924] mb-4" />
+            <p className="font-bold uppercase text-xs">Sincronizando...</p>
+          </div>
+        ) : filteredBookings.length > 0 ? (
+          <BookingTable bookings={filteredBookings} updateStatus={updateStatus} showActions={filter !== "all"} />
+        ) : (
+          <div className="flex flex-col items-center justify-center py-24 text-center px-6">
+            <FileText size={40} className="text-[#8D6A93] mb-4" />
+            <h3 className="text-2xl font-bold text-[#1F3924]">Nenhum registro</h3>
+          </div>
+        )}
+      </div>
 
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </main>
-    {/* Toast */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-          // position="top"
-        />
-      )}
-      </>
+  );
+}
+
+function StatusCard({ label, value, icon, color, onClick, isActive }: {
+  label: string; value: number; icon: React.ReactNode; color: string; onClick: () => void; isActive: boolean;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className={`relative p-6 rounded-[2rem] border transition-all duration-500 text-left ${
+        isActive ? "bg-white border-[#8D6A93] shadow-xl ring-1 ring-[#8D6A93]" : "bg-white border-[#8D6A93]/10 hover:border-[#8D6A93]/40 shadow-sm"
+      }`}
+    >
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white mb-4 ${color}`}>
+        {icon}
+      </div>
+      <p className="text-xs font-black uppercase text-[#1F3924]/40 mb-1">{label}</p>
+      <p className="text-3xl font-black text-[#1F3924]">{value}</p>
+      {isActive && <div className={`absolute top-0 right-0 w-2 h-full ${color}`} />}
+    </button>
   );
 }

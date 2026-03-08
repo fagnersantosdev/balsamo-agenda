@@ -1,9 +1,9 @@
-export interface Testimonial {
+export type Testimonial = {
   id: number;
-  author: string;
+  author: string | null;
   message: string;
-  rating: number | null;
-  suggestion?: string | null;
-  createdAt: string;
-  approvede: boolean;
-}
+  rating: number;
+  approved: boolean; // ⬅️ Verifique se estava "approvede" e apague o "e" extra
+  createdAt: string; // ou Date, dependendo de como você usa
+  photoUrl?: string | null;
+};

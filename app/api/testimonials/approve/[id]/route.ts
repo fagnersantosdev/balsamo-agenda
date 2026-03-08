@@ -1,10 +1,18 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(
+  _: Request,
+  props: { params: Promise<{ id: string }> }
+) {
+  const params = await props.params; // ⬅️ Await obrigatório no Next.js 15
+  const id = Number(params.id);
+
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   try {
-    const id = Number(params.id);
-
     const testimonial = await prisma.testimonial.update({
       where: { id },
       data: { approved: true },

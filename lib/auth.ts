@@ -1,20 +1,19 @@
+// lib/auth.ts
 import { cookies } from "next/headers";
-import jwt from "jsonwebtoken";
 import { redirect } from "next/navigation";
+import { jwtVerify } from "jose";
 
-/**
- * 🔒 Middleware server-side para proteger páginas administrativas
- */
 export async function requireAdminAuth() {
-  const cookieStore = await cookies(); // ✅ Next 15+ precisa de await
-  const token = cookieStore.get("token")?.value;
+  const cookieStore = await cookies(); // Next 15 exige await
+  const token = cookieStore.get("admin_token")?.value;
 
   if (!token) {
     redirect("/login");
   }
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET!);
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET!);
+    await jwtVerify(token, secret);
   } catch {
     redirect("/login");
   }

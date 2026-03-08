@@ -1,69 +1,77 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import type { Prisma, BookingStatus } from "@prisma/client";
+import { requireAdminApiAuth } from "@/lib/adminApiAuth";
+import {
+  startOfBrazilDay,
+  endOfBrazilDay,
+} from "@/lib/timezone";
+import { getTotalDuration } from "@/lib/lib.scheduling";
 
 /* ============================================================
-   GET — Buscar agendamentos com filtros
+   GET — Buscar agendamentos (ADMIN)
 ============================================================ */
 export async function GET(req: Request) {
+  const auth = await requireAdminApiAuth();
+  if (auth) return auth;
+
   const { searchParams } = new URL(req.url);
-  const filter = searchParams.get("filter");
-  const status = searchParams.get("status");
+  const filter = searchParams.get("filter"); // today | future | all
+  const status = searchParams.get("status"); // PENDENTE | CONCLUIDO | CANCELADO
 
   try {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
+    const todayStart = startOfBrazilDay();
+    const todayEnd = endOfBrazilDay();
 
-    const endOfToday = new Date();
-    endOfToday.setHours(23, 59, 59, 999);
-
-    const pastLimit = new Date();
-    pastLimit.setDate(pastLimit.getDate() - 30);
-
-    const futureLimit = new Date();
-    futureLimit.setDate(futureLimit.getDate() + 30);
-
-    const threeMonthsAgo = new Date();
+    const threeMonthsAgo = new Date(todayStart);
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
-    const whereClause: Prisma.BookingWhereInput = {};
+    const futureLimit = new Date(todayEnd);
+    futureLimit.setMonth(futureLimit.getMonth() + 3);
 
-    /* -------- Filtro por status -------- */
+    const where: Prisma.BookingWhereInput = {};
+
     if (status && status !== "ALL") {
-      whereClause.status = status as BookingStatus;
-
-      if (status === "CONCLUIDO" || status === "CANCELADO") {
-        whereClause.startDateTime = {
-          gte: threeMonthsAgo,
-          lte: endOfToday,
-        };
-      }
+      where.status = status as BookingStatus;
     }
 
-    /* -------- Filtro por período -------- */
     if (filter === "today") {
-      whereClause.startDateTime = { gte: startOfToday, lte: endOfToday };
-      whereClause.status = { notIn: ["CANCELADO", "CONCLUIDO"] };
+      where.startDateTime = {
+        gte: todayStart,
+        lt: todayEnd,
+      };
+      where.status = "PENDENTE";
     }
 
     if (filter === "future") {
-      whereClause.startDateTime = { gt: endOfToday, lte: futureLimit };
-      whereClause.status = "PENDENTE";
+      where.startDateTime = {
+        gt: todayEnd,
+        lt: futureLimit,
+      };
+      where.status = "PENDENTE";
     }
 
-    if (filter === "past") {
-      whereClause.endDateTime = { lt: startOfToday, gte: pastLimit };
+    if (filter === "all" && (status === "CONCLUIDO" || status === "CANCELADO")) {
+      where.startDateTime = {
+        gte: threeMonthsAgo,
+        lt: todayEnd,
+      };
     }
+
+    const orderBy: Prisma.BookingOrderByWithRelationInput =
+      status === "CONCLUIDO" || status === "CANCELADO"
+        ? { startDateTime: "desc" }
+        : { startDateTime: "asc" };
 
     const bookings = await prisma.booking.findMany({
-      where: whereClause,
+      where,
       include: { service: true },
-      orderBy: { startDateTime: "asc" },
+      orderBy,
     });
 
     return NextResponse.json(bookings);
   } catch (error) {
-    console.error("❌ Erro no GET bookings:", error);
+    console.error("❌ Erro ao buscar agendamentos:", error);
     return NextResponse.json(
       { error: "Erro ao buscar agendamentos." },
       { status: 500 }
@@ -72,103 +80,125 @@ export async function GET(req: Request) {
 }
 
 /* ============================================================
-   POST — Criar agendamento (SEM UTC, horário local)
+   POST — Criar agendamento (CLIENTE)
 ============================================================ */
 export async function POST(req: Request) {
   try {
     const data = await req.json();
 
-    if (!data.clientName || !data.clientPhone || !data.serviceId || !data.startDateTime) {
-      return NextResponse.json({ error: "Dados incompletos" }, { status: 400 });
-    }
-
-    /* -------- Serviço -------- */
-    const service = await prisma.service.findUnique({
-      where: { id: Number(data.serviceId) },
-    });
-
-    if (!service) {
-      return NextResponse.json({ error: "Serviço não encontrado." }, { status: 404 });
-    }
-
-    /* -------- Criar horário local -------- */
-    const startLocal = new Date(data.startDateTime);
-    startLocal.setSeconds(0, 0);
-
-    const endLocal = new Date(startLocal.getTime() + (service.durationMin + 15) * 60000);
-    endLocal.setSeconds(0, 0);
-
-    /* ============================================================
-       MAPEAR DIA DA SEMANA — DOM=1, SEG=2, ..., SÁB=7
-    ============================================================ */
-    const jsDay = startLocal.getDay(); // 0-6 (0=domingo)
-    const dayOfWeek = jsDay === 0 ? 1 : jsDay + 1;
-
-    /* -------- Proibir sábado (7) e domingo (1) -------- */
-    if (dayOfWeek === 1 || dayOfWeek === 7) {
+    if (
+      !data.clientName ||
+      !data.clientPhone ||
+      !data.serviceId ||
+      !data.startDateTime
+    ) {
       return NextResponse.json(
-        { error: "❌ Não é possível agendar aos fins de semana." },
+        { error: "Dados incompletos." },
         { status: 400 }
       );
     }
 
-    /* -------- Disponibilidade -------- */
+    /* ============================
+      🛠 Serviço e Configurações
+    ============================ */
+    const service = await prisma.service.findUnique({
+      where: { id: Number(data.serviceId) },
+    });
+
+    if (!service || !service.active) {
+      return NextResponse.json(
+        { error: "Serviço inválido ou inativo." },
+        { status: 404 }
+      );
+    }
+
+    /* ============================
+      ⏱ Duração (Fonte única da regra)
+      Aqui, 'total' já retorna (duração do serviço + buffer do banco)
+    ============================ */
+    const { total } = await getTotalDuration(Number(data.serviceId));
+
+    /* ============================
+       🕒 Horários (Brasil → UTC)
+    ============================ */
+    const startLocal = new Date(data.startDateTime);
+    startLocal.setSeconds(0, 0);
+
+    const startUTC = new Date(data.startDateTime);
+    startUTC.setSeconds(0, 0);
+    
+    // Bloqueio total na agenda: Início + (Duração Serviço + Buffer)
+    const endWithBufferUTC = new Date(startUTC.getTime() + total * 60_000);
+
+    /* ============================
+       📅 Disponibilidade Semanal
+    ============================ */
+    const dayOfWeek = startLocal.getDay();
     const availability = await prisma.availability.findUnique({
       where: { dayOfWeek },
     });
 
     if (!availability || !availability.active) {
       return NextResponse.json(
-        { error: "❌ Este dia não está disponível para agendamento." },
+        { error: "Dia indisponível para agendamento." },
         { status: 400 }
       );
     }
 
-    /* -------- Verificar horário dentro do expediente -------- */
     const startHour = startLocal.getHours() + startLocal.getMinutes() / 60;
+    const endHour = (startLocal.getHours() * 60 + startLocal.getMinutes() + total) / 60;
 
-    if (startHour < availability.openHour || startHour >= availability.closeHour) {
+    if (startHour < availability.openHour || endHour > availability.closeHour) {
       return NextResponse.json(
-        { error: "⏳ Horário fora do expediente." },
+        { error: "Horário fora do expediente." },
         { status: 400 }
       );
     }
 
-    /* -------- Conflito de horário real -------- */
+    /* ============================
+       🔁 Verificar conflito
+    ============================ */
     const conflict = await prisma.booking.findFirst({
       where: {
-        status: { notIn: ["CANCELADO", "CONCLUIDO"] },
-        startDateTime: { lt: endLocal },
-        endDateTime: { gt: startLocal },
+        status: { in: ["PENDENTE", "CONCLUIDO"] },
+        AND: [
+          { startDateTime: { lt: endWithBufferUTC } },
+          { endDateTime: { gt: startUTC } },
+        ],
       },
     });
 
     if (conflict) {
       return NextResponse.json(
-        { error: "❌ Este horário já está reservado." },
+        { error: "Este horário já está reservado." },
         { status: 409 }
       );
     }
 
-    /* -------- Criar agendamento -------- */
+    /* ============================
+       ✅ Criar agendamento
+    ============================ */
     const booking = await prisma.booking.create({
       data: {
         clientName: data.clientName,
         clientPhone: data.clientPhone,
         clientEmail: data.clientEmail || null,
         serviceId: Number(data.serviceId),
-        startDateTime: startLocal,
-        endDateTime: endLocal,
+        startDateTime: startUTC,
+        endDateTime: endWithBufferUTC, // Salvamos o bloco total ocupado
         status: "PENDENTE",
       },
       include: { service: true },
     });
 
     return NextResponse.json(
-      { ok: true, message: "Agendamento criado com sucesso!", booking },
+      {
+        ok: true,
+        message: "Agendamento criado com sucesso!",
+        booking,
+      },
       { status: 201 }
     );
-
   } catch (error) {
     console.error("❌ Erro ao criar agendamento:", error);
     return NextResponse.json(

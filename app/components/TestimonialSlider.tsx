@@ -1,27 +1,19 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { Testimonial } from "@/app/types/Testimonial";
-
-// export type Testimonial = {
-//   id: number;
-//   author: string;
-//   message: string;
-//   createdAt: string;
-// };
+import React from "react";
+import { Quote } from "lucide-react";
 
 interface Props {
   testimonials: Testimonial[];
 }
 
 export default function TestimonialSlider({ testimonials }: Props) {
-  const trackRef = useRef<HTMLDivElement | null>(null);
+  const tripleTestimonials = [...testimonials, ...testimonials, ...testimonials];
 
-  // Função para formatar datas (agora no Client Component)
   function formatRelativeDate(dateString: string) {
     const date = new Date(dateString);
     const now = new Date();
-
     const diffMs = now.getTime() - date.getTime();
     const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
@@ -34,72 +26,53 @@ export default function TestimonialSlider({ testimonials }: Props) {
     if (diffWeeks < 4) return `Há ${diffWeeks} semanas`;
 
     const diffMonths = Math.floor(diffDays / 30);
-    if (diffMonths === 1) return "Há 1 mês";
-
-    return `Há ${diffMonths} meses`;
+    return diffMonths <= 1 ? "Há 1 mês" : `Há ${diffMonths} meses`;
   }
 
-  // Slider automático
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || testimonials.length === 0) return;
-
-    let index = 0;
-    const total = testimonials.length;
-
-    function slide() {
-      if (!track) return;
-
-      const firstCard = track.children[0] as HTMLElement | undefined;
-      if (!firstCard) return;
-
-      const width = firstCard.clientWidth;
-      index = (index + 1) % total;
-
-      track.style.transform = `translateX(-${index * width}px)`;
-    }
-
-    const interval = setInterval(slide, 5000);
-
-    return () => clearInterval(interval);
-  }, [testimonials]);
-
   return (
-    <div className="relative overflow-hidden">
-      {/* Faixa dos cards */}
-      <div
-        ref={trackRef}
-        className="flex transition-transform duration-700 ease-out"
-      >
-        {testimonials.map((t) => (
+    <div className="relative w-full overflow-hidden">
+      {/* Gradientes Laterais (Máscara) - Visíveis apenas no Desktop para evitar cortes no Mobile */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 hidden w-32 bg-gradient-to-r from-[#F5F3EB] to-transparent lg:block" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden w-32 bg-gradient-to-l from-[#F5F3EB] to-transparent lg:block" />
+
+      {/* Faixa que se move continuamente */}
+      <div className="flex gap-6 animate-scroll-infinite hover:pause-on-hover w-max px-6 sm:px-12 py-4">
+        {tripleTestimonials.map((t, index) => (
           <div
-            key={t.id}
-            className="
-              flex-shrink-0
-              w-full
-              max-w-[90vw]
-              sm:max-w-none
-              sm:w-1/2         /* Tablet */
-              md:w-1/3         /* Desktop */
-              px-3
-            "
+            key={`${t.id}-${index}`}
+            className="flex-shrink-0 w-[85vw] sm:w-[380px]"
           >
-            <div
-              className="
-                bg-[#F5F3EB]/90 rounded-2xl h-full p-6
-                shadow-[0_8px_25px_-5px_rgba(141,106,147,0.25)]
-                border border-[#8D6A93]/20
-              "
-            >
-              <p className="text-[#1F3924]/90 italic mb-4 leading-relaxed">
-                {t.message.replace(/^\$/, "")}
+            <div className="
+              relative bg-white/80 backdrop-blur-sm
+              rounded-[2rem] h-full p-8 
+              border border-[#8D6A93]/10 
+              shadow-xl shadow-[#8D6A93]/5 
+              transition-all duration-500 
+              hover:scale-[1.02] hover:bg-white
+              flex flex-col justify-between
+            ">
+              {/* Ícone Decorativo de Aspas */}
+              <div className="absolute top-6 right-8 text-[#8D6A93]/10">
+                <Quote size={40} fill="currentColor" />
+              </div>
+
+              <p className="text-[#1F3924] font-medium italic mb-8 leading-relaxed text-sm sm:text-base relative z-10">
+                &ldquo;{t.message}&rdquo;
               </p>
 
-              <p className="text-[#8A4B2E] font-semibold">— {t.author}</p>
-
-              <p className="text-sm text-[#1F3924]/50 mt-1">
-                {formatRelativeDate(t.createdAt)}
-              </p>
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-full bg-[#8D6A93]/10 flex items-center justify-center text-[#8D6A93] font-bold text-xs">
+                  {(t.author || "A")[0].toUpperCase()}
+                </div>
+                <div>
+                  <p className="text-[#1F3924] font-black text-xs uppercase tracking-widest">
+                    {t.author || "Anônimo"}
+                  </p>
+                  <p className="text-[10px] font-bold text-[#8D6A93]/60 mt-0.5 uppercase tracking-tighter">
+                    {formatRelativeDate(t.createdAt)}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         ))}

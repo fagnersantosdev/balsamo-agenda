@@ -2,289 +2,242 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import { User, Phone, Mail, Sparkles, Clock, CalendarCheck } from "lucide-react";
 import Toast from "../components/Toast";
 import EventPromo from "../components/EventPromo";
 import SuccessCard from "../components/SuccessCard";
-import { DayPicker } from "react-day-picker";
-import "react-day-picker/style.css";
-import { ptBR } from "date-fns/locale";
+import BookingCalendar from "@/app/components/BookingCalendar";
 
 /* ============================================================
    TIPOS
 ============================================================ */
-type Service = { id: number; name: string; durationMin: number };
+type Service = {
+  id: number;
+  name: string;
+  durationMin: number;
+};
+
 type Availability = {
-  dayOfWeek: number; // 1=domingo ... 7=sábado
+  id: number;
+  dayOfWeek: number;
   openHour: number;
   closeHour: number;
   active: boolean;
-};
-type Booking = {
-  id: number;
-  startDateTime: string;
-  endDateTime: string;
-  serviceId: number;
-  status: "PENDENTE" | "CONCLUIDO" | "CANCELADO";
 };
 
 type SuccessInfo = {
   name: string;
   date: string;
   service: string;
-  phone?: string;
 };
 
-/* ============================================================
-   MAPEAMENTO PARA COMBINAR COM A TABELA availability
-============================================================ */
-function mapDay(jsDay: number): number {
-  // const map: Record<number, number> = {
-  //   0: 1, //domingo
-  //   1: 2, //...
-  //   2: 3, //...
-  //   3: 4, //...
-  //   4: 5, //...
-  //   5: 6, //...
-  //   6: 7, //sabado
-  // };
-  return jsDay;
-  //return map[jsDay];
-}
-
-/* ============================================================
-   FORMATAÇÃO SEGURA DE HORÁRIO LOCAL
-============================================================ */
-function formatSlot(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  const h = String(date.getHours()).padStart(2, "0");
-  return `${y}-${m}-${d}T${h}:00`;
-}
-
-/* ============================================================
-   COMPONENTE PRINCIPAL
-============================================================ */
 export default function BookPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [availability, setAvailability] = useState<Availability[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const [selectedServiceId, setSelectedServiceId] = useState<number | null>(null);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
   const [msg, setMsg] = useState<string | null>(null);
   const [msgType, setMsgType] = useState<"success" | "error" | null>(null);
   const [successData, setSuccessData] = useState<SuccessInfo | null>(null);
 
-  /* ============================================================
-     CARREGA SERVIÇOS + DISPONIBILIDADE
-  ============================================================ */
   useEffect(() => {
     fetch("/api/services").then((r) => r.json()).then(setServices);
     fetch("/api/availability").then((r) => r.json()).then(setAvailability);
   }, []);
 
-  /* ============================================================
-     GERAR HORÁRIOS DISPONÍVEIS
-  ============================================================ */
-  async function loadAvailableTimes(dateString: string, serviceId: number) {
-    if (!serviceId || !dateString) return;
-
+  async function loadAvailableTimes(date: Date, serviceId: number) {
     setAvailableTimes([]);
-
-    // Cria a data LOCAL sem UTC
-    const [year, month, day] = dateString.split("-").map(Number);
-    const selectedDate = new Date(year, month - 1, day, 0, 0, 0);
-
-    const now = new Date();
-    now.setSeconds(0, 0);
-
-    // Buscar agendamentos
-    const res = await fetch("/api/bookings");
-    const allBookings: Booking[] = res.ok ? await res.json() : [];
-
-    const bookingsDoDia = allBookings.filter((b) => {
-      const start = new Date(b.startDateTime);
-      return start.toDateString() === selectedDate.toDateString();
-    });
-
-    // Disponibilidade do dia (corrigida)
-    const dbDay = mapDay(selectedDate.getDay());
-    const dayAvail = availability.find((a) => a.dayOfWeek === dbDay);
-
-    if (!dayAvail || !dayAvail.active) {
-      setMsgType("error");
-      setMsg("🚫 Este dia não está disponível para agendamento.");
-      return;
-    }
-
-    const slots: string[] = [];
-
-    for (let hour = dayAvail.openHour; hour < dayAvail.closeHour; hour++) {
-      const slot = new Date(selectedDate);
-      slot.setHours(hour, 0, 0, 0);
-
-      // Só bloqueia horários passados se o usuário selecionar o DIA REAL de hoje
-    const todayReal = new Date();
-    todayReal.setHours(0,0,0,0);
-
-    if (selectedDate.toDateString() === todayReal.toDateString()) {
-      if (slot.getTime() <= new Date().getTime()) continue;
-    }
-
-      const conflict = bookingsDoDia.some((b) => {
-        const start = new Date(b.startDateTime);
-        const end = new Date(b.endDateTime);
-        return slot >= start && slot < end;
-      });
-
-      if (!conflict) slots.push(formatSlot(slot));
-    }
-
-    setAvailableTimes(slots);
+    const dayISO = date.toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+    const res = await fetch(`/api/availability-times?date=${dayISO}&serviceId=${serviceId}`);
+    if (!res.ok) return;
+    const times: string[] = await res.json();
+    setAvailableTimes(times);
   }
 
-  /* ============================================================
-     SUBMIT DO FORMULÁRIO
-  ============================================================ */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    const formEl = e.currentTarget as HTMLFormElement;
+    const formElement = e.currentTarget; 
+    const formData = new FormData(formElement);
+    const time = String(formData.get("startDateTime"));
 
-    const form = new FormData(formEl);
-
-    const payload = {
-      clientName: form.get("clientName"),
-      clientPhone: String(form.get("clientPhone")).replace(/\D/g, ""),
-      clientEmail: form.get("clientEmail") || null,
-      serviceId: Number(form.get("serviceId")),
-      startDateTime: form.get("startDateTime"),
-    };
-
-    const res = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
+    if (!selectedDate || !time) {
       setMsgType("error");
-      setMsg(`❌ ${data.error}`);
+      setMsg("⚠️ Selecione data e horário.");
       return;
     }
 
-    const booking = data.booking;
+    setLoading(true);
+    const [hour, minute] = time.split(":").map(Number);
+    const startDateTime = new Date(selectedDate);
+    startDateTime.setHours(hour, minute, 0, 0);
 
-    setSuccessData({
-      name: booking.clientName,
-      date: new Date(booking.startDateTime).toLocaleString("pt-BR", {
-        dateStyle: "short",
-        timeStyle: "short",
-      }),
-      service: booking.service.name,
-      phone: booking.clientPhone,
-    });
+    const payload = {
+      clientName: formData.get("clientName"),
+      clientPhone: String(formData.get("clientPhone")).replace(/\D/g, ""),
+      clientEmail: formData.get("clientEmail") || null,
+      serviceId: Number(formData.get("serviceId")),
+      startDateTime: startDateTime.toISOString(),
+    };
 
-    if (formEl) formEl.reset();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    try {
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setMsgType("error");
+        setMsg(data.error || "Este horário não está mais disponível.");
+        return;
+      }
+
+      setSuccessData({
+        name: String(formData.get("clientName")),
+        date: startDateTime.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }),
+        service: selectedService?.name || "",
+      });
+
+      formElement.reset(); 
+      setSelectedServiceId(null);
+      setSelectedService(null);
+      setSelectedDate(null);
+      setAvailableTimes([]);
+      setMsgType("success");
+      setMsg("✅ Agendamento realizado com sucesso!");
+
+    } catch {
+      setMsgType("error");
+      setMsg("❌ Erro ao conectar com o servidor.");
+    } finally {
+      setLoading(false);
+    }
   }
 
-  /* ============================================================
-     INTERFACE
-  ============================================================ */
+  const inputClass = "w-full pl-12 pr-4 py-3 bg-white border border-[#8D6A93]/20 rounded-2xl focus:ring-2 focus:ring-[#8D6A93] outline-none transition-all text-[#1F3924] placeholder:text-gray-300";
+  const labelClass = "block text-[10px] font-black uppercase tracking-widest text-[#1F3924]/40 ml-1 mb-1";
+
   return (
     <>
-      <main className="relative max-w-lg mx-auto bg-[#F5F3EB] p-8 rounded-3xl shadow-xl border border-purple-100">
+      <main className="max-w-6xl mx-auto px-4 py-12 md:py-20">
+        <div className="max-w-xl mx-auto bg-white rounded-[3rem] shadow-2xl shadow-[#8D6A93]/10 border border-[#8D6A93]/5 p-8 md:p-12 relative overflow-hidden">
+          
+          {/* Fundo Decorativo */}
+          <div className="absolute top-0 right-0 p-8 opacity-5 text-[#8D6A93] pointer-events-none">
+            <CalendarCheck size={120} />
+          </div>
 
-        <h1 className="flex items-center gap-2 text-2xl font-bold text-[#1F3924] mb-4">
-          <Image src="/borboleta.png" width={50} height={50} alt="Borboleta" />
-          Agendar Atendimento
-        </h1>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-
-          <input name="clientName" required placeholder="Nome completo" className="w-full p-2 border rounded" />
-          <input name="clientPhone" required placeholder="(24) 99999-9999" className="w-full p-2 border rounded" />
-          <input name="clientEmail" placeholder="E-mail (opcional)" className="w-full p-2 border rounded" />
-
-          {/* Serviço */}
-          <select
-            name="serviceId"
-            required
-            className="w-full p-2 border rounded"
-            onChange={(e) => {
-              if (!selectedDate) return;
-              loadAvailableTimes(selectedDate.toISOString().split("T")[0], Number(e.target.value));
-            }}
-          >
-            <option value="">Selecione um serviço</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>{s.name}</option>
-            ))}
-          </select>
-
-          {/* Calendário */}
-          <DayPicker
-            mode="single"
-            selected={selectedDate ?? undefined}
-            locale={ptBR}
-            weekStartsOn={1}
-            disabled={(d) => {
-              const today = new Date();
-              today.setHours(0, 0, 0, 0);
-
-              const dbDay = mapDay(d.getDay());
-              return d < today || d.getDay() === 0 || d.getDay() === 6; // bloqueia domingo e sábado
-            }}
-            onSelect={(date) => {
-              if (!date) return;
-
-              setSelectedDate(date);
-
-              const serviceId = Number(
-                (document.querySelector("[name='serviceId']") as HTMLSelectElement)?.value
-              );
-
-              if (serviceId) {
-                loadAvailableTimes(date.toISOString().split("T")[0], serviceId);
-              }
-            }}
-          />
-
-          {/* Horários */}
-          {availableTimes.length > 0 ? (
-            <select name="startDateTime" required className="w-full p-2 border rounded">
-              <option value="">Selecione um horário</option>
-              {availableTimes.map((t) => (
-                <option key={t} value={t}>
-                  {new Date(t).toLocaleTimeString("pt-BR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <p className="text-sm text-[#8A4B2E] italic">
-              Escolha um serviço e uma data para ver os horários disponíveis.
+          <header className="flex flex-col items-center text-center mb-10">
+            <div className="bg-[#F5F3EB] p-4 rounded-[2rem] mb-6 shadow-sm border border-[#D6A77A]/10">
+              <Image src="/logo-balsamo.png" width={60} height={60} alt="Logo" className="object-contain" />
+            </div>
+            <h1 className="text-3xl font-bold text-[#1F3924] tracking-tight">
+              Reserve seu Momento
+            </h1>
+            <p className="text-sm text-[#1F3924]/80 mt-2 font-medium">
+              Sua jornada de relaxamento começa aqui 🌿
             </p>
-          )}
+          </header>
 
-          <button className="w-full bg-[#1F3924] text-purple-50 font-medium px-4 py-2 rounded-lg">
-            Confirmar Agendamento
-          </button>
-        </form>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div className="relative">
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                <input name="clientName" required placeholder="Nome completo" className={inputClass} />
+              </div>
 
-        {successData && (
-          <SuccessCard show onClose={() => setSuccessData(null)} {...successData} />
-        )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="relative">
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                  <input name="clientPhone" required placeholder="WhatsApp" className={inputClass} />
+                </div>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                  <input name="clientEmail" type="email" placeholder="Email (opcional)" className={inputClass} />
+                </div>
+              </div>
+            </div>
 
-        {msg && <Toast message={msg} type={msgType || "error"} onClose={() => setMsg(null)} />}
+            <div className="space-y-4 pt-4 border-t border-[#8D6A93]/8">
+              <div>
+                <label className={labelClass}>O que você deseja hoje?</label>
+                <div className="relative">
+                  <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                  <select
+                    name="serviceId"
+                    required
+                    className={inputClass}
+                    value={selectedServiceId ?? ""}
+                    onChange={(e) => {
+                      const id = Number(e.target.value);
+                      const s = services.find((sv) => sv.id === id) || null;
+                      setSelectedServiceId(id);
+                      setSelectedService(s);
+                      setAvailableTimes([]);
+                      if (selectedDate && s) loadAvailableTimes(selectedDate, s.id);
+                    }}
+                  >
+                    <option value="">Escolha um tratamento</option>
+                    {services.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
+                </div>
+              </div>
 
+              <div className="animate-fadeIn">
+                <label className={labelClass}>Escolha o dia</label>
+                <BookingCalendar
+                  selected={selectedDate}
+                  availability={availability}
+                  onSelect={(date?: Date) => {
+                    const d = date ?? null;
+                    setSelectedDate(d);
+                    setAvailableTimes([]);
+                    if (d && selectedServiceId) loadAvailableTimes(d, selectedServiceId);
+                  }}
+                />
+              </div>
+
+              {selectedDate && availableTimes.length > 0 && (
+                <div className="animate-slideDown">
+                  <label className={labelClass}>Horários disponíveis</label>
+                  <div className="relative">
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                    <select name="startDateTime" required className={inputClass}>
+                      <option value="">Selecione a hora</option>
+                      {availableTimes.map((t) => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <button 
+              disabled={loading}
+              className="w-full bg-[#1F3924] text-[#FFFEF9] py-4 rounded-2xl font-bold text-lg shadow-xl shadow-[#1F3924]/20 hover:bg-[#2a4d31] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+            >
+              {loading ? "Processando..." : "Confirmar Agendamento"}
+            </button>
+          </form>
+        </div>
       </main>
 
-      <EventPromo />
+      <div className="pb-20">
+        <EventPromo />
+      </div>
+
+      {successData && (
+        <SuccessCard show onClose={() => setSuccessData(null)} {...successData} />
+      )}
+
+      {msg && (
+        <Toast message={msg} type={msgType || "error"} onClose={() => setMsg(null)} />
+      )}
     </>
   );
 }

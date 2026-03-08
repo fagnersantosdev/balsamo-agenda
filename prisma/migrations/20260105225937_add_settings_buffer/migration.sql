@@ -1,0 +1,6 @@
+-- CreateTable
+CREATE TABLE "Settings" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT DEFAULT 1,
+    "bufferMinutes" INTEGER NOT NULL DEFAULT 15,
+    "updatedAt" DATETIME NOT NULL
+);
