@@ -117,7 +117,9 @@ async function main() {
   ===================================================== */
   const monday = nextWeekday(1, 10);   // 10:00 da próxima segunda
   const tuesday = nextWeekday(2, 14);  // 14:00 da próxima terça
-  const wednesday = nextWeekday(3, 9); // 09:00 da próxima quarta
+  //const wednesday = nextWeekday(3, 9); // 09:00 da próxima quarta
+  const hoje = new Date();
+  hoje.setHours(10, 0, 0, 0);
 
   await prisma.booking.createMany({
     data: [
@@ -140,10 +142,10 @@ async function main() {
         status: BookingStatus.PENDENTE,
       },
       {
-        clientName: "João Pedro",
+        clientName: "João Pedro (Teste Hoje)",
         clientPhone: "24977777777",
-        startDateTime: wednesday,
-        endDateTime: new Date(wednesday.getTime() + 30 * 60000),
+        startDateTime: hoje,
+        endDateTime: new Date(hoje.getTime() + 30 * 60000),
         serviceId: services[2].id,
         status: BookingStatus.CONCLUIDO,
       },

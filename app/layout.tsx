@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Oooh_Baby, Outfit } from "next/font/google";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import SiteFooter from "./components/SiteFooter";
-import ClientEfeccts from "./components/ClientEfects";
+import ClientEfects from "./components/ClientEfects";
 
 
 const ooohBaby = Oooh_Baby({
@@ -36,7 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         className={`${ooohBaby.variable} ${outfit.variable} font-sans bg-[#FFFEF9] text-[#1F3924] relative antialiased`}
       >
         {/* Efeitos visuais de fundo */}
-        <ClientEfeccts />
+        <ClientEfects />
 
         {/* HEADER PREMIUM */}
         <header
