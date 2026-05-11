@@ -1,13 +1,27 @@
 "use client";
 
+// 👇 1. Adicionamos o useState e useEffect na importação do React
+import { useState, useEffect } from "react"; 
 import { MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 
 export default function FloatingWhatsApp() {
   const pathname = usePathname();
+  
+  // estado para controlar a exibição da mensagem (começa visível)
+  const [showGreeting, setShowGreeting] = useState(true);
 
-  // ⛔ Não exibe no admin ou login para manter o foco total na gestão
+  // cronômetro para esconder após 5 segundos
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowGreeting(false);
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Não exibe no admin ou login para manter o foco total na gestão
   if (pathname.startsWith("/admin") || pathname === "/login") {
     return null;
   }
@@ -28,7 +42,7 @@ export default function FloatingWhatsApp() {
       className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-[100]"
     >
       {/* Efeito de Ondas (Pulse) */}
-      <div className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20 pointer-events-none" />
+      {/* <div className="absolute inset-0 rounded-full bg-[#25D366] animate-ping opacity-20 pointer-events-none" /> */}
       
       <a
         href={link}
@@ -53,8 +67,19 @@ export default function FloatingWhatsApp() {
           className="w-7 h-7 sm:w-8 sm:h-8 group-hover:rotate-12 transition-transform duration-300" 
         />
         
-        {/* Tooltip (Desktop Only) */}
-        <span className="absolute right-20 bg-white text-[#1F3924] text-xs font-bold px-4 py-2 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 whitespace-nowrap border border-gray-100 hidden sm:block">
+        {/* 👇 4. Tooltip (Desktop Only) com transição dinâmica */}
+        <span 
+          className={`
+            absolute right-20 bg-white text-[#1F3924] text-xs font-bold px-4 py-2 
+            rounded-xl shadow-xl pointer-events-none transition-all duration-500 
+            whitespace-nowrap border border-gray-100 hidden sm:block
+            ${
+              showGreeting 
+                ? "opacity-100 translate-x-0" 
+                : "opacity-0 translate-x-4 group-hover:opacity-100 group-hover:translate-x-0"
+            }
+          `}
+        >
           Dúvidas? Fale conosco 🌿
         </span>
       </a>

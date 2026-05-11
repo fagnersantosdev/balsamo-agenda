@@ -4,6 +4,8 @@ import { requireAdminApiAuth } from "@/lib/adminApiAuth";
 import { startOfBrazilDay, endOfBrazilDay } from "@/lib/timezone";
 import { BookingsCountDTO } from "@/app/types/BookingsCountDTO";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const auth = await requireAdminApiAuth();
   if (auth) return auth;
@@ -12,6 +14,10 @@ export async function GET() {
     // 🇧🇷 Intervalo do dia no Brasil (retornado em UTC)
     const startToday = startOfBrazilDay();
     const endToday = endOfBrazilDay();
+
+    // 👇 "régua" de 3 meses para sincronizar com a tabela
+    const threeMonthsAgo = new Date(startToday);
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
     const [
       todayPending,
@@ -40,14 +46,24 @@ export async function GET() {
         },
       }),
 
-      // ✅ Concluídos (histórico)
+      // ✅ Concluídos (histórico sincronizado com a tabela: últimos 3 meses para frente)
       prisma.booking.count({
-        where: { status: "CONCLUIDO" },
+        where: { 
+          status: "CONCLUIDO",
+          startDateTime: {
+            gte: threeMonthsAgo, // <-- Filtro adicionado
+          }
+        },
       }),
 
-      // ❌ Cancelados
+      // ❌ Cancelados (histórico sincronizado com a tabela: últimos 3 meses para frente)
       prisma.booking.count({
-        where: { status: "CANCELADO" },
+        where: { 
+          status: "CANCELADO",
+          startDateTime: {
+            gte: threeMonthsAgo, // <-- Filtro adicionado
+          }
+        },
       }),
     ]);
 

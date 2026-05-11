@@ -8,6 +8,8 @@ import {
 } from "@/lib/timezone";
 import { getTotalDuration } from "@/lib/lib.scheduling";
 
+export const dynamic = "force-dynamic";
+
 /* ============================================================
    GET — Buscar agendamentos (ADMIN)
 ============================================================ */
@@ -23,6 +25,7 @@ export async function GET(req: Request) {
     const todayStart = startOfBrazilDay();
     const todayEnd = endOfBrazilDay();
 
+    // Mantemos as suas variáveis de limite!
     const threeMonthsAgo = new Date(todayStart);
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
 
@@ -51,10 +54,11 @@ export async function GET(req: Request) {
       where.status = "PENDENTE";
     }
 
+    // 👇 A trava dos 3 meses para trás, 
+    // deixando aberto para a frente para não esconder os testes!
     if (filter === "all" && (status === "CONCLUIDO" || status === "CANCELADO")) {
       where.startDateTime = {
-        gte: threeMonthsAgo,
-        lt: todayEnd,
+        gte: threeMonthsAgo, 
       };
     }
 

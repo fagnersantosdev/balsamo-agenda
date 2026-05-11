@@ -121,7 +121,7 @@ export default function NewServicePage() {
                 className={`${inputClass} h-40 resize-none pl-10 pt-4`}
               />
             </div>
-            <p className="text-[10px] text-[#1F3924]/40 mt-2 ml-1 italic">
+            <p className="text-[12px] text-[#1F3924]/45 mt-2 ml-1 italic">
               * Cada linha se tornará um tópico na visualização do cliente.
             </p>
           </div>
