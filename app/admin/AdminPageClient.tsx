@@ -78,12 +78,13 @@ export default function AdminPageClient() {
     doc.text("Relatório de Agendamentos - Bálsamo", 14, 15);
     autoTable(doc, {
       startY: 20,
-      head: [["Cliente", "Serviço", "Data/Hora", "Status"]],
+      head: [["Cliente", "Serviço", "Data/Hora", "Status", "Valor"]],
       body: bookings.map((b) => [
         b.clientName,
         b.service?.name || "N/A",
         new Date(b.startDateTime).toLocaleString("pt-BR"),
         b.status,
+        b.service ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(b.service.price) : "R$ 0,00",
       ]),
     });
     doc.save("relatorio-balsamo.pdf");

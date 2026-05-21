@@ -9,6 +9,7 @@ type SuccessCardProps = {
   name: string;
   date: string;
   service: string;
+  price: number | string; // 💰 Adicionado a tipagem do preço
   phone?: string;
 };
 
@@ -18,11 +19,18 @@ export default function SuccessCard({
   name,
   date,
   service,
+  price, // 💰 Recebendo o preço via props
 }: SuccessCardProps) {
   const balsamoPhone = "5524992640951";
 
+  // Formata o preço caso ele venha como número pura (ex: 150 vira R$ 150,00)
+  const formattedPrice = typeof price === "number"
+    ? new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(price)
+    : price;
+
+  // 💬 Atualizado o texto do WhatsApp para incluir o valor do investimento
   const whatsappLink = `https://wa.me/${balsamoPhone}?text=${encodeURIComponent(
-    `Olá! 🌿 Fiz um agendamento no site da Bálsamo Massoterapia.\n\n🧘‍♀️ Nome: ${name}\n🗓 Data: ${date}\n💆 Serviço: ${service}\n\nGostaria de confirmar o atendimento.`
+    `Olá! 🌿 Fiz um agendamento no site da Bálsamo Massoterapia.\n\n🧘‍♀️ Nome: ${name}\n🗓 Data: ${date}\n💆 Serviço: ${service}\n💰 Valor: ${formattedPrice}\n\nGostaria de confirmar o atendimento.`
   )}`;
 
   return (
@@ -74,9 +82,19 @@ export default function SuccessCard({
               <div className="flex flex-col items-center gap-2">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8D6A93]">Tratamento Selecionado</span>
                 <p className="text-lg font-bold text-[#1F3924]">{service}</p>
-                <div className="flex items-center gap-2 mt-2 text-[#1F3924]/70 font-semibold bg-white/50 px-4 py-1.5 rounded-full text-sm shadow-sm border border-white">
-                  <Calendar size={14} className="text-[#8D6A93]" />
-                  {date}
+                
+                {/* 🏷️ Badges de Informações (Data e Preço Lado a Lado/Flex) */}
+                <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                  <div className="flex items-center gap-2 text-[#1F3924]/70 font-semibold bg-white/50 px-4 py-1.5 rounded-full text-sm shadow-sm border border-white">
+                    <Calendar size={14} className="text-[#8D6A93]" />
+                    {date}
+                  </div>
+
+                  {/* 💰 Badge do Preço adicionada com o mesmo estilo premium */}
+                  <div className="flex items-center gap-1.5 text-[#1F3924] font-bold bg-[#8D6A93]/10 px-4 py-1.5 rounded-full text-sm shadow-sm border border-[#8D6A93]/20">
+                    <span className="text-[#8D6A93] text-xs font-black">VALOR:</span>
+                    {formattedPrice}
+                  </div>
                 </div>
               </div>
             </div>

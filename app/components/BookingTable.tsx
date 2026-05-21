@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Booking } from "@/app/types/Booking";
 import ConfirmModal from "./ConfirmModal";
-import { Check, X, Calendar, Phone, User, Clock } from "lucide-react";
+import { Check, X, Calendar, Phone, User, Clock, DollarSign } from "lucide-react";
 
 type Props = {
   bookings: Booking[];
@@ -31,6 +31,15 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
         hour12: false 
       }),
     };
+  }
+
+  // Função para formatar o preço do serviço
+  function formatPrice(price?: number) {
+    if (!price) return "R$ 0,00";
+    return new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    }).format(price);
   }
 
   async function updateStatus(id: number, status: "CONCLUIDO" | "CANCELADO") {
@@ -77,6 +86,9 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
                 <p className="flex items-center gap-2 font-medium text-[#1F3924]"><Clock size={14} className="text-[#8D6A93]"/> {b.service?.name}</p>
                 <p className="flex items-center gap-2"><Calendar size={14} /> {date} às {time}</p>
                 <p className="flex items-center gap-2"><Phone size={14} /> {b.clientPhone}</p>
+                <p className="flex items-center gap-2 font-bold text-[#8D6A93] mt-1">
+                  <DollarSign size={14} /> {formatPrice(b.service?.price)}
+                </p>
               </div>
 
               {showActions && b.status === "PENDENTE" && (
@@ -104,10 +116,11 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
       <div className="hidden sm:block overflow-x-auto px-4">
         <table className="w-full border-separate border-spacing-y-3">
           <thead>
-            <tr className="text-left text-[10px] font-black uppercase tracking-[0.2em] text-[#1F3924]/40">
+            <tr className="text-left text-[10px] font-black uppercase tracking-[0.2em] text-[#1F3924]/60">
               <th className="pb-4 pl-6">Cliente</th>
               <th className="pb-4 px-4">Data/Hora</th>
               <th className="pb-4 px-4">Serviço</th>
+              <th className="pb-4 px-4">Valor</th>
               <th className="pb-4 px-4">Status</th>
               {showActions && <th className="pb-4 pr-6 text-center">Ações</th>}
             </tr>
@@ -126,6 +139,9 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
                   </td>
                   <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-bold text-[#8D6A93]">
                     {b.service?.name}
+                  </td>
+                  <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-bold text-[#8D6A93]">
+                    {formatPrice(b.service?.price)}
                   </td>
                   <td className="py-4 px-4 border-y border-[#8D6A93]/10">
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyle(b.status)}`}>

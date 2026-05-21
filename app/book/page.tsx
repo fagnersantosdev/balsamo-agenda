@@ -15,6 +15,7 @@ type Service = {
   id: number;
   name: string;
   durationMin: number;
+  price: number;
 };
 
 type Availability = {
@@ -29,6 +30,7 @@ type SuccessInfo = {
   name: string;
   date: string;
   service: string;
+  price: number;
 };
 
 export default function BookPage() {
@@ -102,6 +104,7 @@ export default function BookPage() {
         name: String(formData.get("clientName")),
         date: startDateTime.toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }),
         service: selectedService?.name || "",
+        price: selectedService?.price || 0,
       });
 
       formElement.reset(); 
