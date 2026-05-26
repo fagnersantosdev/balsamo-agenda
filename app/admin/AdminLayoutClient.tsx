@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminMobileNav from "../components/AdminMobileNav";
 import Toast from "../components/Toast";
-import "@/app/globals.css";
+
 
 // 🔹 Tipagem global do toast
 declare global {
