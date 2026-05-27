@@ -60,7 +60,7 @@ export default function SuccessCard({
 
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 text-[#1F3924]/20 hover:text-[#1F3924] transition-colors"
+              className="absolute top-6 right-6 text-[#083536]/20 hover:text-[#1F3924] transition-colors"
             >
               <X size={20} />
             </button>
@@ -70,29 +70,29 @@ export default function SuccessCard({
               <CheckCircle2 size={40} />
             </div>
 
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1F3924] mb-2 tracking-tight">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#083536] mb-2 tracking-tight">
               Tudo pronto, {name.split(" ")[0]}!
             </h2>
-            <p className="text-[#1F3924]/60 text-sm mb-8 font-medium">
+            <p className="text-[#083536]/60 text-sm mb-8 font-medium">
               Seu momento de relaxamento está reservado.
             </p>
 
             {/* Voucher do Agendamento */}
-            <div className="bg-[#F5F3EB] rounded-3xl p-6 mb-8 border border-[#D6A77A]/20 relative">
+            <div className="bg-[#FAF8ED] rounded-3xl p-6 mb-8 border border-[#D6A77A]/20 relative">
               <div className="flex flex-col items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8D6A93]">Tratamento Selecionado</span>
-                <p className="text-lg font-bold text-[#1F3924]">{service}</p>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#97709B]">Tratamento Selecionado</span>
+                <p className="text-lg font-bold text-[#083536]">{service}</p>
                 
                 {/* 🏷️ Badges de Informações (Data e Preço Lado a Lado/Flex) */}
                 <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-                  <div className="flex items-center gap-2 text-[#1F3924]/70 font-semibold bg-white/50 px-4 py-1.5 rounded-full text-sm shadow-sm border border-white">
-                    <Calendar size={14} className="text-[#8D6A93]" />
+                  <div className="flex items-center gap-2 text-[#083536]/70 font-semibold bg-white/50 px-4 py-1.5 rounded-full text-sm shadow-sm border border-white">
+                    <Calendar size={14} className="text-[#97709B]" />
                     {date}
                   </div>
 
                   {/* 💰 Badge do Preço adicionada com o mesmo estilo premium */}
-                  <div className="flex items-center gap-1.5 text-[#1F3924] font-bold bg-[#8D6A93]/10 px-4 py-1.5 rounded-full text-sm shadow-sm border border-[#8D6A93]/20">
-                    <span className="text-[#8D6A93] text-xs font-black">VALOR:</span>
+                  <div className="flex items-center gap-1.5 text-[#083536] font-bold bg-[#8D6A93]/10 px-4 py-1.5 rounded-full text-sm shadow-sm border border-[#8D6A93]/20">
+                    <span className="text-[#97709B] text-xs font-black">VALOR:</span>
                     {formattedPrice}
                   </div>
                 </div>
@@ -122,8 +122,8 @@ export default function SuccessCard({
                 onClick={onClose}
                 className="
                   w-full py-3 rounded-2xl
-                  text-[#1F3924]/60 font-bold text-xs uppercase tracking-widest
-                  hover:text-[#1F3924] hover:bg-gray-100
+                  text-[#083536]/60 font-bold text-xs uppercase tracking-widest
+                  hover:text-[#083536] hover:bg-gray-100
                   transition-all
                 "
               >
@@ -131,7 +131,7 @@ export default function SuccessCard({
               </button>
             </div>
             
-            <p className="mt-8 text-[9px] text-[#1F3924]/30 font-bold uppercase tracking-[0.3em]">
+            <p className="mt-8 text-[9px] text-[#083536]/30 font-bold uppercase tracking-[0.3em]">
               Bálsamo Massoterapia • Bem-estar Real
             </p>
           </motion.div>

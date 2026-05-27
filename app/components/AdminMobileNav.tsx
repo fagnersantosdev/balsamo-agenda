@@ -41,20 +41,20 @@ export default function AdminMobileNav() {
   <Link
     href={href}
     className={`flex flex-col items-center justify-center flex-1 transition-all relative ${
-      isActive(href) ? "text-[#8D6A93]" : "text-[#1F3924]/40"
+      isActive(href) ? "text-[#97709B]" : "text-[#083536]/40"
     }`}
   >
     <Icon className={`w-6 h-6 ${isActive(href) ? "animate-pulse" : ""}`} />
     <span className="text-[10px] font-black uppercase tracking-widest mt-1">{label}</span>
     {isActive(href) && (
-      <motion.div layoutId="activeTab" className="absolute -bottom-2 w-1 h-1 bg-[#8D6A93] rounded-full" />
+      <motion.div layoutId="activeTab" className="absolute -bottom-2 w-1 h-1 bg-[#97709B] rounded-full" />
     )}
   </Link>
 );
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[#8D6A93]/10 lg:hidden z-[60] px-4 pb-6 pt-3 shadow-[0_-10px_30px_rgba(141,106,147,0.1)] rounded-t-[2.5rem]">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-xl border-t border-[#97709B]/10 lg:hidden z-[60] px-4 pb-6 pt-3 shadow-[0_-10px_30px_rgba(141,106,147,0.1)] rounded-t-[2.5rem]">
         <div className="flex justify-around items-center">
           <NavItem href="/admin" icon={CalendarDays} label="Agenda" />
           <NavItem href="/admin/services" icon={Sparkles} label="Serviços" />
@@ -62,7 +62,7 @@ export default function AdminMobileNav() {
           
           <button
             onClick={() => setShowMore(true)}
-            className="flex flex-col items-center justify-center flex-1 text-[#1F3924]/40"
+            className="flex flex-col items-center justify-center flex-1 text-[#083536]/40"
           >
             <MoreHorizontal className="w-6 h-6" />
             <span className="text-[10px] font-black uppercase tracking-widest mt-1">Mais</span>
@@ -89,11 +89,11 @@ export default function AdminMobileNav() {
               className="relative w-full bg-[#F5F3EB] rounded-t-[3rem] p-8 shadow-2xl"
             >
               {/* Handle de arraste visual */}
-              <div className="w-12 h-1.5 bg-[#1F3924]/10 rounded-full mx-auto mb-6" />
+              <div className="w-12 h-1.5 bg-[#083536]/10 rounded-full mx-auto mb-6" />
 
               <div className="flex justify-between items-center mb-8">
-                <h3 className="text-xl font-bold text-[#1F3924]">Menu Extra</h3>
-                <button onClick={() => setShowMore(false)} className="p-2 bg-white rounded-full shadow-sm text-[#1F3924]/40">
+                <h3 className="text-xl font-bold text-[#083536]">Menu Extra</h3>
+                <button onClick={() => setShowMore(false)} className="p-2 bg-[#FAF8ED] rounded-full shadow-sm text-[#1F3924]/40">
                   <X size={20} />
                 </button>
               </div>
@@ -127,10 +127,10 @@ export default function AdminMobileNav() {
 function MenuButton({ icon: Icon, label, href, onClick, isAction }: MenuButtonProps) {
   const content = (
     <>
-      <div className={`p-2 rounded-lg ${isAction ? "bg-[#1F3924] text-white" : "bg-white text-[#8D6A93]"}`}>
+      <div className={`p-2 rounded-lg ${isAction ? "bg-[#1F3924] text-[#FAF8ED]" : "bg-[#FAF8ED] text-[#97709B]"}`}>
         <Icon size={20} />
       </div>
-      <span className="font-bold text-[#1F3924]">{label}</span>
+      <span className="font-bold text-[#083536]">{label}</span>
     </>
   );
 

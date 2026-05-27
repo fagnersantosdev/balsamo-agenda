@@ -57,9 +57,9 @@ export default function ChangePasswordForm() {
   }
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-[#8D6A93]/20">
-      <div className="flex items-center gap-2 mb-6 text-[#1F3924]">
-        <Lock className="w-5 h-5 text-[#8D6A93]" />
+    <div className="bg-[#FAF8ED] p-6 rounded-2xl shadow-sm border border-[#8D6A93]/20">
+      <div className="flex items-center gap-2 mb-6 text-[#083536]">
+        <Lock className="w-5 h-5 text-[#97709B]" />
         <h2 className="font-bold text-lg">Segurança da Conta</h2>
       </div>
 
@@ -71,7 +71,7 @@ export default function ChangePasswordForm() {
           { label: "Confirmar nova senha", val: confirmPassword, set: setConfirmPassword, ph: "Repita a senha" }
         ].map((field, i) => (
           <div key={i}>
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#1F3924]/60 mb-1.5 ml-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#083536]/60 mb-1.5 ml-1">
               {field.label}
             </label>
             <div className="relative">
@@ -80,7 +80,7 @@ export default function ChangePasswordForm() {
                 value={field.val}
                 onChange={(e) => field.set(e.target.value)}
                 placeholder={field.ph}
-                className="w-full pl-4 pr-12 py-3 rounded-xl border border-[#8D6A93]/20 bg-[#F5F3EB]/30 focus:bg-white focus:ring-2 focus:ring-[#8D6A93] focus:border-transparent transition-all outline-none text-[#1F3924]"
+                className="w-full pl-4 pr-12 py-3 rounded-xl border border-[#8D6A93]/20 bg-[#F5F3EB]/30 focus:bg-white focus:ring-2 focus:ring-[#8D6A93] focus:border-transparent transition-all outline-none text-[#083536]"
               />
               {/* Botão Olhinho (apenas no primeiro ou em todos) */}
               <button
@@ -96,7 +96,7 @@ export default function ChangePasswordForm() {
 
         <button
           disabled={loading}
-          className="w-full mt-6 bg-[#1F3924] text-[#FFFEF9] py-4 rounded-xl font-bold shadow-lg shadow-[#1F3924]/10 hover:bg-[#2a4d31] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
+          className="w-full mt-6 bg-[#083536] text-[#FAF8ED] py-4 rounded-xl font-bold shadow-lg shadow-[#083536]/10 hover:bg-[#2a4d31] active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

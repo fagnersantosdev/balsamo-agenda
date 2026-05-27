@@ -70,7 +70,7 @@ export default function FloatingWhatsApp() {
         {/* 👇 4. Tooltip (Desktop Only) com transição dinâmica */}
         <span 
           className={`
-            absolute right-20 bg-white text-[#1F3924] text-xs font-bold px-4 py-2 
+            absolute right-20 bg-[#FAF8ED] text-[#083536] text-xs font-bold px-4 py-2 
             rounded-xl shadow-xl pointer-events-none transition-all duration-500 
             whitespace-nowrap border border-gray-100 hidden sm:block
             ${

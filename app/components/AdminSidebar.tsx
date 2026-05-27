@@ -26,7 +26,7 @@ export default function AdminSidebar() {
   ];
 
   return (
-    <div className="flex flex-col h-full p-6 bg-white border-r border-[#8D6A93]/10">
+    <div className="flex flex-col h-full p-6 bg-[#FAF8ED] border-r border-[#8D6A93]/10">
       
       {/* Logo + Nome (Refinado) */}
       <div className="flex items-center gap-4 mb-10 px-2">
@@ -44,7 +44,7 @@ export default function AdminSidebar() {
           <h2 className="text-sm font-black uppercase tracking-[0.2em] text-[#1F3924]">
             Bálsamo
           </h2>
-          <p className="text-[10px] font-bold text-[#8D6A93] uppercase tracking-widest">
+          <p className="text-[10px] font-bold text-[#97709B] uppercase tracking-widest">
             Admin Panel
           </p>
         </div>
@@ -102,7 +102,7 @@ export default function AdminSidebar() {
           Sair do Painel
         </button>
         
-        <p className="mt-4 text-[9px] text-center text-[#1F3924]/30 font-black uppercase tracking-[0.3em]">
+        <p className="mt-4 text-[9px] text-center text-[#083536]/30 font-black uppercase tracking-[0.3em]">
           v2.0 Beta • Bálsamo
         </p>
       </div>

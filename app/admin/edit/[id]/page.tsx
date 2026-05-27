@@ -87,7 +87,7 @@ export default function EditBookingPage() {
   }
 
   if (loading) {
-    return <p className="text-center py-10 text-[#1F3924]">Carregando...</p>;
+    return <p className="text-center py-10 text-[#083536]">Carregando...</p>;
   }
 
   if (!booking) {
@@ -95,8 +95,8 @@ export default function EditBookingPage() {
   }
 
   return (
-    <main className="relative max-w-lg mx-auto bg-white rounded-3xl shadow-x1 p-8 mt-8 border border-purple-200">
-      <h1 className="text-2xl font-bold text-[#1F3924] mb-6">Editar Agendamento</h1>
+    <main className="relative max-w-lg mx-auto bg-[#FAF8ED] rounded-3xl shadow-x1 p-8 mt-8 border border-purple-200">
+      <h1 className="text-2xl font-bold text-[#083536] mb-6">Editar Agendamento</h1>
 
       {message && (
         <div
@@ -111,7 +111,7 @@ export default function EditBookingPage() {
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Nome */}
         <div>
-          <label className="block font-medium text-[#1F3924] mb-1">Nome do Cliente</label>
+          <label className="block font-medium text-[#083536] mb-1">Nome do Cliente</label>
           <input
             type="text"
             name="clientName"
@@ -124,7 +124,7 @@ export default function EditBookingPage() {
 
         {/* Telefone */}
         <div>
-          <label className="block font-medium text-[#1F3924] mb-1">Telefone</label>
+          <label className="block font-medium text-[#083536] mb-1">Telefone</label>
           <input
             type="text"
             name="clientPhone"
@@ -137,7 +137,7 @@ export default function EditBookingPage() {
 
         {/* E-mail */}
         <div>
-          <label className="block font-medium text-[#1F3924] mb-1">E-mail</label>
+          <label className="block font-medium text-[#083536] mb-1">E-mail</label>
           <input
             type="email"
             name="clientEmail"
@@ -149,7 +149,7 @@ export default function EditBookingPage() {
 
         {/* Serviço */}
         <div>
-          <label className="block font-medium text-[#1F3924] mb-1">Serviço</label>
+          <label className="block font-medium text-[#083536] mb-1">Serviço</label>
           <select
             name="serviceId"
             value={booking.serviceId}
@@ -166,7 +166,7 @@ export default function EditBookingPage() {
 
         {/* Data e Hora */}
         <div>
-          <label className="block font-medium text-[#1F3924] mb-1">Data e Hora</label>
+          <label className="block font-medium text-[#083536] mb-1">Data e Hora</label>
           <input
             type="datetime-local"
             name="startDateTime"

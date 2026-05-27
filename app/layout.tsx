@@ -42,7 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header
           className="
             fixed top-0 left-0 w-full z-50 
-            bg-[#8D6A93]/95 backdrop-blur-md
+            bg-[#97709B]/95 backdrop-blur-md
             border-b border-[#D6A77A]/30
             shadow-sm transition-all
           "

@@ -53,10 +53,10 @@ export default function AvailabilityPage() {
     <main className="max-w-5xl mx-auto px-4 py-8 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-[#1F3924] flex items-center gap-2">
-            <Clock className="text-[#8D6A93]" /> Horários
+          <h1 className="text-3xl font-bold text-[#083536] flex items-center gap-2">
+            <Clock className="text-[#97709B]" /> Horários
           </h1>
-          <p className="text-[#1F3924]/80 text-sm mt-1">
+          <p className="text-[#083536]/80 text-sm mt-1">
             Defina os períodos em que os clientes podem realizar agendamentos.
           </p>
         </div>
@@ -64,7 +64,7 @@ export default function AvailabilityPage() {
         <button
           onClick={saveChanges}
           disabled={loading}
-          className="flex items-center justify-center gap-2 bg-[#1F3924] text-white px-6 py-3 rounded-xl hover:bg-[#2a4d31] transition-all shadow-lg shadow-[#1F3924]/10 disabled:opacity-50 active:scale-95"
+          className="flex items-center justify-center gap-2 bg-[#083536] text-[#FAF8ED] px-6 py-3 rounded-xl hover:bg-[#2a4d31] transition-all shadow-lg shadow-[#083536]/10 disabled:opacity-50 active:scale-95"
         >
           {loading ? <Loader2 className="animate-spin w-5 h-5" /> : <Save size={20} />}
           <span>Salvar Alterações</span>
@@ -78,12 +78,12 @@ export default function AvailabilityPage() {
             key={item.id}
             className={`transition-all duration-300 rounded-2xl border p-5 ${
               item.active 
-                ? "bg-white border-[#8D6A93]/30 shadow-md" 
+                ? "bg-[#FAF8ED] border-[#8D6A93]/30 shadow-md" 
                 : "bg-gray-50 border-gray-200 opacity-70"
             }`}
           >
             <div className="flex justify-between items-center mb-4">
-              <span className={`font-bold text-lg ${item.active ? "text-[#1F3924]" : "text-gray-400"}`}>
+              <span className={`font-bold text-lg ${item.active ? "text-[#083536]" : "text-gray-400"}`}>
                 {dayLabels[item.dayOfWeek]}
               </span>
               
@@ -101,7 +101,7 @@ export default function AvailabilityPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase text-[#1F3924]/40 ml-1">Abertura</label>
+                <label className="text-[10px] font-bold uppercase text-[#083536]/40 ml-1">Abertura</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -109,14 +109,14 @@ export default function AvailabilityPage() {
                     disabled={!item.active}
                     value={item.openHour}
                     onChange={(e) => updateItem(item.id, "openHour", Number(e.target.value))}
-                    className="w-full bg-[#F5F3EB]/50 border-none rounded-xl px-4 py-2.5 text-[#1F3924] font-semibold focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
+                    className="w-full bg-[#F5F3EB]/50 border-none rounded-xl px-4 py-2.5 text-[#083536] font-semibold focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#1F3924]/30">H</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#083536]/30">H</span>
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase text-[#1F3924]/40 ml-1">Fechamento</label>
+                <label className="text-[10px] font-bold uppercase text-[#083536]/40 ml-1">Fechamento</label>
                 <div className="relative">
                   <input
                     type="number"
@@ -124,9 +124,9 @@ export default function AvailabilityPage() {
                     disabled={!item.active}
                     value={item.closeHour}
                     onChange={(e) => updateItem(item.id, "closeHour", Number(e.target.value))}
-                    className="w-full bg-[#F5F3EB]/50 border-none rounded-xl px-4 py-2.5 text-[#1F3924] font-semibold focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
+                    className="w-full bg-[#F5F3EB]/50 border-none rounded-xl px-4 py-2.5 text-[#083536] font-semibold focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
                   />
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#1F3924]/30">H</span>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#083536]/30">H</span>
                 </div>
               </div>
             </div>
@@ -135,10 +135,10 @@ export default function AvailabilityPage() {
       </div>
 
       {/* ===== DESKTOP (TABELA LIMPA) ===== */}
-      <div className="hidden md:block bg-white rounded-3xl border border-[#8D6A93]/15 shadow-xl shadow-[#8D6A93]/5 overflow-hidden">
+      <div className="hidden md:block bg-[#FAF8ED] rounded-3xl border border-[#8D6A93]/15 shadow-xl shadow-[#8D6A93]/5 overflow-hidden">
         <table className="w-full">
           <thead>
-            <tr className="bg-[#F5F3EB]/50 text-[#1F3924]/60 text-xs uppercase tracking-widest">
+            <tr className="bg-[#F5F3EB]/50 text-[#083536]/60 text-xs uppercase tracking-widest">
               <th className="px-8 py-5 text-left font-bold">Dia da Semana</th>
               <th className="px-8 py-5 text-center font-bold">Abertura</th>
               <th className="px-8 py-5 text-center font-bold">Fechamento</th>
@@ -147,11 +147,11 @@ export default function AvailabilityPage() {
           </thead>
           <tbody className="divide-y divide-[#8D6A93]/10">
             {availability.map((item) => (
-              <tr key={item.id} className={`transition-colors ${item.active ? "bg-white" : "bg-gray-50/50"}`}>
+              <tr key={item.id} className={`transition-colors ${item.active ? "bg-[#FAF8ED]" : "bg-gray-50/50"}`}>
                 <td className="px-8 py-4">
                   <div className="flex items-center gap-3">
-                    <Calendar size={16} className={item.active ? "text-[#8D6A93]" : "text-gray-300"} />
-                    <span className={`font-semibold ${item.active ? "text-[#1F3924]" : "text-gray-400"}`}>
+                    <Calendar size={16} className={item.active ? "text-[#97709B]" : "text-gray-300"} />
+                    <span className={`font-semibold ${item.active ? "text-[#083536]" : "text-gray-400"}`}>
                       {dayLabels[item.dayOfWeek]}
                     </span>
                   </div>
@@ -162,7 +162,7 @@ export default function AvailabilityPage() {
                     disabled={!item.active}
                     value={item.openHour}
                     onChange={(e) => updateItem(item.id, "openHour", Number(e.target.value))}
-                    className="w-20 text-center bg-[#F5F3EB]/50 border-none rounded-lg py-1.5 font-bold text-[#1F3924] focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
+                    className="w-20 text-center bg-[#F5F3EB]/50 border-none rounded-lg py-1.5 font-bold text-[#083536] focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
                   />
                 </td>
                 <td className="px-8 py-4 text-center">
@@ -171,7 +171,7 @@ export default function AvailabilityPage() {
                     disabled={!item.active}
                     value={item.closeHour}
                     onChange={(e) => updateItem(item.id, "closeHour", Number(e.target.value))}
-                    className="w-20 text-center bg-[#F5F3EB]/50 border-none rounded-lg py-1.5 font-bold text-[#1F3924] focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
+                    className="w-20 text-center bg-[#F5F3EB]/50 border-none rounded-lg py-1.5 font-bold text-[#083536] focus:ring-2 focus:ring-[#8D6A93] disabled:opacity-30"
                   />
                 </td>
                 <td className="px-8 py-4">

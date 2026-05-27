@@ -26,15 +26,15 @@ export default function SiteFooter() {
 
         {/* Coluna 2: Contato */}
         <div className="space-y-4">
-          <h3 className="font-bold text-[#8D6A93] uppercase tracking-wider text-xs">Atendimento</h3>
+          <h3 className="font-bold text-[#97709B] uppercase tracking-wider text-xs">Atendimento</h3>
           <ul className="space-y-3 text-sm">
             <li>
-              <a href="https://wa.me/5524992640951" target="_blank" className="flex items-center justify-center md:justify-start gap-2 font-semibold hover:text-[#8D6A93] transition-colors">
+              <a href="https://wa.me/5524992640951" target="_blank" className="flex items-center justify-center md:justify-start gap-2 font-semibold hover:text-[#97709B] transition-colors">
                 <span className="text-green-600">●</span> WhatsApp: (24) 99264-0951
               </a>
             </li>
             <li>
-              <a href="https://www.instagram.com/balsamo_massoterapia" target="_blank" className="flex items-center justify-center md:justify-start gap-2 font-semibold hover:text-[#8D6A93] transition-colors">
+              <a href="https://www.instagram.com/balsamo_massoterapia" target="_blank" className="flex items-center justify-center md:justify-start gap-2 font-semibold hover:text-[#97709B] transition-colors">
                 <span className="text-pink-600">●</span> @balsamo_massoterapia
               </a>
             </li>
@@ -43,9 +43,9 @@ export default function SiteFooter() {
 
         {/* Coluna 3: Endereço */}
         <div className="space-y-4">
-          <h3 className="font-bold text-[#8D6A93] uppercase tracking-wider text-xs">Nossa Localização</h3>
+          <h3 className="font-bold text-[#97709B] uppercase tracking-wider text-xs">Nossa Localização</h3>
           <div className="flex flex-col items-center md:items-start gap-2">
-            <p className="text-sm text-[#1F3924] font-medium leading-relaxed">
+            <p className="text-sm text-[#083536] font-medium leading-relaxed">
               R. Albino de Almeida, 81 - sala 02<br />
               Campos Elíseos, Resende - RJ
             </p>
@@ -55,7 +55,7 @@ export default function SiteFooter() {
               href="https://www.google.com/maps/search/?api=1&query=R.+Albino+de+Almeida,+81+-+sala+02+-+Campos+Elíseos,+Resende+-+RJ" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="flex items-center gap-2 mt-2 text-xs font-bold text-[#8D6A93] hover:text-[#1F3924] transition-all group"
+              className="flex items-center gap-2 mt-2 text-xs font-bold text-[#97709B] hover:text-[#083536] transition-all group"
             >
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 

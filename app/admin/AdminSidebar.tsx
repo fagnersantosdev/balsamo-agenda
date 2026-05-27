@@ -37,10 +37,10 @@ export default function AdminSidebar() {
       {/* Marca */}
       <div className="bg-white/70 rounded-2xl p-3 shadow-sm border border-[#8D6A93]/20">
         <Link href="/admin" className="block">
-          <span className="block text-xs text-[#1F3924]/60">
+          <span className="block text-xs text-[#083536]/60">
             Painel administrativo
           </span>
-          <span className="text-lg font-semibold text-[#1F3924]">
+          <span className="text-lg font-semibold text-[#083536]">
             Bálsamo Admin
           </span>
         </Link>

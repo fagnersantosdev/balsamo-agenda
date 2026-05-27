@@ -123,8 +123,8 @@ export default function BookPage() {
     }
   }
 
-  const inputClass = "w-full pl-12 pr-4 py-3 bg-white border border-[#8D6A93]/20 rounded-2xl focus:ring-2 focus:ring-[#8D6A93] outline-none transition-all text-[#1F3924] placeholder:text-gray-300";
-  const labelClass = "block text-[10px] font-black uppercase tracking-widest text-[#1F3924]/40 ml-1 mb-1";
+  const inputClass = "w-full pl-12 pr-4 py-3 bg-white border border-[#8D6A93]/20 rounded-2xl focus:ring-2 focus:ring-[#8D6A93] outline-none transition-all text-[#083536] placeholder:text-gray-300";
+  const labelClass = "block text-[10px] font-black uppercase tracking-widest text-[#083536]/40 ml-1 mb-1";
 
   return (
     <>
@@ -132,7 +132,7 @@ export default function BookPage() {
         <div className="max-w-xl mx-auto bg-white rounded-[3rem] shadow-2xl shadow-[#8D6A93]/10 border border-[#8D6A93]/5 p-8 md:p-12 relative overflow-hidden">
           
           {/* Fundo Decorativo */}
-          <div className="absolute top-0 right-0 p-8 opacity-5 text-[#8D6A93] pointer-events-none">
+          <div className="absolute top-0 right-0 p-8 opacity-5 text-[#97709B] pointer-events-none">
             <CalendarCheck size={120} />
           </div>
 
@@ -140,10 +140,10 @@ export default function BookPage() {
             <div className="bg-[#F5F3EB] p-4 rounded-[2rem] mb-6 shadow-sm border border-[#D6A77A]/10">
               <Image src="/logo-balsamo.png" width={60} height={60} alt="Logo" className="object-contain" />
             </div>
-            <h1 className="text-3xl font-bold text-[#1F3924] tracking-tight">
+            <h1 className="text-3xl font-bold text-[#083536] tracking-tight">
               Reserve seu Momento
             </h1>
-            <p className="text-sm text-[#1F3924]/80 mt-2 font-medium">
+            <p className="text-sm text-[#083536]/80 mt-2 font-medium">
               Sua jornada de relaxamento começa aqui 🌿
             </p>
           </header>
@@ -151,17 +151,17 @@ export default function BookPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-4">
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-[#97709B]/60 w-5 h-5" />
                 <input name="clientName" required placeholder="Nome completo" className={inputClass} />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-[#97709B]/60 w-5 h-5" />
                   <input name="clientPhone" required placeholder="WhatsApp" className={inputClass} />
                 </div>
                 <div className="relative">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-[#97709B]/60 w-5 h-5" />
                   <input name="clientEmail" type="email" placeholder="Email (opcional)" className={inputClass} />
                 </div>
               </div>
@@ -171,7 +171,7 @@ export default function BookPage() {
               <div>
                 <label className={labelClass}>O que você deseja hoje?</label>
                 <div className="relative">
-                  <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                  <Sparkles className="absolute left-4 top-1/2 -translate-y-1/2 text-[#97709B]/60 w-5 h-5" />
                   <select
                     name="serviceId"
                     required
@@ -210,7 +210,7 @@ export default function BookPage() {
                 <div className="animate-slideDown">
                   <label className={labelClass}>Horários disponíveis</label>
                   <div className="relative">
-                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#8D6A93]/60 w-5 h-5" />
+                    <Clock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#97709B]/60 w-5 h-5" />
                     <select name="startDateTime" required className={inputClass}>
                       <option value="">Selecione a hora</option>
                       {availableTimes.map((t) => <option key={t} value={t}>{t}</option>)}
@@ -222,7 +222,7 @@ export default function BookPage() {
 
             <button 
               disabled={loading}
-              className="w-full bg-[#1F3924] text-[#FFFEF9] py-4 rounded-2xl font-bold text-lg shadow-xl shadow-[#1F3924]/20 hover:bg-[#2a4d31] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              className="w-full bg-[#083536] text-[#FFFEF9] py-4 rounded-2xl font-bold text-lg shadow-xl shadow-[#083536]/20 hover:bg-[#2a4d31] active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {loading ? "Processando..." : "Confirmar Agendamento"}
             </button>

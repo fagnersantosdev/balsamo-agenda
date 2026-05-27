@@ -49,7 +49,7 @@ export default async function HomePage() {
               height={110}
               className="mx-auto md:mx-0"
             />
-            <h1 className="font-[var(--font-ooohbaby)] text-3xl sm:text-4xl text-[#8D6A93]">
+            <h1 className="font-[var(--font-ooohbaby)] text-3xl sm:text-4xl text-[#97709B]">
               Bem-vindo à Bálsamo Massoterapia 🌿
             </h1>
             <p className="text-[#1F3924] leading-relaxed text-base sm:text-lg">
@@ -79,7 +79,7 @@ export default async function HomePage() {
 
         {/* Apresentação dos Vídeos */}
         <section className="max-w-6xl mx-auto py-20 px-4">
-          <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
+          <h2 className="text-2xl font-bold text-[#083536] text-center mb-12">
             Conheça Mais Sobre Nossos Cuidados 🌿
           </h2>
 
@@ -91,7 +91,7 @@ export default async function HomePage() {
                   relative
                   rounded-[2.5rem] 
                   p-[2px]
-                  bg-gradient-to-b from-[#8D6A93]/20 to-transparent
+                  bg-gradient-to-b from-[#97709B]/20 to-transparent
                   shadow-2xl
                   will-change-transform
                 "
@@ -107,21 +107,21 @@ export default async function HomePage() {
                 rounded-2xl
                 p-6 md:p-8
                 shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
-                border border-[#8D6A93]/20
+                border border-[#97709B]/20
                 leading-relaxed
                 animate-[fadeInUp_0.7s_ease-out]
               "
             >
-              <h3 className="text-2xl font-semibold text-[#1F3924] mb-4">
+              <h3 className="text-2xl font-semibold text-[#083536] mb-4">
                 Qualidade, cuidado e carinho em cada atendimento 🌿
               </h3>
 
-              <p className="text-[#1F3924]/90 text-base md:text-lg mb-4">
+              <p className="text-[#083536]/90 text-base md:text-lg mb-4">
                 Na Bálsamo Massoterapia, cada sessão é pensada para acolher,
                 relaxar e trazer equilíbrio ao corpo e à mente.
               </p>
 
-              <p className="text-[#1F3924]/90 text-base md:text-lg">
+              <p className="text-[#083536]/90 text-base md:text-lg">
                 Técnicas aplicadas com sensibilidade, ambiente tranquilo e um cuidado
                 genuíno para transformar o seu dia.
               </p>
@@ -135,8 +135,10 @@ export default async function HomePage() {
                   px-6 py-3
                   rounded-xl
                   shadow-md
-                  hover:bg-[#1F3924]
-                  transition-colors
+                  hover:bg-[#083536]
+                  hover:scale-[1.02]
+                  active:scale-95
+                  transition-all duration-300
                   font-medium
                   mt-6
                 "
@@ -148,7 +150,7 @@ export default async function HomePage() {
         </section>
 
         {/* Mensagem Instagram */}
-        <div className="text-center text-[#1F3924]/80 mt-4 mb-20">
+        <div className="text-center text-[#083536]/80 mt-4 mb-20">
           <p className="text-base md:text-lg font-medium">
             Acompanhe nossos serviços também no Instagram ✨
           </p>
@@ -159,7 +161,7 @@ export default async function HomePage() {
             className="
               inline-flex items-center gap-2
               text-[#8A4B2E] font-semibold
-              hover:text-[#1F3924]
+              hover:text-[#083536]
               transition-colors
               mt-2
             "
@@ -173,7 +175,7 @@ export default async function HomePage() {
 
         {/* Benefícios */}
         <section className="max-w-6xl mx-auto px-4 py-20">
-          <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
+          <h2 className="text-2xl font-bold text-[#083536] text-center mb-12">
             Benefícios da Massoterapia 🌿
           </h2>
 
@@ -183,12 +185,12 @@ export default async function HomePage() {
               { img: "/img2.png", title: "Equilíbrio mental", desc: "Ajuda na ansiedade, foco e sensação de bem-estar emocional." },
               { img: "/img3.png", title: "Saúde do corpo", desc: "Melhora circulação, alivia dores e libera tensões acumuladas." }
             ].map((item, i) => (
-              <div key={i} className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#8D6A93]/20 text-center">
+              <div key={i} className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#97709B]/20 text-center">
                 <div className="w-full h-40 mb-4 overflow-hidden rounded-xl">
                   <Image src={item.img} alt={item.title} width={300} height={200} className="w-full h-full object-cover rounded-xl shadow-sm" />
                 </div>
-                <h3 className="text-lg font-semibold text-[#1F3924] mb-2">{item.title}</h3>
-                <p className="text-[#1F3924]/80 text-sm">{item.desc}</p>
+                <h3 className="text-lg font-semibold text-[#083536] mb-2">{item.title}</h3>
+                <p className="text-[#083536]/80 text-sm">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -196,12 +198,12 @@ export default async function HomePage() {
 
         {/* Serviços */}
         <section className="py-16">
-          <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-10">
+          <h2 className="text-2xl font-bold text-[#083536] text-center mb-10">
             Nossos Serviços 🌿
           </h2>
 
           {services.length === 0 ? (
-            <p className="text-center text-[#1F3924]/70">
+            <p className="text-center text-[#083536]/70">
               Nenhum serviço cadastrado no momento.
             </p>
           ) : (
@@ -211,11 +213,11 @@ export default async function HomePage() {
                   key={service.id}
                   className="
                     bg-white rounded-2xl shadow-md
-                    border border-[#8D6A93]/30 p-6
+                    border border-[#97709B]/30 p-6
                     hover:shadow-lg transition-shadow h-full
                   "
                 >
-                  <h3 className="text-xl font-semibold text-[#1F3924] mb-2">
+                  <h3 className="text-xl font-semibold text-[#083536] mb-2">
                     {service.name}
                   </h3>
 
@@ -224,7 +226,7 @@ export default async function HomePage() {
                   </p>
 
                   {service.details && service.details.length > 0 && (
-                    <ul className="list-disc list-inside mt-3 text-sm text-[#1F3924] space-y-1">
+                    <ul className="list-disc list-inside mt-3 text-sm text-[#083536] space-y-1">
                       {service.details.map((d, i) => (
                         <li key={i}>{d}</li>
                       ))}
@@ -241,7 +243,10 @@ export default async function HomePage() {
               className="
                 inline-block bg-[#8A4B2E] text-[#F5F3EB]
                 px-8 py-4 rounded-xl shadow
-                hover:bg-[#1F3924] transition-colors
+                hover:bg-[#083536]
+                hover:scale-[1.02]
+                active:scale-95
+                transition-all duration-300
                 text-lg font-medium
               "
             >
@@ -254,28 +259,28 @@ export default async function HomePage() {
         <EventPromo />
 
         <section className="max-w-6xl mx-auto px-4 py-16">
-          <h2 className="text-2xl font-bold text-[#1F3924] text-center mb-12">
+          <h2 className="text-2xl font-bold text-[#083536] text-center mb-12">
             Sobre a Profissional 🌿
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start animate-[fadeInUp_0.9s_ease-out]">
             <div className="flex justify-center md:justify-start">
-              <div className="rounded-2xl overflow-hidden shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)] border border-[#8D6A93]/20 bg-[#F5F3EB]/70 w-[190px] h-[260px]">
+              <div className="rounded-2xl overflow-hidden shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)] border border-[#97709B]/20 bg-[#F5F3EB]/70 w-[190px] h-[260px]">
                 <Image src="/proprietaria2.jpg" alt="Profissional" width={190} height={260} className="w-full h-full object-cover rounded-2xl" />
               </div>
             </div>
             <div className="md:col-span-2">
-              <h3 className="text-xl md:text-2xl font-semibold text-[#1F3924] mb-4">Maria da Penha — Massoterapeuta Especialista</h3>
-              <p className="text-[#1F3924]/90 leading-relaxed text-base md:text-lg mb-4">
+              <h3 className="text-xl md:text-2xl font-semibold text-[#083536] mb-4">Maria da Penha — Massoterapeuta Especialista</h3>
+              <p className="text-[#083536]/90 leading-relaxed text-base md:text-lg mb-4">
                 Com uma trajetória construída com dedicação e amor pelo cuidado, Maria da Penha atua na área da massoterapia oferecendo acolhimento, técnica e sensibilidade em cada sessão.
               </p>
-              <ul className="space-y-3 text-[#1F3924]/90 text-base md:text-lg mb-6">
+              <ul className="space-y-3 text-[#083536]/90 text-base md:text-lg mb-6">
                 <li>🌱 <strong>Formação em Massoterapia</strong>, com foco em práticas terapêuticas e relaxantes.</li>
                 <li>💆‍♀️ Especialização em <strong>Pedras Quentes, Quick Massage e Massagem Relaxante</strong>.</li>
                 <li>🌿 Experiência em atendimento humanizado e abordagem integrada corpo–mente.</li>
                 <li>✨ Propósito voltado ao bem-estar, equilíbrio emocional e qualidade de vida.</li>
               </ul>
-              <p className="text-[#1F3924]/80 leading-relaxed text-base md:text-lg">
+              <p className="text-[#083536]/80 leading-relaxed text-base md:text-lg">
                 Na Bálsamo Massoterapia, cada toque é guiado pela empatia, pela presença e pelo compromisso de transformar o dia de cada cliente, trazendo mais leveza e bem-estar.
               </p>
             </div>
@@ -283,9 +288,10 @@ export default async function HomePage() {
         </section>
 
         <section className="max-w-4xl mx-auto text-center py-20 px-4">
-          <h2 className="text-3xl font-bold text-[#1F3924] mb-6">Pronto para cuidar de você hoje? 🌿</h2>
-          <p className="text-[#1F3924]/80 text-lg mb-8">A Bálsamo Massoterapia está preparada para oferecer uma experiência acolhedora, relaxante e transformadora.</p>
-          <Link href="/book" className="inline-block bg-[#8A4B2E] text-[#F5F3EB] px-10 py-4 rounded-xl shadow-lg hover:bg-[#1F3924] transition-all text-lg font-medium">📅 Agendar minha sessão</Link>
+          <h2 className="text-3xl font-bold text-[#083536] mb-6">Pronto para cuidar de você hoje? 🌿</h2>
+          <p className="text-[#083536]/80 text-lg mb-8">A Bálsamo Massoterapia está preparada para oferecer uma experiência acolhedora, relaxante e transformadora.</p>
+          <Link href="/book" className="inline-block bg-[#8A4B2E] text-[#F5F3EB] px-10 py-4 rounded-xl shadow-lg hover:bg-[#083536] hover:scale-[1.02]
+                active:scale-95 transition-all duration-300 text-lg font-medium">📅 Agendar minha sessão</Link>
         </section>
 
       </main>

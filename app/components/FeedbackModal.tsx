@@ -66,7 +66,7 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
           >
             <button
               onClick={onClose}
-              className="absolute top-6 right-6 text-[#1F3924]/30 hover:text-[#1F3924] transition-colors"
+              className="absolute top-6 right-6 text-[#083536]/30 hover:text-[#1F3924] transition-colors"
             >
               <X size={20} />
             </button>
@@ -82,16 +82,16 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                   <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-3xl flex items-center justify-center mb-6">
                     <CheckCircle2 size={40} />
                   </div>
-                  <h3 className="text-2xl font-bold text-[#1F3924] mb-2">Gratidão!</h3>
-                  <p className="text-[#1F3924]/60">Sua avaliação foi enviada com sucesso.</p>
+                  <h3 className="text-2xl font-bold text-[#083536] mb-2">Gratidão!</h3>
+                  <p className="text-[#083536]/60">Sua avaliação foi enviada com sucesso.</p>
                 </motion.div>
               ) : (
                 <motion.div key="form">
                   <header className="text-center mb-8">
-                    <h2 className="text-2xl font-bold text-[#1F3924] mb-2">
+                    <h2 className="text-2xl font-bold text-[#083536] mb-2">
                       Sua experiência 🌿
                     </h2>
-                    <p className="text-sm text-[#1F3924]/80">
+                    <p className="text-sm text-[#083536]/80">
                       Como foi seu momento na Bálsamo?
                     </p>
                   </header>
@@ -121,7 +121,7 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
 
                     <div className="space-y-4">
                       <div className="group">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#1F3924]/40 ml-1 mb-1 block">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#083536]/40 ml-1 mb-1 block">
                           Seu Nome (Opcional)
                         </label>
                         <input
@@ -129,12 +129,12 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                           placeholder="Ex: Maria Silva"
                           value={author}
                           onChange={(e) => setAuthor(e.target.value)}
-                          className="w-full px-5 py-3 rounded-2xl border border-[#8D6A93]/10 bg-[#F5F3EB]/30 focus:bg-white focus:ring-2 focus:ring-[#8D6A93] focus:border-transparent outline-none transition-all text-[#1F3924]"
+                          className="w-full px-5 py-3 rounded-2xl border border-[#97709B]/10 bg-[#F5F3EB]/30 focus:bg-white focus:ring-2 focus:ring-[#97709B] focus:border-transparent outline-none transition-all text-[#083536]"
                         />
                       </div>
 
                       <div className="group">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#1F3924]/40 ml-1 mb-1 block">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-[#083536]/40 ml-1 mb-1 block">
                           Sua Mensagem
                         </label>
                         <textarea
@@ -143,7 +143,7 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                           onChange={(e) => setMessage(e.target.value)}
                           required
                           rows={4}
-                          className="w-full px-5 py-3 rounded-2xl border border-[#8D6A93]/10 bg-[#F5F3EB]/30 focus:bg-white focus:ring-2 focus:ring-[#8D6A93] focus:border-transparent outline-none transition-all text-[#1F3924] resize-none"
+                          className="w-full px-5 py-3 rounded-2xl border border-[#97709B]/10 bg-[#F5F3EB]/30 focus:bg-white focus:ring-2 focus:ring-[#97709B] focus:border-transparent outline-none transition-all text-[#083536] resize-none"
                         />
                       </div>
                     </div>
@@ -151,7 +151,7 @@ export default function FeedbackModal({ open, onClose }: FeedbackModalProps) {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-4 rounded-2xl bg-[#1F3924] text-[#FFFEF9] font-bold shadow-xl shadow-[#1F3924]/20 hover:bg-[#2a4d31] transition-all disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-3"
+                      className="w-full py-4 rounded-2xl bg-[#083536] text-[#FAF8ED] font-bold shadow-xl shadow-[#083536]/20 hover:bg-[#083536]/90 transition-all disabled:opacity-50 active:scale-[0.98] flex items-center justify-center gap-3"
                     >
                       {loading ? (
                         <Loader2 className="animate-spin" size={20} />

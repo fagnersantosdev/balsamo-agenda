@@ -24,11 +24,11 @@ export default function FeedbackSection({ testimonials }: Props) {
             initial={{ opacity: 0, y: -10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#8D6A93]/10 text-[#8D6A93] mb-4"
+            className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-[#8D6A93]/10 text-[#97709B] mb-4"
           >
             <MessageSquareQuote size={24} />
           </motion.div>
-          <h2 className="text-3xl md:text-4xl font-bold text-[#1F3924] tracking-tight">
+          <h2 className="text-3xl md:text-4xl font-bold text-[#083536] tracking-tight">
             O que nossos clientes dizem
           </h2>
           <div className="w-12 h-1 bg-[#D6A77A] mx-auto mt-4 rounded-full opacity-50" />
@@ -38,7 +38,7 @@ export default function FeedbackSection({ testimonials }: Props) {
         <div className="relative mb-16">
           {testimonials.length === 0 ? (
             <div className="py-20 text-center bg-white/50 rounded-[2.5rem] border border-dashed border-[#8D6A93]/20">
-              <p className="text-[#1F3924]/40 italic font-medium">
+              <p className="text-[#083536]/40 italic font-medium">
                 Sua opinião é muito importante para nós. Seja a primeira a avaliar!
               </p>
             </div>
@@ -63,15 +63,16 @@ export default function FeedbackSection({ testimonials }: Props) {
             className="
               inline-flex items-center gap-3
               px-10 py-4
-              bg-[#1F3924]
+              bg-[#083536]
               text-[#FFFEF9]
               rounded-2xl
               font-bold
               text-sm
               uppercase
               tracking-[0.2em]
-              shadow-xl shadow-[#1F3924]/20
-              hover:bg-[#2a4d31]
+              shadow-xl shadow-[#083536]/20
+              hover:bg-[#083536]/90
+              active:scale-95
               transition-all
             "
           >
@@ -79,7 +80,7 @@ export default function FeedbackSection({ testimonials }: Props) {
             Deixar minha avaliação
           </motion.button>
           
-          <p className="mt-4 text-[10px] text-[#1F3924]/40 font-bold uppercase tracking-widest">
+          <p className="mt-4 text-[10px] text-[#083536]/40 font-bold uppercase tracking-widest">
             Sua privacidade é respeitada
           </p>
         </div>

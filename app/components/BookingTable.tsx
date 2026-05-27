@@ -70,7 +70,7 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
             <div key={b.id} className="bg-white rounded-[2rem] border border-[#8D6A93]/10 shadow-sm p-6 space-y-4">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-[#F5F3EB] rounded-full flex items-center justify-center text-[#8D6A93]">
+                  <div className="w-10 h-10 bg-[#F5F3EB] rounded-full flex items-center justify-center text-[#97709B]">
                     <User size={20} />
                   </div>
                   <div>
@@ -82,11 +82,11 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 gap-2 text-sm text-[#1F3924]/70 bg-[#F5F3EB]/30 p-3 rounded-2xl">
-                <p className="flex items-center gap-2 font-medium text-[#1F3924]"><Clock size={14} className="text-[#8D6A93]"/> {b.service?.name}</p>
+              <div className="grid grid-cols-1 gap-2 text-sm text-[#083536]/70 bg-[#F5F3EB]/30 p-3 rounded-2xl">
+                <p className="flex items-center gap-2 font-medium text-[#083536]"><Clock size={14} className="text-[#97709B]"/> {b.service?.name}</p>
                 <p className="flex items-center gap-2"><Calendar size={14} /> {date} às {time}</p>
                 <p className="flex items-center gap-2"><Phone size={14} /> {b.clientPhone}</p>
-                <p className="flex items-center gap-2 font-bold text-[#8D6A93] mt-1">
+                <p className="flex items-center gap-2 font-bold text-[#97709B] mt-1">
                   <DollarSign size={14} /> {formatPrice(b.service?.price)}
                 </p>
               </div>
@@ -132,15 +132,15 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
                 <tr key={b.id} className="bg-white hover:bg-[#F5F3EB]/30 transition-all group">
                   <td className="py-4 pl-6 rounded-l-[1.5rem] border-y border-l border-[#8D6A93]/10">
                     <p className="font-bold text-[#1F3924]">{b.clientName}</p>
-                    <p className="text-xs text-[#1F3924]/50">{b.clientPhone}</p>
+                    <p className="text-xs text-[#083536]/50">{b.clientPhone}</p>
                   </td>
-                  <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-medium text-[#1F3924]">
-                    {date} <span className="text-[#8D6A93] font-bold">às {time}</span>
+                  <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-medium text-[#083536]">
+                    {date} <span className="text-[#97709B] font-bold">às {time}</span>
                   </td>
-                  <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-bold text-[#8D6A93]">
+                  <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-bold text-[#97709B]">
                     {b.service?.name}
                   </td>
-                  <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-bold text-[#8D6A93]">
+                  <td className="py-4 px-4 border-y border-[#8D6A93]/10 text-sm font-bold text-[#97709B]">
                     {formatPrice(b.service?.price)}
                   </td>
                   <td className="py-4 px-4 border-y border-[#8D6A93]/10">

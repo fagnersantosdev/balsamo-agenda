@@ -77,26 +77,26 @@ export default function ServicesAdminPage() {
     <main className="max-w-5xl mx-auto p-4 sm:p-8 pb-32">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
         <div>
-          <h1 className="text-3xl font-bold text-[#1F3924] flex items-center gap-2">
-            <Sparkles className="text-[#8D6A93]" /> Serviços
+          <h1 className="text-3xl font-bold text-[#083536] flex items-center gap-2">
+            <Sparkles className="text-[#97709B]" /> Serviços
           </h1>
-          <p className="text-[#1F3924]/80 text-sm mt-1">Configure o menu de tratamentos do Bálsamo.</p>
+          <p className="text-[#083536]/80 text-sm mt-1">Configure o menu de tratamentos do Bálsamo.</p>
         </div>
 
         <Link
           href="/admin/services/new"
-          className="flex items-center justify-center gap-2 bg-[#1F3924] text-[#FFFEF9] px-6 py-3 rounded-xl font-bold shadow-lg shadow-[#1F3924]/10 hover:bg-[#2a4d31] transition-all"
+          className="flex items-center justify-center gap-2 bg-[#083536] text-[#FAF8ED] px-6 py-3 rounded-xl font-bold shadow-lg shadow-[#083536]/10 hover:bg-[#2a4d31] transition-all"
         >
           <Plus size={20} /> Novo Serviço
         </Link>
       </div>
 
       {/* 🔹 Filtros de Status */}
-      <div className="flex p-1 bg-[#F5F3EB] rounded-xl w-fit mb-8 border border-[#8D6A93]/10">
+      <div className="flex p-1 bg-[#F5F3EB] rounded-xl w-fit mb-8 border border-[#97709B]/10">
         <button
           onClick={() => fetchServices(true)}
           className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-            showActive ? "bg-white text-[#8D6A93] shadow-sm" : "text-[#1F3924]/50 hover:text-[#1F3924]"
+            showActive ? "bg-[#FAF8ED] text-[#97709B] shadow-sm" : "text-[#083536]/50 hover:text-[#083536]"
           }`}
         >
           Ativos
@@ -104,7 +104,7 @@ export default function ServicesAdminPage() {
         <button
           onClick={() => fetchServices(false)}
           className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
-            !showActive ? "bg-white text-[#8D6A93] shadow-sm" : "text-[#1F3924]/50 hover:text-[#1F3924]"
+            !showActive ? "bg-[#FAF8ED] text-[#97709B] shadow-sm" : "text-[#083536]/50 hover:text-[#083536]"
           }`}
         >
           Excluídos
@@ -113,7 +113,7 @@ export default function ServicesAdminPage() {
 
       {loading ? (
         <div className="flex flex-col items-center py-20 opacity-40">
-           <Loader2 className="animate-spin w-10 h-10 text-[#8D6A93] mb-4" />
+           <Loader2 className="animate-spin w-10 h-10 text-[#97709B] mb-4" />
            <p className="font-medium">Buscando serviços...</p>
         </div>
       ) : (
@@ -126,20 +126,20 @@ export default function ServicesAdminPage() {
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
             {services.length === 0 ? (
-              <div className="col-span-full py-20 text-center bg-white rounded-3xl border border-dashed border-[#8D6A93]/60">
-                <p className="text-[#1F3924]/40 font-medium italic">Nenhum serviço encontrado nesta categoria.</p>
+              <div className="col-span-full py-20 text-center bg-[#FAF8ED] rounded-3xl border border-dashed border-[#97709B]/60">
+                <p className="text-[#083536]/40 font-medium italic">Nenhum serviço encontrado nesta categoria.</p>
               </div>
             ) : (
               services.map((s) => (
                 <motion.div
                   key={s.id}
                   layout
-                  className={`bg-white rounded-3xl p-6 border transition-all hover:shadow-xl hover:shadow-[#8D6A93]/5 ${
-                    s.active ? "border-[#8D6A93]/15" : "border-gray-200 grayscale-[0.5]"
+                  className={`bg-[#FAF8ED] rounded-3xl p-6 border transition-all hover:shadow-xl hover:shadow-[#97709B]/5 ${
+                    s.active ? "border-[#97709B]/15" : "border-gray-200 grayscale-[0.5]"
                   }`}
                 >
                   <div className="flex justify-between items-start mb-4">
-                    <h3 className="text-xl font-bold text-[#1F3924]">{s.name}</h3>
+                    <h3 className="text-xl font-bold text-[#083536]">{s.name}</h3>
                     <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
                       s.active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"
                     }`}>
@@ -148,10 +148,10 @@ export default function ServicesAdminPage() {
                   </div>
 
                   <div className="flex gap-4 mb-6">
-                    <div className="flex items-center gap-1.5 text-sm font-semibold text-[#8A4B2E]">
+                    <div className="flex items-center gap-1.5 text-sm font-semibold text-[#8B4E23]">
                       <DollarSign size={16} /> R$ {s.price.toFixed(2)}
                     </div>
-                    <div className="flex items-center gap-1.5 text-sm font-semibold text-[#1F3924]/60">
+                    <div className="flex items-center gap-1.5 text-sm font-semibold text-[#083536]/60">
                       <Clock size={16} /> {s.durationMin} min
                     </div>
                   </div>
@@ -161,7 +161,7 @@ export default function ServicesAdminPage() {
                       <>
                         <Link
                           href={`/admin/services/${s.id}/edit`}
-                          className="flex-1 flex items-center justify-center gap-2 bg-[#F5F3EB] text-[#1F3924] py-3 rounded-xl font-bold text-sm hover:bg-[#EDE7F1] transition-colors"
+                          className="flex-1 flex items-center justify-center gap-2 bg-[#FAF8ED] text-[#083536] py-3 rounded-xl font-bold text-sm hover:bg-[#EDE7F1] transition-colors"
                         >
                           <Edit3 size={16} /> Editar
                         </Link>
@@ -175,7 +175,7 @@ export default function ServicesAdminPage() {
                     ) : (
                       <button
                         onClick={() => handleRestore(s.id)}
-                        className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors"
+                        className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-[#FAF8ED] py-3 rounded-xl font-bold hover:bg-emerald-700 transition-colors"
                       >
                         <RotateCcw size={18} /> Restaurar Serviço
                       </button>
@@ -194,28 +194,28 @@ export default function ServicesAdminPage() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <motion.div 
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-[#1F3924]/40 backdrop-blur-sm"
+              className="absolute inset-0 bg-[#083536]/40 backdrop-blur-sm"
               onClick={() => setConfirmModal(prev => ({ ...prev, show: false }))}
             />
             <motion.div 
               initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="relative bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center"
+              className="relative bg-[#FAF8ED] rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl text-center"
             >
               <div className="w-16 h-16 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <AlertTriangle size={32} />
               </div>
-              <h2 className="text-2xl font-bold text-[#1F3924] mb-2">{confirmModal.title}</h2>
-              <p className="text-[#1F3924]/60 mb-8">{confirmModal.message}</p>
+              <h2 className="text-2xl font-bold text-[#083536] mb-2">{confirmModal.title}</h2>
+              <p className="text-[#083536]/60 mb-8">{confirmModal.message}</p>
               <div className="flex gap-3">
                 <button 
                   onClick={() => setConfirmModal(prev => ({ ...prev, show: false }))}
-                  className="flex-1 py-3 font-bold text-[#1F3924]/40 hover:text-[#1F3924] transition-colors"
+                  className="flex-1 py-3 font-bold text-[#083536]/40 hover:text-[#083536] transition-colors"
                 >
                   Cancelar
                 </button>
                 <button 
                   onClick={confirmModal.action}
-                  className={`flex-1 py-3 rounded-2xl text-white font-bold shadow-lg ${confirmModal.color}`}
+                  className={`flex-1 py-3 rounded-2xl text-[#FAF8ED] font-bold shadow-lg ${confirmModal.color}`}
                 >
                   Confirmar
                 </button>

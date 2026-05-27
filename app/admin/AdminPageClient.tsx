@@ -116,12 +116,12 @@ export default function AdminPageClient() {
     <main className="max-w-7xl mx-auto px-4 py-8 pb-32">
       <header className="mb-10 flex flex-col md:flex-row justify-between items-start md:items-center bg-white rounded-[2.5rem] p-8 border border-[#8D6A93]/10 shadow-xl shadow-[#8D6A93]/5">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-[#1F3924] rounded-2xl flex items-center justify-center text-white">
+          <div className="w-14 h-14 bg-[#083536] rounded-2xl flex items-center justify-center text-white">
             <User size={28} />
           </div>
           <div>
-            <h1 className="text-3xl font-bold text-[#1F3924] tracking-tight">Painel de Gestão</h1>
-            <p className="text-[#8D6A93] text-sm font-medium">Bem-vinda, <span className="text-[#1F3924]">Administradora</span></p>
+            <h1 className="text-3xl font-bold text-[#083536] tracking-tight">Painel de Gestão</h1>
+            <p className="text-[#97709B] text-sm font-medium">Bem-vinda, <span className="text-[#083536]">Administradora</span></p>
           </div>
         </div>
         <div className="mt-4 md:mt-0 hidden md:block">
@@ -132,13 +132,13 @@ export default function AdminPageClient() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
         <StatusCard label="Hoje" value={counts.todayPending} icon={<Clock size={20} />} color="bg-[#8D6A93]" onClick={() => handleCardClick("todayPending")} isActive={filter === "today" && statusFilter === "PENDENTE"} />
         <StatusCard label="Próximos" value={counts.futurePending} icon={<Calendar size={20} />} color="bg-[#D6A77A]" onClick={() => handleCardClick("futurePending")} isActive={filter === "future" && statusFilter === "PENDENTE"} />
-        <StatusCard label="Concluídos" value={counts.completed} icon={<CheckCircle size={20} />} color="bg-[#1F3924]" onClick={() => handleCardClick("completed")} isActive={statusFilter === "CONCLUIDO"} />
+        <StatusCard label="Concluídos" value={counts.completed} icon={<CheckCircle size={20} />} color="bg-[#083536]" onClick={() => handleCardClick("completed")} isActive={statusFilter === "CONCLUIDO"} />
         <StatusCard label="Cancelados" value={counts.canceled} icon={<XCircle size={20} />} color="bg-red-500" onClick={() => handleCardClick("canceled")} isActive={statusFilter === "CANCELADO"} />
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
         <div className="relative w-full md:w-96">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#1F3924]/30 w-5 h-5" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#083536]/30 w-5 h-5" />
           <input
             className="w-full pl-12 pr-4 py-4 rounded-2xl border border-[#8D6A93]/10 bg-white shadow-sm outline-none transition-all"
             placeholder="Buscar por nome ou telefone..."
@@ -146,7 +146,7 @@ export default function AdminPageClient() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <div className="text-xs font-black uppercase tracking-widest text-[#8D6A93] bg-[#8D6A93]/5 px-4 py-2 rounded-full border border-[#8D6A93]/10">
+        <div className="text-xs font-black uppercase tracking-widest text-[#97709B] bg-[#8D6A93]/5 px-4 py-2 rounded-full border border-[#8D6A93]/10">
            Exibindo: {statusFilter || "Todos"} ({filter})
         </div>
       </div>
@@ -154,7 +154,7 @@ export default function AdminPageClient() {
       <div className="bg-white rounded-[2.5rem] border border-[#8D6A93]/10 shadow-2xl shadow-[#8D6A93]/5 overflow-hidden">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-24 opacity-30">
-            <Loader2 className="animate-spin w-12 h-12 text-[#1F3924] mb-4" />
+            <Loader2 className="animate-spin w-12 h-12 text-[#083536] mb-4" />
             <p className="font-bold uppercase text-xs">Sincronizando...</p>
           </div>
         ) : filteredBookings.length > 0 ? (
@@ -162,7 +162,7 @@ export default function AdminPageClient() {
         ) : (
           <div className="flex flex-col items-center justify-center py-24 text-center px-6">
             <FileText size={40} className="text-[#8D6A93] mb-4" />
-            <h3 className="text-2xl font-bold text-[#1F3924]">Nenhum registro</h3>
+            <h3 className="text-2xl font-bold text-[#083536]">Nenhum registro</h3>
           </div>
         )}
       </div>
@@ -179,14 +179,14 @@ function StatusCard({ label, value, icon, color, onClick, isActive }: {
     <button
       onClick={onClick}
       className={`relative p-6 rounded-[2rem] border transition-all duration-500 text-left ${
-        isActive ? "bg-white border-[#8D6A93] shadow-xl ring-1 ring-[#8D6A93]" : "bg-white border-[#8D6A93]/10 hover:border-[#8D6A93]/40 shadow-sm"
+        isActive ? "bg-white border-[#97709B] shadow-xl ring-1 ring-[#97709B]" : "bg-white border-[#8D6A93]/10 hover:border-[#8D6A93]/40 shadow-sm"
       }`}
     >
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-white mb-4 ${color}`}>
         {icon}
       </div>
-      <p className="text-xs font-black uppercase text-[#1F3924]/40 mb-1">{label}</p>
-      <p className="text-3xl font-black text-[#1F3924]">{value}</p>
+      <p className="text-xs font-black uppercase text-[#083536]/40 mb-1">{label}</p>
+      <p className="text-3xl font-black text-[#083536]">{value}</p>
       {isActive && <div className={`absolute top-0 right-0 w-2 h-full ${color}`} />}
     </button>
   );

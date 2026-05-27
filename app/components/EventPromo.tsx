@@ -32,7 +32,7 @@ export default function EventPromo() {
         </div>
 
         <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-[#1F3924] mb-6 max-w-3xl mx-auto leading-[1.15]">
-          Transforme seu evento com <span className="text-[#8D6A93]">bem-estar</span> e cuidado
+          Transforme seu evento com <br /> <span className="text-[#8D6A93]">bem-estar</span> e cuidado
         </h2>
 
         <p className="text-[#1F3924]/80 max-w-2xl mx-auto leading-relaxed text-base md:text-lg mb-4">
@@ -54,11 +54,11 @@ export default function EventPromo() {
             className="
               relative
               inline-flex items-center gap-3
-              bg-[#1F3924] text-[#FFFEF9]
+              bg-[#083536] text-[#FFFEF9]
               px-10 py-5 rounded-2xl
               font-bold text-sm uppercase tracking-widest
-              shadow-xl shadow-[#1F3924]/20
-              hover:bg-[#2a4d31]
+              shadow-xl shadow-[#083536]/20
+              hover:bg-[#083536]/90
               hover:scale-[1.02]
               active:scale-95
               transition-all duration-300

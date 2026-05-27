@@ -51,10 +51,10 @@ export default function AdminMenu() {
           flex items-center gap-2
           px-4 py-2.5
           rounded-2xl
-          bg-[#1F3924]
-          text-[#FFFEF9]
-          shadow-lg shadow-[#1F3924]/20
-          hover:bg-[#2a4d31]
+          bg-[#083536]
+          text-[#FAF8ED]
+          shadow-lg shadow-[#083536]/20
+          hover:bg-[#083536]/90
           transition-all
           active:scale-95
         "
@@ -68,7 +68,7 @@ export default function AdminMenu() {
       <div
         className={`
           absolute right-0 mt-3 w-64
-          bg-white/95 backdrop-blur-md
+          bg-[#FAF8ED]/95 backdrop-blur-md
           border border-[#8D6A93]/10
           rounded-[2rem]
           shadow-2xl shadow-[#8D6A93]/20
@@ -85,24 +85,24 @@ export default function AdminMenu() {
                 key={idx}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-[#1F3924] font-semibold text-sm hover:bg-[#F5F3EB] rounded-xl transition-colors group"
+                className="flex items-center gap-3 px-4 py-3 text-[#083536] font-semibold text-sm hover:bg-[#FAF8ED] rounded-xl transition-colors group"
               >
-                <span className="text-[#8D6A93] group-hover:scale-110 transition-transform">{item.icon}</span>
+                <span className="text-[#97709B] group-hover:scale-110 transition-transform">{item.icon}</span>
                 {item.label}
               </Link>
             ) : (
               <button
                 key={idx}
                 onClick={item.onClick}
-                className="flex items-center gap-3 w-full px-4 py-3 text-[#1F3924] font-semibold text-sm hover:bg-[#F5F3EB] rounded-xl transition-colors group"
+                className="flex items-center gap-3 w-full px-4 py-3 text-[#083536] font-semibold text-sm hover:bg-[#FAF8ED] rounded-xl transition-colors group"
               >
-                <span className="text-[#8D6A93] group-hover:scale-110 transition-transform">{item.icon}</span>
+                <span className="text-[#97709B] group-hover:scale-110 transition-transform">{item.icon}</span>
                 {item.label}
               </button>
             )
           ))}
 
-          <div className="my-2 border-t border-[#8D6A93]/10 mx-4" />
+          <div className="my-2 border-t border-[#97709B]/10 mx-4" />
 
           <button
             onClick={async () => {

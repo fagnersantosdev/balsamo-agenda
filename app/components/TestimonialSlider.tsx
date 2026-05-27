@@ -56,16 +56,16 @@ export default function TestimonialSlider({ testimonials }: Props) {
                 <Quote size={40} fill="currentColor" />
               </div>
 
-              <p className="text-[#1F3924] font-medium italic mb-8 leading-relaxed text-sm sm:text-base relative z-10">
+              <p className="text-[#083536] font-medium italic mb-8 leading-relaxed text-sm sm:text-base relative z-10">
                 &ldquo;{t.message}&rdquo;
               </p>
 
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-[#8D6A93]/10 flex items-center justify-center text-[#8D6A93] font-bold text-xs">
+                <div className="w-10 h-10 rounded-full bg-[#8D6A93]/10 flex items-center justify-center text-[#97709B] font-bold text-xs">
                   {(t.author || "A")[0].toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-[#1F3924] font-black text-xs uppercase tracking-widest">
+                  <p className="text-[#083536] font-black text-xs uppercase tracking-widest">
                     {t.author || "Anônimo"}
                   </p>
                   <p className="text-[10px] font-bold text-[#8D6A93]/60 mt-0.5 uppercase tracking-tighter">
