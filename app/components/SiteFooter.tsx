@@ -16,7 +16,7 @@ export default function SiteFooter() {
         {/* Coluna 1: Marca */}
         <div className="flex flex-col items-center md:items-start">
           <div className="flex items-center gap-3 mb-4">
-            <Image src="/logo-balsamo.png" alt="Bálsamo" width={50} height={50} />
+            <Image src="/logo-balsamo2.png" alt="Bálsamo" width={60} height={60} />
             <span className="font-bold text-xl text-[#1F3924]">Bálsamo Massoterapia</span>
           </div>
           <p className="text-sm text-[#1F3924] font-medium leading-relaxed">

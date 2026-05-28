@@ -10,7 +10,7 @@ export default function Loading() {
         
         <div className="absolute">
           <Image 
-            src="/logo-balsamo.png" 
+            src="/logovertical.png" 
             alt="Carregando Bálsamo" 
             width={50} 
             height={50} 

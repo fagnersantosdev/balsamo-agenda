@@ -16,7 +16,7 @@ export default function FeedbackSection({ testimonials }: Props) {
 
   return (
     <section className="relative w-full py-24 overflow-hidden bg-gradient-to-b from-transparent to-[#F5F3EB]/30">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-2">
         
         {/* Título com Ícone e Estilo */}
         <header className="text-center mb-16">
@@ -29,7 +29,7 @@ export default function FeedbackSection({ testimonials }: Props) {
             <MessageSquareQuote size={24} />
           </motion.div>
           <h2 className="text-3xl md:text-4xl font-bold text-[#083536] tracking-tight">
-            O que nossos clientes dizem
+            O que nossos clientes dizem:
           </h2>
           <div className="w-12 h-1 bg-[#D6A77A] mx-auto mt-4 rounded-full opacity-50" />
         </header>

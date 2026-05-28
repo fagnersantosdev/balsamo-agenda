@@ -131,7 +131,7 @@ export default function AdminTestimonialsPage() {
               {!t.approved && (
                 <Button
                   onClick={() => handleApprove(t.id)}
-                  className="flex-1 bg-[#083536] hover:bg-[#2a4d31] text-white rounded-xl gap-2 font-bold transition-all active:scale-95"
+                  className="flex-1 bg-[#083536] hover:bg-[#083536]/80 text-white rounded-xl gap-2 font-bold transition-all active:scale-95"
                 >
                   <CheckCircle2 size={18} /> Aprovar no Site
                 </Button>
@@ -151,9 +151,9 @@ export default function AdminTestimonialsPage() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto p-4 sm:p-8 pb-32">
+    <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <Link href="/admin" className="inline-flex items-center gap-2 text-sm font-medium text-[#1F3924]/60 hover:text-[#8D6A93] transition-colors mb-8 group">
+      <Link href="/admin" className="inline-flex items-center gap-2 text-sm font-medium text-[#083536]/60 hover:text-[#8D6A93] transition-colors mb-8 group">
         <ChevronLeft className="w-6 h-6 transition-transform group-hover:-translate-x-1" />
         Voltar para o Painel
       </Link>
@@ -166,17 +166,32 @@ export default function AdminTestimonialsPage() {
       </header>
 
       <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as TabKey)} className="space-y-6">
-        <TabsList className="bg-[#F5F3EB] p-1 rounded-2xl border border-[#97709B]/10 inline-flex">
-          <TabsTrigger value="pending" className="rounded-xl px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-[#97709B] data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all">
+        {/*Trocamos inline-flex por flex com overflow-x-auto no mobile */}
+        <TabsList className="bg-[#F5F3EB] p-1.5 rounded-2xl border border-[#97709B]/10 flex w-full overflow-x-auto sm:inline-flex sm:w-auto snap-x hide-scrollbar">
+          
+          <TabsTrigger 
+            value="pending" 
+            className="rounded-xl px-4 sm:px-6 py-2.5 flex-1 min-w-fit whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-[#97709B] data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all snap-start"
+          >
             Pendentes
           </TabsTrigger>
-          <TabsTrigger value="approved" className="rounded-xl px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-[#97709B] data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all">
+          
+          <TabsTrigger 
+            value="approved" 
+            className="rounded-xl px-4 sm:px-6 py-2.5 flex-1 min-w-fit whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-[#97709B] data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all snap-start"
+          >
             Aprovadas
           </TabsTrigger>
-          <TabsTrigger value="all" className="rounded-xl px-6 py-2 data-[state=active]:bg-white data-[state=active]:text-[#97709B] data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all">
+          
+          <TabsTrigger 
+            value="all" 
+            className="rounded-xl px-4 sm:px-6 py-2.5 flex-1 min-w-fit whitespace-nowrap data-[state=active]:bg-white data-[state=active]:text-[#97709B] data-[state=active]:shadow-sm font-bold text-xs uppercase tracking-widest transition-all snap-start"
+          >
             Ver Todas
           </TabsTrigger>
+
         </TabsList>
+        {/* ... restante dos TabsContent ... */}
 
         <TabsContent value="pending" className="mt-0 focus-visible:outline-none">
           {renderList(items.filter(i => !i.approved))}
@@ -208,6 +223,6 @@ export default function AdminTestimonialsPage() {
       </AnimatePresence>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-    </main>
+    </div>
   );
 }

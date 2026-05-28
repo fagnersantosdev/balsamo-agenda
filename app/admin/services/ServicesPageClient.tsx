@@ -85,7 +85,7 @@ export default function ServicesAdminPage() {
 
         <Link
           href="/admin/services/new"
-          className="flex items-center justify-center gap-2 bg-[#083536] text-[#FAF8ED] px-6 py-3 rounded-xl font-bold shadow-lg shadow-[#083536]/10 hover:bg-[#2a4d31] transition-all"
+          className="flex items-center justify-center gap-2 bg-[#083536] text-[#FAF8ED] px-6 py-3 rounded-xl font-bold shadow-lg shadow-[#083536]/10 hover:bg-[#083536]/80 transition-all"
         >
           <Plus size={20} /> Novo Serviço
         </Link>
@@ -95,7 +95,7 @@ export default function ServicesAdminPage() {
       <div className="flex p-1 bg-[#F5F3EB] rounded-xl w-fit mb-8 border border-[#97709B]/10">
         <button
           onClick={() => fetchServices(true)}
-          className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`px-12 py-2 rounded-lg text-sm font-bold transition-all ${
             showActive ? "bg-[#FAF8ED] text-[#97709B] shadow-sm" : "text-[#083536]/50 hover:text-[#083536]"
           }`}
         >
@@ -103,7 +103,7 @@ export default function ServicesAdminPage() {
         </button>
         <button
           onClick={() => fetchServices(false)}
-          className={`px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`px-12 py-2 rounded-lg text-sm font-bold transition-all ${
             !showActive ? "bg-[#FAF8ED] text-[#97709B] shadow-sm" : "text-[#083536]/50 hover:text-[#083536]"
           }`}
         >

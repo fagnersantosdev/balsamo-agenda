@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               className="flex items-center gap-2 group cursor-pointer"
             >
               <Image
-                src="/logo-balsamo.png"
+                src="/header.png"
                 alt="Bálsamo"
                 width={45} // Reduzido para ganhar espaço no mobile
                 height={45}

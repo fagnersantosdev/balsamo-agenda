@@ -92,7 +92,7 @@ export default function EditServicePage() {
   if (!service) return <p className="text-center py-20 font-bold">Serviço não encontrado.</p>;
 
   return (
-    <main className="max-w-2xl mx-auto p-4 sm:p-8 pb-32">
+    <main className="max-w-2xl mx-auto p-1 sm:p-8 pb-32">
       <Link 
         href="/admin/services" 
         className="inline-flex items-center gap-2 text-sm font-medium text-[#083536]/60 hover:text-[#97709B] transition-colors mb-8 group"

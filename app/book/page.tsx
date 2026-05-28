@@ -138,7 +138,7 @@ export default function BookPage() {
 
           <header className="flex flex-col items-center text-center mb-10">
             <div className="bg-[#F5F3EB] p-4 rounded-[2rem] mb-6 shadow-sm border border-[#D6A77A]/10">
-              <Image src="/logo-balsamo.png" width={60} height={60} alt="Logo" className="object-contain" />
+              <Image src="/logovertical.png" width={125} height={125} alt="Logo" className="object-contain" />
             </div>
             <h1 className="text-3xl font-bold text-[#083536] tracking-tight">
               Reserve seu Momento
@@ -233,6 +233,7 @@ export default function BookPage() {
       <div className="pb-20">
         <EventPromo />
       </div>
+      
 
       {successData && (
         <SuccessCard show onClose={() => setSuccessData(null)} {...successData} />

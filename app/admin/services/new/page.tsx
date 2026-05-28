@@ -61,7 +61,7 @@ export default function NewServicePage() {
   const inputClass = "w-full pl-10 pr-4 py-3 bg-white border border-[#8D6A93]/20 rounded-2xl focus:ring-2 focus:ring-[#8D6A93] focus:border-transparent outline-none transition-all text-[#083536] placeholder:text-gray-300";
 
   return (
-    <main className="max-w-2xl mx-auto p-4 sm:p-8 pb-32">
+    <main className="max-w-2xl mx-auto p-1 sm:p-8 pb-32">
       {/* Voltar */}
       <Link 
         href="/admin/services" 
@@ -121,7 +121,7 @@ export default function NewServicePage() {
                 className={`${inputClass} h-40 resize-none pl-10 pt-4`}
               />
             </div>
-            <p className="text-[12px] text-[#083536]/45 mt-2 ml-1 italic">
+            <p className="text-[14px] text-[#083536]/50 mt-2 ml-1 italic">
               * Cada linha se tornará um tópico na visualização do cliente.
             </p>
           </div>

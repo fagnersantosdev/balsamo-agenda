@@ -32,7 +32,7 @@ export default function AdminSidebar() {
       <div className="flex items-center gap-4 mb-10 px-2">
         <div className="relative">
           <Image
-            src="/logo-balsamo.png"
+            src="/logovertical.png"
             width={48}
             height={48}
             alt="Logo Bálsamo"
@@ -45,7 +45,7 @@ export default function AdminSidebar() {
             Bálsamo
           </h2>
           <p className="text-[10px] font-bold text-[#97709B] uppercase tracking-widest">
-            Admin Panel
+            Admin Painel
           </p>
         </div>
       </div>

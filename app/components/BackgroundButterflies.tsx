@@ -26,7 +26,7 @@ export default function BackgroundButterflies() {
       {butterflies.map((b, i) => (
         <Image
           key={i}
-          src="/borboleta.png" // confirme que este arquivo existe em /public
+          src="/logo-borboleta.png" // confirme que este arquivo existe em /public
           alt="Borboleta decorativa"
           width={b.size}
           height={b.size}

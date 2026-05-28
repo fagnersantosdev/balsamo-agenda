@@ -40,16 +40,16 @@ export default function LoginPage() {
   const inputClass = "w-full pl-12 pr-4 py-3 bg-[#F5F3EB]/50 border border-[#97709B]/10 rounded-2xl focus:ring-2 focus:ring-[#8D6A93] focus:bg-white outline-none transition-all text-[#083536]";
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-[#FAF8ED] p-4">
+    <main className="min-h-screen flex items-center justify-center bg-white p-4">
       <div className="w-full max-w-md">
         
         {/* Logo e Boas-vindas */}
         <div className="flex flex-col items-center mb-8 text-center">
           <div className="bg-[#FAF8ED] p-4 rounded-[2rem] shadow-xl shadow-[#97709B]/10 border border-[#8D6A93]/5 mb-6">
             <Image 
-              src="/logo-balsamo.png" 
-              width={70} 
-              height={70} 
+              src="/logovertical.png" 
+              width={90} 
+              height={90} 
               alt="Logo Bálsamo" 
               className="object-contain"
             />
@@ -63,7 +63,7 @@ export default function LoginPage() {
         </div>
 
         {/* Card de Login */}
-        <div className="bg-[#FAF8ED] rounded-[2.5rem] shadow-2xl shadow-[#97709B]/5 border border-[#8D6A93]/10 p-8 md:p-10">
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-[#97709B]/5 border border-[#8D6A93]/8 p-8 md:p-10">
           <form onSubmit={handleLogin} className="space-y-5">
             
             <div className="space-y-4">

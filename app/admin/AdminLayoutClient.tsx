@@ -44,21 +44,25 @@ export default function AdminLayoutClient({
         />
       )}
 
-      <div className="min-h-screen flex bg-[#FFFEF9] relative">
+      {/* 👇 Adicionamos overflow-x-hidden nesta linha para "cortar" as borboletas */}
+      <div className="min-h-screen flex bg-[#FFFEF9] relative overflow-x-hidden">
+        
         {/* Sidebar — apenas desktop */}
         <aside className="hidden lg:block w-64 border-r border-[#D6A77A]/30 bg-[#F5F3EB]/80 px-5 py-8">
           <AdminSidebar />
         </aside>
 
         {/* Conteúdo */}
-        <main className="flex-1 px-4 sm:px-6 py-8 pb-32">
+        <main className="flex-1 min-w-0 px-4 sm:px-6 py-8 pb-32">
           {children}
         </main>
 
         {/* Menu mobile */}
-        <div className="lg:hidden fixed bottom-0 left-0 w-full z-50 bg-[#FFFEF9] border-t border-[#D6A77A]/40">
+        {/* 👇 Adicionamos uma sombra (shadow) para destacar o menu sobre o conteúdo */}
+        <div className="lg:hidden fixed bottom-0 left-0 w-full z-50 bg-[#FFFEF9] border-t border-[#D6A77A]/40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
           <AdminMobileNav />
         </div>
+        
       </div>
     </>
   );

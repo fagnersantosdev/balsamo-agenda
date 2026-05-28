@@ -14,7 +14,7 @@ export default async function ChangePasswordPage() {
         {/* Botão Voltar: Essencial para a experiência do Admin */}
         <Link 
           href="/admin" 
-          className="inline-flex items-center gap-2 text-sm font-medium text-[#1F3924]/60 hover:text-[#8D6A93] transition-colors mb-6 group"
+          className="inline-flex items-center gap-2 text-sm font-medium text-[#083536]/60 hover:text-[#8D6A93] transition-colors mb-6 group"
         >
           <ChevronLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
           Voltar para o Painel
@@ -36,10 +36,10 @@ export default async function ChangePasswordPage() {
             <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-[#8D6A93]/10 text-[#8D6A93] mb-4">
               <ShieldCheck className="w-7 h-7" />
             </div>
-            <h1 className="text-2xl font-bold text-[#1F3924]">
+            <h1 className="text-2xl font-bold text-[#083536] tracking-tight">
               Alterar Senha
             </h1>
-            <p className="text-sm text-[#8D6A93] mt-2">
+            <p className="text-sm text-[#97709B] mt-2">
               Escolha uma senha forte para proteger seu acesso.
             </p>
           </div>
@@ -48,7 +48,7 @@ export default async function ChangePasswordPage() {
           <ChangePasswordForm />
         </div>
 
-        <p className="text-center text-[10px] text-[#1F3924]/30 mt-8 uppercase tracking-[0.2em] font-bold">
+        <p className="text-center text-[10px] text-[#083536]/30 mt-8 uppercase tracking-[0.2em] font-bold">
           Ambiente Seguro • Bálsamo
         </p>
       </div>

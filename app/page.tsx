@@ -37,20 +37,27 @@ export default async function HomePage() {
 
   return (
     <>
-      <main className="max-w-6xl mx-auto px-6 py-8 bg-gradient-to-b from-[#F5F3EB] to-[#D6A77A]/20">
+      <main className="max-w-6xl mx-auto px-6 py-8 md:py-20 bg-gradient-to-b from-[#F5F3EB] to-[#D6A77A]/20">
         
         {/* Saudação */}
         <section className="grid md:grid-cols-2 gap-10 items-center py-18">
           <div className="text-center md:text-left space-y-4">
             <Image
-              src="/logo-balsamo.png"
+              src="/logovertical.png"
               alt="Logo Bálsamo Massoterapia"
-              width={110}
-              height={110}
+              width={145}
+              height={145}
               className="mx-auto md:mx-0"
             />
             <h1 className="font-[var(--font-ooohbaby)] text-3xl sm:text-4xl text-[#97709B]">
-              Bem-vindo à Bálsamo Massoterapia 🌿
+              Bem-vindo à Bálsamo Massoterapia
+              <Image
+                src="/flor.png"
+                alt="Flor"
+                width={45}
+                height={45}
+                className="inline-block ml-2"
+              />
             </h1>
             <p className="text-[#1F3924] leading-relaxed text-base sm:text-lg">
               Cuidamos do seu corpo e da sua mente com técnicas terapêuticas
@@ -80,7 +87,14 @@ export default async function HomePage() {
         {/* Apresentação dos Vídeos */}
         <section className="max-w-6xl mx-auto py-20 px-4">
           <h2 className="text-2xl font-bold text-[#083536] text-center mb-12">
-            Conheça Mais Sobre Nossos Cuidados 🌿
+            Conheça Mais Sobre Nossos Cuidados
+            <Image
+              src="/flor.png"
+              alt="Flor"
+              width={45}
+              height={45}
+              className="inline-block ml-2"
+            />
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-14 items-center">
@@ -104,7 +118,7 @@ export default async function HomePage() {
             <div
               className="
                 bg-[#F5F3EB]/90
-                rounded-2xl
+                rounded-3xl
                 p-6 md:p-8
                 shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)]
                 border border-[#97709B]/20
@@ -113,7 +127,14 @@ export default async function HomePage() {
               "
             >
               <h3 className="text-2xl font-semibold text-[#083536] mb-4">
-                Qualidade, cuidado e carinho em cada atendimento 🌿
+                Qualidade, cuidado e carinho em cada atendimento
+                <Image
+                  src="/flor.png"
+                  alt="Flor"
+                  width={45}
+                  height={45}
+                  className="inline-block ml-2"
+                />
               </h3>
 
               <p className="text-[#083536]/90 text-base md:text-lg mb-4">
@@ -174,15 +195,22 @@ export default async function HomePage() {
         <FeedbackSection testimonials={testimonials} />
 
         {/* Benefícios */}
-        <section className="max-w-6xl mx-auto px-4 py-20">
+        <section className="max-w-6xl mx-auto px-4 py-16">
           <h2 className="text-2xl font-bold text-[#083536] text-center mb-12">
-            Benefícios da Massoterapia 🌿
+            Benefícios da Massoterapia 
+            <Image
+              src="/flor.png"
+              alt="Flor"
+              width={45}
+              height={45}
+              className="inline-block ml-2"
+            />
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
             {[
               { img: "/img1.png", title: "Relaxamento profundo", desc: "Reduz o estresse, acalma o corpo e melhora a qualidade do sono." },
-              { img: "/img2.png", title: "Equilíbrio mental", desc: "Ajuda na ansiedade, foco e sensação de bem-estar emocional." },
+              { img: "/img22.png", title: "Equilíbrio mental", desc: "Ajuda na ansiedade, foco e sensação de bem-estar emocional." },
               { img: "/img3.png", title: "Saúde do corpo", desc: "Melhora circulação, alivia dores e libera tensões acumuladas." }
             ].map((item, i) => (
               <div key={i} className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#97709B]/20 text-center">
@@ -197,9 +225,16 @@ export default async function HomePage() {
         </section>
 
         {/* Serviços */}
-        <section className="py-16">
+        <section className="max-w-6xl mx-auto px-4 py-16">
           <h2 className="text-2xl font-bold text-[#083536] text-center mb-10">
-            Nossos Serviços 🌿
+            Nossos Serviços 
+            <Image
+              src="/flor.png"
+              alt="Flor"
+              width={45}
+              height={45}
+              className="inline-block ml-2"
+            />
           </h2>
 
           {services.length === 0 ? (
@@ -254,13 +289,20 @@ export default async function HomePage() {
             </Link>
           </div>
         </section>
-
+        
         {/* Promo e Sobre */}
         <EventPromo />
 
-        <section className="max-w-6xl mx-auto px-4 py-16">
+        <section className="max-w-6xl mx-auto px-4 py-12">
           <h2 className="text-2xl font-bold text-[#083536] text-center mb-12">
-            Sobre a Profissional 🌿
+            Sobre a Profissional 
+            {/* <Image
+              src="/flor.png"
+              alt="Flor"
+              width={45}
+              height={45}
+              className="inline-block ml-2"
+            /> */}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start animate-[fadeInUp_0.9s_ease-out]">
@@ -288,7 +330,15 @@ export default async function HomePage() {
         </section>
 
         <section className="max-w-4xl mx-auto text-center py-20 px-4">
-          <h2 className="text-3xl font-bold text-[#083536] mb-6">Pronto para cuidar de você hoje? 🌿</h2>
+          <h2 className="text-3xl font-bold text-[#083536] mb-6">Pronto para cuidar de você hoje? 
+            <Image
+              src="/flor.png"
+              alt="Flor"
+              width={45}
+              height={45}
+              className="inline-block ml-2"
+            />
+          </h2>
           <p className="text-[#083536]/80 text-lg mb-8">A Bálsamo Massoterapia está preparada para oferecer uma experiência acolhedora, relaxante e transformadora.</p>
           <Link href="/book" className="inline-block bg-[#8A4B2E] text-[#F5F3EB] px-10 py-4 rounded-xl shadow-lg hover:bg-[#083536] hover:scale-[1.02]
                 active:scale-95 transition-all duration-300 text-lg font-medium">📅 Agendar minha sessão</Link>
