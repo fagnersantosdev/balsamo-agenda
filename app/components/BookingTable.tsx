@@ -2,7 +2,9 @@
 import { useState } from "react";
 import { Booking } from "@/app/types/Booking";
 import ConfirmModal from "./ConfirmModal";
-import { Check, X, Calendar, Phone, User, Clock, DollarSign } from "lucide-react";
+import { Check, X, Calendar, Phone, User, Clock, DollarSign, Edit2 } from "lucide-react";
+import {useRouter} from "next/navigation";
+
 
 type Props = {
   bookings: Booking[];
@@ -11,6 +13,7 @@ type Props = {
 };
 
 export default function BookingTable({ bookings, showActions = true }: Props) {
+  const router = useRouter();
   const [confirmData, setConfirmData] = useState<{
     show: boolean;
     id?: number;
@@ -92,18 +95,30 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
               </div>
 
               {showActions && b.status === "PENDENTE" && (
-                <div className="flex gap-2">
-                  <button
-                    className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 rounded-xl font-bold text-xs hover:bg-emerald-700 transition-all active:scale-95"
-                    onClick={() => setConfirmData({ show: true, id: b.id, type: "CONCLUIDO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+                <div className="flex gap-2 mt-4 pt-4 border-t border-[#8D6A93]/10">
+                  {/* Editar */}
+                  <button 
+                    onClick={() => router.push(`/admin/edit/${b.id}`)}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-[#8D6A93]/10 text-[#8D6A93] rounded-xl hover:bg-[#8D6A93] hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
                   >
-                    <Check size={16}/> Concluir
+                    <Edit2 size={16} />
                   </button>
-                  <button
-                    className="flex-1 flex items-center justify-center gap-2 bg-red-50 text-red-600 py-3 rounded-xl font-bold text-xs hover:bg-red-600 hover:text-white transition-all active:scale-95 border border-red-100"
-                    onClick={() => setConfirmData({ show: true, id: b.id, type: "CANCELADO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+
+                  {/* Concluir */}
+                  <button 
+                    onClick={() => setConfirmData({ show: true, id: b.id, type: "CONCLUIDO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
                   >
-                    <X size={16}/> Cancelar
+                    <Check size={16} />
+                  </button>
+
+                  {/* Cancelar */}
+                  {/* Usamos apenas o ícone no celular para economizar espaço e deixar os outros dois botões maiores, já que cancelar é uma ação menos frequente */}
+                  <button 
+                    onClick={() => setConfirmData({ show: true, id: b.id, type: "CANCELADO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+                    className="flex-1 flex items-center justify-center gap-2 py-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all font-bold text-xs uppercase tracking-widest"
+                  >
+                    <X size={20} />
                   </button>
                 </div>
               )}
@@ -152,17 +167,32 @@ export default function BookingTable({ bookings, showActions = true }: Props) {
                     <td className="py-4 pr-6 rounded-r-[1.5rem] border-y border-r border-[#8D6A93]/10 text-center">
                       {b.status === "PENDENTE" ? (
                         <div className="flex justify-center gap-4">
+
+                          {/* Botão Editar */}
                           <button 
-                            className="text-emerald-600 hover:text-emerald-800 font-bold text-xs uppercase tracking-tighter transition-colors"
-                            onClick={() => setConfirmData({ show: true, id: b.id, type: "CONCLUIDO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+                            title="Editar"
+                            onClick={() => router.push(`/admin/edit/${b.id}`)}
+                            className="w-10 h-10 flex items-center justify-center bg-[#8D6A93]/10 text-[#97709B] rounded-xl hover:bg-[#97709B] hover:text-white transition-all shadow-sm"
                           >
-                            Concluir
+                            <Edit2 size={18} />
                           </button>
+                
+                          {/* Botão Concluir */}
                           <button 
-                            className="text-red-400 hover:text-red-600 font-bold text-xs uppercase tracking-tighter transition-colors"
-                            onClick={() => setConfirmData({ show: true, id: b.id, type: "CANCELADO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+                            title="Concluir"
+                            onClick={() => setConfirmData({ show: true, id: b.id, type: "CONCLUIDO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+                            className="w-10 h-10 flex items-center justify-center bg-emerald-50 text-emerald-600 rounded-xl hover:bg-emerald-600 hover:text-white transition-all shadow-sm"
                           >
-                            Cancelar
+                            <Check size={18} />
+                          </button>
+                      
+                          {/* Botão Cancelar */}
+                          <button 
+                            title="Cancelar"
+                            onClick={() => setConfirmData({ show: true, id: b.id, type: "CANCELADO", clientName: b.clientName, clientPhone: b.clientPhone, serviceName: b.service?.name || "", date: `${date} ${time}` })}
+                            className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm"
+                          >
+                            <X size={18} />
                           </button>
                         </div>
                       ) : (

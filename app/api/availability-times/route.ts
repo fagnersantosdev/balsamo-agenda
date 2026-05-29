@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { getTotalDuration } from "@/lib/lib.scheduling";
 import { startOfBrazilDay, endOfBrazilDay, toUTCFromBrazil } from "@/lib/timezone";
 
@@ -10,6 +11,7 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const dateParam = searchParams.get("date");
     const serviceIdParam = searchParams.get("serviceId");
+    const currentBookingIdParam = searchParams.get("currentBookingId"); // 👈 Novo parâmetro capturado
 
     if (!dateParam || !serviceIdParam) {
       return NextResponse.json({ error: "Parâmetros ausentes." }, { status: 400 });
@@ -49,21 +51,27 @@ export async function GET(req: Request) {
     /* ============================================================
         📋 4. BUSCA DE AGENDAMENTOS
     ============================================================ */
-    const bookings = await prisma.booking.findMany({
-      where: {
-        status: { in: ["PENDENTE", "CONCLUIDO"] },
-        startDateTime: {
-          gte: dayStartUTC,
-          lte: dayEndUTC,
-        },
+    // Avisando ao TypeScript que este objeto é estritamente do tipo que o Prisma espera
+    const whereClause: Prisma.BookingWhereInput = {
+      status: { in: ["PENDENTE", "CONCLUIDO"] },
+      startDateTime: {
+        gte: dayStartUTC,
+        lte: dayEndUTC,
       },
+      // Inserção condicional segura
+      ...(currentBookingIdParam ? { id: { not: Number(currentBookingIdParam) } } : {})
+    };
+
+    const bookings = await prisma.booking.findMany({
+      where: whereClause,
       select: {
         startDateTime: true,
         endDateTime: true,
       },
     });
 
-    const bookedRanges = bookings.map((b) => ({
+
+    const bookedRanges: { start: number; end: number }[] = bookings.map((b) => ({
       start: b.startDateTime.getTime(),
       end: b.endDateTime.getTime(),
     }));
@@ -74,7 +82,6 @@ export async function GET(req: Request) {
     const slots: string[] = [];
     const now = new Date();
 
-    // Aqui usamos const porque o objeto Date será mutado, não reatribuído
     const cursorLocal = new Date(baseDate);
     cursorLocal.setHours(availability.openHour, 0, 0, 0);
 
