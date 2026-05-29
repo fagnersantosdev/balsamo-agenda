@@ -4,7 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, TrendingUp } from "lucide-react";
 import {
   CalendarDays,
   Sparkles,
@@ -101,6 +101,7 @@ export default function AdminMobileNav() {
               <div className="grid grid-cols-1 gap-3">
                 <MenuButton icon={Settings} label="Configurações" href="/admin/settings" onClick={() => setShowMore(false)} />
                 <MenuButton icon={MessageSquare} label="Avaliações" href="/admin/testimonials" onClick={() => setShowMore(false)} />
+                <MenuButton icon={TrendingUp} label="Relatórios" href="/admin/reports" onClick={() => setShowMore(false)} />
                 <MenuButton icon={Lock} label="Segurança" href="/admin/change-password" onClick={() => setShowMore(false)} />
                 <MenuButton icon={FileText} label="Exportar Relatório PDF" onClick={triggerPDF} isAction />
                 

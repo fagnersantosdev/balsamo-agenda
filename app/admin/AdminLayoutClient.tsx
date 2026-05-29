@@ -48,7 +48,7 @@ export default function AdminLayoutClient({
       <div className="min-h-screen flex bg-[#FFFEF9] relative overflow-x-hidden">
         
         {/* Sidebar — apenas desktop */}
-        <aside className="hidden lg:block w-64 border-r border-[#D6A77A]/30 bg-[#F5F3EB]/80 px-5 py-8">
+        <aside className="hidden lg:block w-64 border-r border-[#D6A77A]/30 bg-[#F5F3EB]/80 px-5 py-8 print:hidden">
           <AdminSidebar />
         </aside>
 
@@ -59,7 +59,7 @@ export default function AdminLayoutClient({
 
         {/* Menu mobile */}
         {/* 👇 Adicionamos uma sombra (shadow) para destacar o menu sobre o conteúdo */}
-        <div className="lg:hidden fixed bottom-0 left-0 w-full z-50 bg-[#FFFEF9] border-t border-[#D6A77A]/40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+        <div className="lg:hidden fixed bottom-0 left-0 w-full z-50 bg-[#FFFEF9] border-t border-[#D6A77A]/40 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] print:hidden">
           <AdminMobileNav />
         </div>
         

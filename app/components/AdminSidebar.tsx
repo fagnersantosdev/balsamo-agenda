@@ -10,6 +10,7 @@ import {
   Clock, 
   Settings, 
   LogOut,
+  TrendingUp,
   //LayoutDashboard
 } from "lucide-react";
 import { motion } from "framer-motion";
@@ -23,6 +24,8 @@ export default function AdminSidebar() {
     { href: "/admin/testimonials", label: "Avaliações", icon: MessageSquare },
     { href: "/admin/availability", label: "Disponibilidade", icon: Clock },
     { href: "/admin/settings", label: "Configurações", icon: Settings },
+    { href: "/admin/reports", label: "Relatórios", icon: TrendingUp },
+    { href: "/admin/change-password", label: "Segurança", icon: Settings },
   ];
 
   return (
