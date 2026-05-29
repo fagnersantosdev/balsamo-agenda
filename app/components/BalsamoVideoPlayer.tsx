@@ -5,10 +5,12 @@ import Image from "next/image";
 
 // 📸 Lembre-se de colocar o nome das suas fotos reais aqui
 const IMAGES = [
-  "/foto1.jpeg", 
-  "/foto2.jpeg",
-  "/foto3.jpeg",
-  "/foto4.jpeg",
+  "/img01.jpg", 
+  "/img02.jpg",
+  "/img03.jpg",
+  "/img04.jpg",
+  "/img05.jpg",
+  "/img06.jpg",
 ];
 
 export default function BalsamoVideoPlayer() {
