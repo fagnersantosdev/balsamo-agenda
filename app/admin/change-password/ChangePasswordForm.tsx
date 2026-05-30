@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Toast from "@/app/components/Toast";
+import Toast from "@/app/components/ToastMessage";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, Lock } from "lucide-react"; // Importe os ícones
 

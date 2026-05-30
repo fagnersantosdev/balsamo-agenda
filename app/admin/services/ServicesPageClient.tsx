@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import Toast from "../../components/Toast";
+import Toast from "../../components/ToastMessage";
 import { Plus, Trash2, Edit3, RotateCcw, Sparkles, Clock, DollarSign, AlertTriangle, Loader2 } from "lucide-react";
 
 type Service = {

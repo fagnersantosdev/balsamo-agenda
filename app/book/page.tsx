@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { User, Phone, Mail, Sparkles, Clock, CalendarCheck } from "lucide-react";
-import Toast from "../components/Toast";
+import Toast from "../components/ToastMessage";
 import EventPromo from "../components/EventPromo";
 import SuccessCard from "../components/SuccessCard";
 import BookingCalendar from "@/app/components/BookingCalendar";

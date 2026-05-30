@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Toast from "@/app/components/Toast";
+import Toast from "@/app/components/ToastMessage";
 import { Clock, Save, Loader2, Info, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 

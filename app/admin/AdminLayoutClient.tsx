@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import AdminMobileNav from "../components/AdminMobileNav";
-import Toast from "../components/Toast";
+import Toast from "../components/ToastMessage";
 
 
 // 🔹 Tipagem global do toast

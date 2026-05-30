@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import BookingTable from "../components/BookingTable";
-import Toast from "../components/Toast";
+import Toast from "../components/ToastMessage";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import AdminMenu from "../components/AdminMenu";

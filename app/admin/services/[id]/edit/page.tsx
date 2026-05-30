@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Toast from "../../../../components/Toast";
+import Toast from "../../../../components/ToastMessage";
 import { ChevronLeft, Edit3, DollarSign, Clock, ListPlus, Loader2, Sparkles } from "lucide-react";
 
 type Service = {

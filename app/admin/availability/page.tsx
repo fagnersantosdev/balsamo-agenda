@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Toast from "@/app/components/Toast";
+import Toast from "@/app/components/ToastMessage";
 import { Save, Clock, Calendar, Loader2 } from "lucide-react";
 
 type Availability = {

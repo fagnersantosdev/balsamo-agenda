@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 //import { Separator } from "@/components/ui/separator";
-import Toast from "@/app/components/Toast";
+import Toast from "@/app/components/ToastMessage";
 import { CheckCircle2, Trash2, MessageSquare, Star, Clock, AlertCircle, Loader2, ChevronLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";

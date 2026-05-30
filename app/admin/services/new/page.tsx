@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Toast from "../../../components/Toast";
+import Toast from "../../../components/ToastMessage";
 import { ChevronLeft, Sparkles, DollarSign, Clock, ListPlus, Loader2 } from "lucide-react";
 
 export default function NewServicePage() {
