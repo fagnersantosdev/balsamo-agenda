@@ -8,10 +8,12 @@ export default async function ChangePasswordPage() {
   await requireAdminAuth();
 
   return (
-    <main className="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4">
-      <div className="w-full max-w-lg">
+    <main className="min-h-[80vh] flex flex-col items-center justify-center py-12 px-4 sm:px-6">
+      
+      {/* 👇 AQUI: Trocamos max-w-lg por max-w-2xl para alargar o limite do quadro */}
+      <div className="w-full max-w-2xl">
         
-        {/* Botão Voltar: Essencial para a experiência do Admin */}
+        {/* Botão Voltar */}
         <Link 
           href="/admin" 
           className="inline-flex items-center gap-2 text-sm font-medium text-[#083536]/60 hover:text-[#8D6A93] transition-colors mb-6 group"
@@ -24,10 +26,10 @@ export default async function ChangePasswordPage() {
         <div
           className="
             bg-white/80 backdrop-blur-md
-            rounded-3xl
+            rounded-[2.5rem] 
             shadow-[0_20px_50px_-15px_rgba(141,106,147,0.15)]
             border border-[#8D6A93]/15
-            p-8
+            p-6 sm:p-10 
             transition-all
           "
         >
@@ -40,11 +42,11 @@ export default async function ChangePasswordPage() {
               Alterar Senha
             </h1>
             <p className="text-sm text-[#97709B] mt-2">
-              Escolha uma senha forte para proteger seu acesso.
+              Escolha uma senha forte para proteger o seu acesso.
             </p>
           </div>
 
-          {/* O formulário com o "olhinho" e loading que refinamos */}
+          {/* O formulário com o "olhinho" e loading */}
           <ChangePasswordForm />
         </div>
 

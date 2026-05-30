@@ -10,7 +10,8 @@ const IMAGES = [
   "/img03.jpg",
   "/img04.jpg",
   "/img05.jpg",
-  "/img06.jpg",
+  "/img06.png",
+  "/img07.jpg",
 ];
 
 export default function BalsamoVideoPlayer() {

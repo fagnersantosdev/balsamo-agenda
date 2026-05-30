@@ -59,7 +59,7 @@ export default function SettingsClient() {
   }
 
   return (
-    <main className="max-w-xl mx-auto p-4 sm:p-8">
+    <main className="max-w-xl mx-auto p-1 sm:p-8">
       {/* Botão Voltar */}
       <Link 
         href="/admin" 

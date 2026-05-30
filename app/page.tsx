@@ -12,6 +12,7 @@ export default async function HomePage() {
   // ✅ Busca direta no banco
   const [servicesData, testimonialsData] = await Promise.all([
     prisma.service.findMany({
+      where: { active: true }, // filtro de ativos
       orderBy: { price: "asc" },
     }),
     prisma.testimonial.findMany({
@@ -210,7 +211,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
             {[
               { img: "/img1.png", title: "Relaxamento profundo", desc: "Reduz o estresse, acalma o corpo e melhora a qualidade do sono." },
-              { img: "/img22.png", title: "Equilíbrio mental", desc: "Ajuda na ansiedade, foco e sensação de bem-estar emocional." },
+              { img: "/img2.png", title: "Equilíbrio mental", desc: "Ajuda na ansiedade, foco e sensação de bem-estar emocional." },
               { img: "/img3.png", title: "Saúde do corpo", desc: "Melhora circulação, alivia dores e libera tensões acumuladas." }
             ].map((item, i) => (
               <div key={i} className="bg-[#F5F3EB]/90 rounded-2xl p-6 shadow-md border border-[#97709B]/20 text-center">
@@ -261,7 +262,7 @@ export default async function HomePage() {
                   </p>
 
                   {service.details && service.details.length > 0 && (
-                    <ul className="list-disc list-inside mt-3 text-sm text-[#083536] space-y-1">
+                    <ul className="list-disc list-outside pl-5 mt-3 text-sm text-[#083536] space-y-1">
                       {service.details.map((d, i) => (
                         <li key={i}>{d}</li>
                       ))}
@@ -308,7 +309,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start animate-[fadeInUp_0.9s_ease-out]">
             <div className="flex justify-center md:justify-start">
               <div className="rounded-2xl overflow-hidden shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)] border border-[#97709B]/20 bg-[#F5F3EB]/70 w-[190px] h-[260px]">
-                <Image src="/proprietaria2.jpg" alt="Profissional" width={190} height={260} className="w-full h-full object-cover rounded-2xl" />
+                <Image src="/proprietaria3.png" alt="Profissional" width={190} height={260} className="w-full h-full object-cover rounded-2xl" />
               </div>
             </div>
             <div className="md:col-span-2">
