@@ -60,10 +60,15 @@ export default async function HomePage() {
                 className="inline-block ml-2"
               />
             </h1>
-            <p className="text-[#1F3924] leading-relaxed text-base sm:text-lg">
+            <p className="text-[#1F3924] leading-relaxed text-base sm:text-lg mb-4">
               Cuidamos do seu corpo e da sua mente com técnicas terapêuticas
               que promovem relaxamento, saúde e bem-estar.
             </p>
+            
+            {/* Etiqueta de Exclusividade */}
+            <div className="inline-flex items-center gap-2 bg-[#97709B]/10 text-[#8A4B2E] px-4 py-2 rounded-full font-medium text-sm md:text-base border border-[#8A4B2E]/20 mt-2">
+              <span className="text-lg">⚜️</span> Atendimento Exclusivo para Mulheres
+            </div>
           </div>
 
           <div className="flex justify-center md:justify-end">
@@ -309,29 +314,35 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 items-start animate-[fadeInUp_0.9s_ease-out]">
             <div className="flex justify-center md:justify-start">
               <div className="rounded-2xl overflow-hidden shadow-[0_8px_28px_-10px_rgba(141,106,147,0.25)] border border-[#97709B]/20 bg-[#F5F3EB]/70 w-[190px] h-[260px]">
-                <Image src="/proprietaria3.png" alt="Profissional" width={190} height={260} className="w-full h-full object-cover rounded-2xl" />
+                <Image src="/proprietaria3.png" alt="Maria Souza Gonçalves" width={190} height={260} className="w-full h-full object-cover rounded-2xl" />
               </div>
             </div>
+            
             <div className="md:col-span-2">
-              <h3 className="text-xl md:text-2xl font-semibold text-[#083536] mb-4">Maria da Penha — Massoterapeuta Especialista</h3>
+              <h3 className="text-xl md:text-2xl font-semibold text-[#083536] mb-4">
+                Maria Souza Gonçalves — Massoterapeuta & Terapeuta Makawee
+              </h3>
+              
               <p className="text-[#083536]/90 leading-relaxed text-base md:text-lg mb-4">
-                Com uma trajetória construída com dedicação e amor pelo cuidado, Maria da Penha atua na área da massoterapia oferecendo acolhimento, técnica e sensibilidade em cada sessão.
+                Com uma trajetória construída com dedicação e amor pelo cuidado, Maria atua na área da massoterapia oferecendo acolhimento, técnica e sensibilidade. Como referência na região, seu trabalho é focado em proporcionar um verdadeiro refúgio de paz para suas clientes.
               </p>
+              
               <ul className="space-y-3 text-[#083536]/90 text-base md:text-lg mb-6">
-                <li>🌱 <strong>Formação em Massoterapia</strong>, com foco em práticas terapêuticas e relaxantes.</li>
-                <li>💆‍♀️ Especialização em <strong>Pedras Quentes, Quick Massage e Massagem Relaxante</strong>.</li>
-                <li>🌿 Experiência em atendimento humanizado e abordagem integrada corpo–mente.</li>
-                <li>✨ Propósito voltado ao bem-estar, equilíbrio emocional e qualidade de vida.</li>
+                <li>⚜️ <strong>Atendimento EXCLUSIVO à mulheres</strong>, garantindo um ambiente seguro, privativo e totalmente focado no bem-estar feminino.</li>
+                <li>✅<strong>Terapeuta Makawee Certificada:</strong> Especialista na técnica milenar de Massagem Geotermal com Pedras Quentes (Massagem com Pedras Raiz).</li>
+                <li>🌱 <strong>Referência em Massagens</strong> voltadas especificamente para o alívio profundo do cansaço físico e mental.</li>
+                <li>💆‍♀️ Especialização integrada em <strong>Quick Massage e Massagens Relaxantes</strong>.</li>
               </ul>
+              
               <p className="text-[#083536]/80 leading-relaxed text-base md:text-lg">
-                Na Bálsamo Massoterapia, cada toque é guiado pela empatia, pela presença e pelo compromisso de transformar o dia de cada cliente, trazendo mais leveza e bem-estar.
+                Na Bálsamo Massoterapia, cada toque é guiado pela empatia, pela presença e pelo compromisso de transformar o seu dia, trazendo mais leveza, equilíbrio e qualidade de vida.
               </p>
             </div>
           </div>
         </section>
 
         <section className="max-w-4xl mx-auto text-center py-20 px-4">
-          <h2 className="text-3xl font-bold text-[#083536] mb-6">Pronto para cuidar de você hoje? 
+          <h2 className="text-3xl font-bold text-[#083536] mb-6">Pronta para cuidar de você hoje? 
             <Image
               src="/flor.png"
               alt="Flor"
@@ -340,7 +351,10 @@ export default async function HomePage() {
               className="inline-block ml-2"
             />
           </h2>
-          <p className="text-[#083536]/80 text-lg mb-8">A Bálsamo Massoterapia está preparada para oferecer uma experiência acolhedora, relaxante e transformadora.</p>
+          <p className="text-[#083536]/80 text-lg mb-8">
+            Um refúgio seguro e acolhedor, pensado <strong>exclusivamente para o bem-estar feminino</strong>. 
+            Permita-se viver essa experiência relaxante e transformadora.
+          </p>
           <Link href="/book" className="inline-block bg-[#8A4B2E] text-[#F5F3EB] px-10 py-4 rounded-xl shadow-lg hover:bg-[#083536] hover:scale-[1.02]
                 active:scale-95 transition-all duration-300 text-lg font-medium">📅 Agendar minha sessão</Link>
         </section>
