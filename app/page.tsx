@@ -331,7 +331,7 @@ export default async function HomePage() {
                 <li>⚜️ <strong>Atendimento EXCLUSIVO à mulheres</strong>, garantindo um ambiente seguro, privativo e totalmente focado no bem-estar feminino.</li>
                 <li>✅<strong>Terapeuta Makawee Certificada:</strong> Especialista na técnica milenar de Massagem Geotermal com Pedras Quentes (Massagem com Pedras Raiz).</li>
                 <li>🌱 <strong>Referência em Massagens</strong> voltadas especificamente para o alívio profundo do cansaço físico e mental.</li>
-                <li>💆‍♀️ Especialização integrada em <strong>Quick Massage e Massagens Relaxantes</strong>.</li>
+                <li>💆‍♀️ Especialização integrada em <strong>Massagens Relaxantes</strong>.</li>
               </ul>
               
               <p className="text-[#083536]/80 leading-relaxed text-base md:text-lg">
