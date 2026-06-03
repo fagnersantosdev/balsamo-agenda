@@ -23,6 +23,11 @@ export const metadata = {
   title: "Bálsamo Massoterapia",
   description: "Agendamento online",
   manifest: "/manifest.json",
+  icons: {
+    icon: '/icon.png', // 👈 Adicione esta linha apontando para a sua imagem
+    shortcut: '/icon.png',
+    apple: '/icon.png',
+  },
 };
 
 export const viewport = {
